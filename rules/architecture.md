@@ -2,7 +2,7 @@
 
 > **이 문서는 LLM 에이전트가 파일을 수정하거나 작성하기 전 반드시 읽는다.** 새 컴포넌트/테이블/라우트 추가 시 여기 있는 패턴을 따를지, 아니면 이 문서 업데이트 PR을 먼저 내야 한다.
 
-상위 전략/스코프는 `AGENTS.md`, 디자인 토큰은 `DESIGN.md`, 구체적 코드 스타일은 `docs/code-conventions.md` 참조.
+상위 전략/스코프는 `AGENTS.md`, 디자인 토큰은 `DESIGN.md`, 구체적 코드 스타일은 `rules/code-conventions.md` 참조.
 
 ---
 

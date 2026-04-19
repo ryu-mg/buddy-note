@@ -2,7 +2,7 @@
 
 > **이 문서는 LLM 에이전트가 파일을 수정하거나 작성하기 전 반드시 읽는다.** 여기 있는 규칙과 다르게 짜야 한다면 **이유를 명시하고 사용자 확인 후** 진행. 일관성이 개인 센스보다 우선.
 
-상위 전략/스코프는 `AGENTS.md`, 시스템 아키텍처는 `docs/architecture.md`, 디자인 토큰은 `DESIGN.md` 참조.
+상위 전략/스코프는 `AGENTS.md`, 시스템 아키텍처는 `rules/architecture.md`, 디자인 토큰은 `DESIGN.md` 참조.
 
 ---
 
@@ -458,8 +458,8 @@ Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 
 ### 새 파일 / 기능 작업 전
 1. **`AGENTS.md` 확인** — 상위 전략, 결정 내역, gstack 요구사항
-2. **`docs/architecture.md` 확인** — 이 새 기능이 어디에 속하는지 (module boundary, data flow, cache)
-3. **이 문서 (`docs/code-conventions.md`) 확인** — 패턴, 이름, import 규칙
+2. **`rules/architecture.md` 확인** — 이 새 기능이 어디에 속하는지 (module boundary, data flow, cache)
+3. **이 문서 (`rules/code-conventions.md`) 확인** — 패턴, 이름, import 규칙
 4. **`DESIGN.md` 확인** — UI 변경이면 token 먼저 체크
 
 ### 코드 수정 전
@@ -468,7 +468,7 @@ Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 - 의존 파일도 Read (예: Server Action 수정 시 그 action을 호출하는 Client component도)
 
 ### 새 테이블/컬럼 추가
-1. `docs/architecture.md` §3 Data Model 업데이트 **먼저**
+1. `rules/architecture.md` §3 Data Model 업데이트 **먼저**
 2. Migration SQL 작성 (`supabase/migrations/<timestamp>_<desc>.sql`)
 3. RLS 정책 migration 분리
 4. `types/database.ts` 업데이트 (수동 또는 CLI regen)
@@ -495,7 +495,7 @@ Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 ## 14. Quick Reference Cheatsheet
 
 ```
-파일 작업 전 읽을 순서: AGENTS.md → docs/architecture.md → docs/code-conventions.md → DESIGN.md
+파일 작업 전 읽을 순서: AGENTS.md → rules/architecture.md → rules/code-conventions.md → DESIGN.md
 
 import 순서: 외부 → @/ → 상대
 Supabase: @/lib/supabase/* 만

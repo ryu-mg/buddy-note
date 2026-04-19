@@ -11,8 +11,8 @@
 | # | 문서 | 용도 | 언제 열어야 하나 |
 |---|---|---|---|
 | 1 | `AGENTS.md` (이 파일) | 상위 전략, scope, 10가지 locked decision, gstack 요구사항 | **항상** (가장 먼저) |
-| 2 | `docs/architecture.md` | 시스템 구조, 데이터 흐름, 모듈 경계, 캐시, 보안 | 새 라우트/테이블/파이프라인 추가할 때 |
-| 3 | `docs/code-conventions.md` | 코드 스타일, 네이밍, import 규칙, 패턴, AI 작업 프로토콜 | **모든 파일 수정 전** |
+| 2 | `rules/architecture.md` | 시스템 구조, 데이터 흐름, 모듈 경계, 캐시, 보안 | 새 라우트/테이블/파이프라인 추가할 때 |
+| 3 | `rules/code-conventions.md` | 코드 스타일, 네이밍, import 규칙, 패턴, AI 작업 프로토콜 | **모든 파일 수정 전** |
 | 4 | `DESIGN.md` | 폴라로이드 style, 테라코타 accent, 토큰 | UI/스타일 바꿀 때 |
 
 ### 핵심 규칙 (자주 틀리는 것)
@@ -25,8 +25,8 @@
 
 ### 충돌 시 우선순위
 1. 사용자의 직접 지시 (최우선)
-2. `docs/code-conventions.md`의 명시적 규칙
-3. `docs/architecture.md`의 구조 결정
+2. `rules/code-conventions.md`의 명시적 규칙
+3. `rules/architecture.md`의 구조 결정
 4. `AGENTS.md`의 전략 결정
 5. `DESIGN.md`의 시각 결정
 6. 기존 코드의 암시적 패턴
@@ -188,7 +188,10 @@ new-project/
 ├── scripts/llm-benchmark/            # self-contained Bun 3-model 비교 하네스
 │   ├── benchmark.ts, package.json, bun.lock, README.md
 │   └── photos/.gitkeep
-├── docs/
+├── rules/                            # AI 에이전트 작업 규칙 SSOT (파일 수정 전 필독)
+│   ├── architecture.md               # 시스템 구조, 데이터 흐름, 모듈 경계, 보안
+│   └── code-conventions.md           # 코드 스타일, 네이밍, 패턴, workflow
+├── docs/                             # 제품 문서 (규칙 아님)
 │   └── pet-mbti-questions-v0.md      # 5문항 source of truth
 ├── DESIGN.md                         # v0.1 디자인 시스템 (폴라로이드, 테라코타, 타이포)
 ├── TODOS.md                          # deferred items + 당신 action items (C1~C8)
