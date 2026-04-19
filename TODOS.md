@@ -5,6 +5,104 @@ Format: Priority (P1/P2/P3) + Effort (S/M/L/XL, 인간 teams / CC+gstack compres
 
 ---
 
+## 🟠 당신(bao)이 할 일 — Week 0 Critical Path
+
+> 내(Claude)가 코드는 병렬로 만들어놨고, 이 항목들은 **당신만 할 수 있는 일**. 하나씩 처리하고 알려주면 다음 단계 이어감.
+
+### [C1] 🔴 카카오 비즈앱 등록 (최우선, 3-7일 승인 대기)
+- **소요**: 10분 신청 + 3-7일 대기
+- **링크**: <https://developers.kakao.com>
+- **단계**: 애플리케이션 추가 → 앱 이름 `buddy-note` → 사업자 카카오 채널 연결 → 도메인/Redirect URI는 나중에 Vercel 도메인 확정 후 추가
+- **왜 지금**: Week 3 OAuth 연동 시점에 승인 완료되어 있어야 함. 지금 신청 안 하면 critical path 밀림.
+- **끝나고 알려줄 것**: 앱 REST API 키, JavaScript 키 (Supabase 연동 시 필요)
+
+### [C2] 🔴 Supabase 프로젝트 생성 (블로커 해제)
+- **소요**: 5분
+- **링크**: <https://supabase.com/dashboard>
+- **단계**: New project → 이름 `buddy-note` → **Region: Northeast Asia (Seoul, ap-northeast-2)** ← 중요 → DB password 생성 + 안전한 곳에 저장
+- **왜 지금**: 모든 schema/auth/storage/RLS 작업의 블로커. 이거 안 되면 dev 환경에서 로그인조차 안 됨.
+- **끝나고 할 일**: Settings → API에서 URL + anon key + service role key 복사 → 아래 C3 진행
+
+### [C3] 🔴 `.env.local` 채우기
+- **소요**: 3분
+- **단계**:
+  ```bash
+  cd /Users/bao/dev/new-project
+  cp .env.example .env.local
+  ```
+  Supabase 값 4개 채우기:
+  - `NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co`
+  - `NEXT_PUBLIC_SUPABASE_ANON_KEY=...`
+  - `SUPABASE_SERVICE_ROLE_KEY=...`
+  - `ANTHROPIC_API_KEY=...` (Claude Sonnet 4.6용, <https://console.anthropic.com>)
+- **끝나면**: dev server 자동 리로드, "로그인 필요"로 표시됨 (env 경고 사라짐)
+
+### [C4] 🟡 Supabase schema migration 적용
+- **소요**: 5분
+- **전제**: C2 완료, Supabase CLI 설치 (`brew install supabase/tap/supabase`)
+- **단계**:
+  ```bash
+  cd /Users/bao/dev/new-project
+  supabase link --project-ref <프로젝트 ref>   # Supabase 대시보드 URL에서 복사
+  supabase db push                              # migrations/ 아래 SQL 자동 적용
+  ```
+- **검증**: Supabase 대시보드 → Table Editor에 `pets`, `logs`, `diaries`, `pet_memory_summary`, `memory_update_queue`, `slug_reserved` 6개 테이블 보이면 OK
+- **RLS 체크**: 각 테이블 → Policies 탭에 정책 들어가 있는지
+
+### [C5] 🟡 LLM A/B 벤치마크 실제 실행 (Week 2 블로커)
+- **소요**: 30-45분
+- **단계**:
+  1. 본인/친구 강아지·고양이 사진 5-10장 준비 (jpg/png, 영문 파일명 권장)
+  2. `scripts/llm-benchmark/photos/` 에 복사
+  3. `cp scripts/llm-benchmark/.env.example scripts/llm-benchmark/.env` → 3개 API 키 입력 (OpenAI, Anthropic, Google)
+     - OpenAI: <https://platform.openai.com>
+     - Anthropic: <https://console.anthropic.com>
+     - Google AI: <https://aistudio.google.com/apikey>
+  4. `cd scripts/llm-benchmark && bun install && bun run bench`
+  5. `results/comparison-*.md` 열어서 rubric 4축(창의성 / 페르소나 / 한국어 / 디테일) 각 1-5점 수동 채점
+- **판정**: 평균 4.0+ 모델 중 **비용·속도 최선**을 v1 LLM으로 확정
+- **끝나고 알려줄 것**: 선택한 모델 — CEO plan의 "Claude Sonnet 4.6" 가정이 맞는지, 아니면 변경할지
+
+### [C6] 🟢 친구 강아지 3마리로 MBTI 5문항 검증
+- **소요**: 주말 1-2시간
+- **단계**: `docs/pet-mbti-questions-v0.md` 열어서 친구한테 카톡으로 5문항 물어보기 (3마리 주인, 서로 다른 성격대)
+- **검증**: 각 답변을 LLM에 돌려서 diary 생성 → 주인한테 "우리 아이 같은가?" 1-5점 평가
+- **기준**: 평균 4.0+ = 합격. 미만이면 문항 수정해서 v0.1
+- **끝나고 알려줄 것**: 합격/수정 결과 → v0.1 업데이트
+
+### [C7] 🟢 GitHub repo 생성 + push (v1 ship 준비)
+- **소요**: 3분
+- **단계**:
+  ```bash
+  gh repo create buddy-note --private --source=. --remote=origin
+  git push -u origin main
+  ```
+  (`gh` 설치되어 있다면. 아니면 github.com에서 New repo 만들고 remote add)
+- **왜 필요**: Vercel 배포 트리거 + CI/CD + 팀 협업 시.
+- **끝나면 알려줄 것**: repo URL
+
+### [C8] 🟢 폰트 라이선스 최종 확인
+- **소요**: 10분
+- **Pretendard**: OFL-1.1 (상업 사용 OK, <https://cactus.tistory.com/306>)
+- **Nanum Myeongjo**: SIL OFL 1.1 (상업 사용 OK)
+- **확인 포인트**: satori 서버사이드 렌더 + 공유 이미지 상업 배포 용도로 문제 없는지 재확인. 문제 있으면 대체 폰트 물색.
+
+---
+
+## 🟢 내(Claude)가 이 세션에서 병렬로 처리 중 — 자동 진행
+
+> 4 에이전트 동시 작업. 각자 파일 영역 독립.
+
+- [ ] **Agent A**: `supabase/migrations/` — 테이블 6개 + RLS 전수 + slug_reserved 시드
+- [ ] **Agent B**: shadcn/ui init + `app/globals.css`에 DESIGN.md 토큰 주입 + Tailwind 연결
+- [ ] **Agent C**: `app/auth/` — 이메일 매직링크 login/callback/verify/signout
+- [ ] **Agent D**: `app/onboarding/` — Pet 등록 + MBTI 5문항 stepper (폴라로이드 느낌)
+- [ ] **메인 세션**: Pretendard/Nanum Myeongjo 폰트 셋업 + `app/layout.tsx` 통합 + 최종 커밋
+
+완료 시 dev server에서 "로그인 → 강아지 등록 → MBTI 답 → 홈" vertical slice 동작 확인 가능. 단 C3 (env 채우기) 완료 후에 실제 login 동작.
+
+---
+
 ## P1 — v1.5 (post-ship, DAU 50+)
 
 ### 월별 BEST MOMENT 투표 카드
