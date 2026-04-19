@@ -4,6 +4,38 @@
 
 ---
 
+## ⚠️ 파일 수정/작성 전 반드시 읽을 것 (AI 에이전트)
+
+**새 파일을 만들거나 기존 파일을 수정하기 전, 아래 4개 문서를 순서대로 확인한다.** 읽지 않고 작업하면 drift가 쌓여 5-10회 반복 수정을 만든다.
+
+| # | 문서 | 용도 | 언제 열어야 하나 |
+|---|---|---|---|
+| 1 | `AGENTS.md` (이 파일) | 상위 전략, scope, 10가지 locked decision, gstack 요구사항 | **항상** (가장 먼저) |
+| 2 | `docs/architecture.md` | 시스템 구조, 데이터 흐름, 모듈 경계, 캐시, 보안 | 새 라우트/테이블/파이프라인 추가할 때 |
+| 3 | `docs/code-conventions.md` | 코드 스타일, 네이밍, import 규칙, 패턴, AI 작업 프로토콜 | **모든 파일 수정 전** |
+| 4 | `DESIGN.md` | 폴라로이드 style, 테라코타 accent, 토큰 | UI/스타일 바꿀 때 |
+
+### 핵심 규칙 (자주 틀리는 것)
+- DB 컬럼명 **`user_id`** (절대 `owner_id` 아님) — 다른 테이블도 이 컨벤션 따름
+- Supabase client은 반드시 **`@/lib/supabase/*`** 경유, 직접 `createServerClient` 금지
+- 에러는 **`throw` 대신 `return { error }`** (Server Actions)
+- 스타일은 **`var(--color-*)` 토큰만**, 하드코딩된 hex/rgb 금지
+- 커밋은 **사용자 요청 시에만** — 파일 생성·수정은 OK, `git add && commit`은 user가 승인 후
+- Migration은 **forward-only**, 컬럼 drop/rename 금지
+
+### 충돌 시 우선순위
+1. 사용자의 직접 지시 (최우선)
+2. `docs/code-conventions.md`의 명시적 규칙
+3. `docs/architecture.md`의 구조 결정
+4. `AGENTS.md`의 전략 결정
+5. `DESIGN.md`의 시각 결정
+6. 기존 코드의 암시적 패턴
+7. 에이전트 본인의 judgment
+
+**미심쩍으면 추측하지 말고 사용자에게 질문한다.**
+
+---
+
 ## 🐾 Project Overview
 
 **buddy-note**는 **"내 강아지의 성격을 1년 동안 기억하는 유일한 앱"**을 지향하는 반려동물 AI 일기 + SNS 공유 이미지 생성 웹앱이다.
