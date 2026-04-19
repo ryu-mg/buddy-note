@@ -16,14 +16,11 @@ Format: Priority (P1/P2/P3) + Effort (S/M/L/XL, 인간 teams / CC+gstack compres
 - **Effort**: M (2-3일) / CC+gstack S (1시간).
 - **Depends on**: v1 ship, DAU 50+ 도달, diaries 테이블 월간 조회 쿼리.
 
-### LLM API 장애 시 알림 + fallback 템플릿
-- **What**: (1) Vercel cron이 매시간 LLM API health check, 실패 시 Discord webhook으로 관리자 알림. (2) 사용자 측 LLM 실패 시 템플릿 일기 ("오늘도 {이름}이와 함께했어요") + 수동 태그 UI + 재시도 버튼.
-- **Why**: 서비스 전체 다운 리스크. 개인 프로젝트에서 LLM API 키 quota/만료는 가장 흔한 장애.
-- **Pros**: 유저 이탈 방지, 조용한 실패 방지.
-- **Cons**: v1 scope 밖으로 판단됨. 하지만 한 번 장애 나면 잃는 trust 크다.
-- **Context**: CEO 리뷰 Section 1/2에서 "스킵" 결정. 리스크로 남김.
-- **Effort**: S (4-6시간) / CC+gstack XS (20분).
-- **Depends on**: PostHog or Discord webhook 설정.
+### ~~LLM API 장애 시 알림 + fallback 템플릿~~ → v1 승격 (2026-04-19 업데이트)
+- **Status**: 원래 v1.5였으나 `/plan-eng-review` + `/plan-design-review` 두 리뷰가 독립적으로 "v1 승격" 권고 → **v1 scope로 이동**. CEO plan에 반영 완료.
+- **v1 포함된 것**: template diary (`diaries.is_fallback=true`) + 재시도 1회 + 재시도 쿨다운 UI + 백그라운드 복구 cron + 정상 지연은 phase copy 4단계 UX.
+- **여전히 v1.5**: LLM API health check cron + Discord webhook 관리자 알림 (API 키 quota/만료 감지). 이건 운영 관측 쪽이라 v1 밖.
+- **Effort (v1.5 잔여)**: XS (2시간) / CC+gstack XS (15분).
 
 ---
 
