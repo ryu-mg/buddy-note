@@ -24,7 +24,7 @@ export default async function OnboardingEntryPage() {
     const { data: existing } = await supabase
       .from('pets')
       .select('id')
-      .eq('owner_id', user.id)
+      .eq('user_id', user.id)
       .limit(1)
       .maybeSingle()
 

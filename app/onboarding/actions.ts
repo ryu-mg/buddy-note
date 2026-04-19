@@ -129,7 +129,7 @@ export async function savePet(
   }
 
   const { error: insertError } = await supabase.from('pets').insert({
-    owner_id: user.id,
+    user_id: user.id,
     name,
     species,
     breed,
