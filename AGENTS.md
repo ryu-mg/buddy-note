@@ -228,7 +228,7 @@ supabase link --project-ref <ref>
 supabase db push
 
 # Dev 서버
-bun run dev                           # http://localhost:3000
+bun run dev                           # http://localhost:4000
 ```
 
 ### Build / Test
