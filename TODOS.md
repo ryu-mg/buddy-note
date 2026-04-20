@@ -23,18 +23,20 @@ Format: Priority (P1/P2/P3) + Effort (S/M/L/XL, 인간 teams / CC+gstack compres
 - **왜 지금**: 모든 schema/auth/storage/RLS 작업의 블로커. 이거 안 되면 dev 환경에서 로그인조차 안 됨.
 - **끝나고 할 일**: Settings → API에서 URL + anon key + service role key 복사 → 아래 C3 진행
 
-### [C3] 🔴 `.env.local` 채우기
+### [C3] 🔴 `.envs/local.env` 채우기
 - **소요**: 3분
 - **단계**:
   ```bash
   cd /Users/bao/dev/new-project
-  cp .env.example .env.local
+  cp .envs/example.env .envs/local.env
+  ln -sf .envs/local.env .env.local    # Next.js 는 루트 .env.local 만 인식
   ```
-  Supabase 값 4개 채우기:
+  Supabase 값 + Anthropic + 워커 시크릿 채우기:
   - `NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co`
   - `NEXT_PUBLIC_SUPABASE_ANON_KEY=...`
   - `SUPABASE_SERVICE_ROLE_KEY=...`
-  - `ANTHROPIC_API_KEY=...` (Claude Sonnet 4.6용, <https://console.anthropic.com>)
+  - `ANTHROPIC_API_KEY=...` (Claude Sonnet용, <https://console.anthropic.com>)
+  - `MEMORY_WORKER_SECRET=$(openssl rand -hex 32)`
 - **끝나면**: dev server 자동 리로드, "로그인 필요"로 표시됨 (env 경고 사라짐)
 
 ### [C4] 🟡 Supabase schema migration 적용
