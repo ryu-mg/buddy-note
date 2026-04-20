@@ -1,5 +1,6 @@
 'use client'
 
+import * as Sentry from '@sentry/nextjs'
 import Link from 'next/link'
 import { useEffect } from 'react'
 
@@ -10,8 +11,12 @@ type ErrorProps = {
 
 export default function Error({ error, reset }: ErrorProps) {
   useEffect(() => {
-    // TODO: client error → Sentry (Sentry wiring 이후 이 지점에서 report)
-    console.error(error)
+    // DSN 있으면 Sentry 로, 없으면 console 로 — dev 에서 패리티 유지.
+    if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
+      Sentry.captureException(error)
+    } else {
+      console.error(error)
+    }
   }, [error])
 
   return (

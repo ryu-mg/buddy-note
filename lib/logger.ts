@@ -1,7 +1,12 @@
-// TODO: swap to Sentry captureException / breadcrumb when DSN configured (env SENTRY_DSN).
+// 구조화된 한 줄 로그 + (DSN 있을 때) Sentry captureException.
 //
-// 의도적으로 의존성 0. 구조화된 한 줄 로그를 stdout/stderr 로 흘리고,
-// 나중에 Sentry / Log Drain 이 붙으면 이 파일 내부만 교체한다 (call site는 불변).
+// 설계:
+//   - DSN (`SENTRY_DSN`) 이 없으면 Sentry 쪽은 전부 no-op → dev/local 오버헤드 0.
+//   - stdout/stderr 로의 구조화 로그는 항상 출력 (log drain, Vercel logs 용).
+//   - error 레벨에만 Sentry.captureException 포워드 (warn/info 는 breadcrumb 취급할 수도 있지만
+//     v1 에서는 비용 관리 위해 error 만).
+//   - context 에 `err` 필드가 Error 이면 그걸 exception payload 로, 아니면 메시지로 새 Error 생성.
+//   - Sentry scope 에 context 를 (sanitize 이후) 심어서 이슈 상세에서 키/값 확인 가능.
 //
 // 사용 예:
 //   const log = createLogger('log:action')
@@ -9,6 +14,8 @@
 //
 // Next.js 서버 전용 — client component 에서 import 하면 build-time 에 실패.
 import 'server-only'
+
+import * as Sentry from '@sentry/nextjs'
 
 type Level = 'error' | 'warn' | 'info' | 'debug'
 
@@ -105,6 +112,43 @@ function format(level: Level, scope: string, message: string, ctx?: Record<strin
   return `${head} · ${stringifyContext(ctx)}`
 }
 
+/**
+ * context 에서 Error 인스턴스를 찾아 반환. 관례상 `err` 키를 먼저 본다.
+ * 못 찾으면 null — 호출부에서 message 로 새 Error 를 만들 수 있게 한다.
+ */
+function findErrorInContext(ctx?: Record<string, unknown>): Error | null {
+  if (!ctx) return null
+  const candidate = ctx.err ?? ctx.error ?? ctx.cause
+  if (candidate instanceof Error) return candidate
+  for (const v of Object.values(ctx)) {
+    if (v instanceof Error) return v
+  }
+  return null
+}
+
+/**
+ * DSN 이 설정된 경우에만 Sentry.captureException 호출. 없으면 완전 no-op.
+ * scope 에 sanitize 를 거친 context 를 심어 이슈 상세에서 바로 보이게 한다.
+ */
+function forwardToSentry(
+  scope: string,
+  message: string,
+  ctx?: Record<string, unknown>,
+): void {
+  if (!process.env.SENTRY_DSN) return
+
+  const err = findErrorInContext(ctx) ?? new Error(`[${scope}] ${message}`)
+
+  Sentry.withScope((s) => {
+    s.setTag('scope', scope)
+    if (ctx && Object.keys(ctx).length > 0) {
+      const cleaned = sanitize(ctx, new WeakSet()) as Record<string, unknown>
+      s.setContext('app', cleaned)
+    }
+    Sentry.captureException(err)
+  })
+}
+
 function emit(level: Level, scope: string, message: string, ctx?: Record<string, unknown>): void {
   if (LEVEL_ORDER[level] > currentThreshold) return
   const line = format(level, scope, message, ctx)
@@ -112,6 +156,9 @@ function emit(level: Level, scope: string, message: string, ctx?: Record<string,
     process.stderr.write(`${line}\n`)
   } else {
     process.stdout.write(`${line}\n`)
+  }
+  if (level === 'error') {
+    forwardToSentry(scope, message, ctx)
   }
 }
 

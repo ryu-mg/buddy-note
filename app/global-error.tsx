@@ -1,5 +1,6 @@
 'use client'
 
+import * as Sentry from '@sentry/nextjs'
 import { useEffect } from 'react'
 
 type GlobalErrorProps = {
@@ -23,8 +24,12 @@ type GlobalErrorProps = {
  */
 export default function GlobalError({ error, reset }: GlobalErrorProps) {
   useEffect(() => {
-    // TODO: client error → Sentry
-    console.error(error)
+    // root layout 이 터진 경우라도 Sentry 는 독립 번들이라 포워드 가능.
+    if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
+      Sentry.captureException(error)
+    } else {
+      console.error(error)
+    }
   }, [error])
 
   const systemFont =
