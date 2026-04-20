@@ -228,5 +228,14 @@ export function buildPersonaPromptFragment(input: {
 
   const joined = fragments.join(' / ')
   const subject = breed ? `${name}, ${breed}` : name
-  return `나는 ${subject}야. 나를 한 줄로 말하면:\n${joined}.`
+  return `나는 ${subject}${josaYa(subject)}. 나를 한 줄로 말하면:\n${joined}.`
+}
+
+// 마지막 음절에 받침이 있으면 '이야', 없으면 '야'. 한글이 아니면 '야'로 폴백.
+function josaYa(word: string): '이야' | '야' {
+  if (!word) return '야'
+  const last = word[word.length - 1]
+  const code = last.charCodeAt(0)
+  if (code < 0xac00 || code > 0xd7a3) return '야'
+  return (code - 0xac00) % 28 === 0 ? '야' : '이야'
 }
