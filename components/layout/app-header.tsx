@@ -51,12 +51,13 @@ export async function AppHeader() {
       right={
         <div className="flex items-center gap-4">
           {pet?.name ? (
-            <span
-              className="text-[13px] text-[var(--color-ink-soft)]"
-              aria-label={`현재 반려동물: ${pet.name}`}
+            <Link
+              href="/pet"
+              className="text-[13px] text-[var(--color-ink-soft)] transition-colors hover:text-[var(--color-accent-brand)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent-brand)] focus-visible:ring-offset-2"
+              aria-label={`현재 반려동물: ${pet.name} — 프로필 설정`}
             >
               {pet.name}
-            </span>
+            </Link>
           ) : null}
           <SignoutButton />
         </div>
