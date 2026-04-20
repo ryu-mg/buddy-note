@@ -48,11 +48,13 @@ export type MemoryUpdateQueueStatus =
 
 /**
  * Entry in pet_memory_summary.recent_callbacks (jsonb).
- * date is ISO 8601 string.
+ * referenceDate is ISO 8601 date (YYYY-MM-DD).
+ * Source of truth: lib/llm/memory-schemas.ts#recentCallbackSchema
  */
 export interface RecentCallback {
-  date: string;
-  detail: string;
+  note: string;
+  source: 'log' | 'diary';
+  referenceDate: string;
 }
 
 /**

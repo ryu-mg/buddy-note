@@ -1,5 +1,6 @@
 import { z } from 'zod'
 
+import { recentCallbackSchema, type RecentCallback } from '@/lib/llm/memory-schemas'
 import type { LogTag } from '@/types/database'
 
 /**
@@ -38,13 +39,10 @@ export type DiaryOutput = z.infer<typeof diarySchema>
 /**
  * Recent callback 항목 — `pet_memory_summary.recent_callbacks` jsonb 와 동일 shape.
  * LLM 입력으로 system prompt 에 직렬화되어 들어간다.
+ * Source of truth: lib/llm/memory-schemas.ts#recentCallbackSchema (재사용).
  */
-export const recentCallbackSchema = z.object({
-  date: z.string().min(1),
-  detail: z.string().min(1).max(200),
-})
-
-export type RecentCallbackInput = z.infer<typeof recentCallbackSchema>
+export { recentCallbackSchema }
+export type RecentCallbackInput = RecentCallback
 
 /**
  * Diary 생성 호출 입력.

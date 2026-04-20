@@ -98,7 +98,7 @@ function fallbackResult(
 
 function formatCallbacks(callbacks: readonly RecentCallbackInput[]): string {
   if (callbacks.length === 0) return '  (없음)'
-  return callbacks.map((c) => `  - "${c.date}: ${c.detail}"`).join('\n')
+  return callbacks.map((c) => `  - "${c.referenceDate} (${c.source}): ${c.note}"`).join('\n')
 }
 
 /**
