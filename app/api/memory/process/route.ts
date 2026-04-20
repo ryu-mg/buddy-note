@@ -4,6 +4,7 @@ import {
   DEFAULT_BATCH_SIZE,
   processQueueBatch,
 } from '@/lib/memory/process-queue'
+import { checkLimit, workerRatelimit } from '@/lib/rate-limit'
 
 /**
  * Memory-updater worker endpoint.
@@ -68,6 +69,17 @@ export async function POST(request: Request): Promise<Response> {
   const provided = match[1].trim()
   if (!timingSafeEqual(provided, expected)) {
     return unauthorized('bearer-mismatch')
+  }
+
+  // Defensive rate limit — 글로벌 60/분. pg_cron 은 분당 1회지만 pg_net retry
+  //  / 수동 트리거 / 장애 복구 중 쌓인 호출이 한꺼번에 터지는 상황에서
+  //  LLM 비용이 폭발하는 걸 막는다. stub 모드에서는 통과.
+  const rl = await checkLimit(workerRatelimit, 'global')
+  if (!rl.allowed) {
+    return NextResponse.json<ErrorBody>(
+      { ok: false, error: 'worker over capacity' },
+      { status: 429 },
+    )
   }
 
   // Batch size는 env로 override 가능. 값이 이상하면 default 로 fallback.

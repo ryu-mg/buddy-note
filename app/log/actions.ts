@@ -10,6 +10,7 @@ import { stripExifServer } from '@/lib/image/exif-strip-server'
 import { renderAllFormats } from '@/lib/image/render-3-formats'
 import { generateDiary } from '@/lib/llm/generate-diary'
 import { LOG_TAG_VALUES, logTagSchema } from '@/lib/llm/schemas'
+import { checkLimit, diaryRatelimit } from '@/lib/rate-limit'
 import {
   getSignedPhotoUrl,
   uploadDiaryImage,
@@ -43,7 +44,7 @@ export type CreateLogSuccess = { ok: true; diaryId: string }
 export type CreateLogFailure = {
   ok: false
   error: string
-  code: 'auth' | 'pet' | 'upload' | 'llm' | 'render' | 'db'
+  code: 'auth' | 'pet' | 'upload' | 'llm' | 'render' | 'db' | 'rate_limit'
 }
 export type CreateLogResult = CreateLogSuccess | CreateLogFailure
 
@@ -84,8 +85,6 @@ function parseTags(raw: FormDataEntryValue | null): LogTag[] | null {
 }
 
 export async function createLog(formData: FormData): Promise<CreateLogResult> {
-  // TODO: rate limit (Upstash Redis sliding window, Week 3 — arch §8)
-
   // 1) Auth
   const supabase = await createClient()
   if (!supabase) {
@@ -96,6 +95,18 @@ export async function createLog(formData: FormData): Promise<CreateLogResult> {
   } = await supabase.auth.getUser()
   if (!user) {
     return { ok: false, error: '로그인이 필요해요.', code: 'auth' }
+  }
+
+  // 1b) Rate limit — per-user 시간당 10 일기 (arch §8). auth 이후, 실제 일 시작
+  //     전에 체크해서 업로드/LLM 호출 비용이 소진되지 않게 한다. Upstash env
+  //     미설정인 dev 모드에서는 stub 이 항상 통과 (isStub=true → 로그 silent).
+  const rl = await checkLimit(diaryRatelimit, user.id)
+  if (!rl.allowed) {
+    return {
+      ok: false,
+      error: '오늘 기록을 많이 남겨주셨어요. 한 시간 뒤에 다시 와주세요.',
+      code: 'rate_limit',
+    }
   }
 
   // 2) Parse FormData
