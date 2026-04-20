@@ -58,7 +58,10 @@ export const diaryInputSchema = z.object({
   photoBase64: z.string().min(1),
   photoMediaType: z.enum(['image/jpeg', 'image/png', 'image/gif', 'image/webp']),
   petName: z.string().trim().min(1).max(24),
-  personaFragment: z.string().min(1),
+  // personaFragment 는 `buildPersonaPromptFragment` (lib/pet-mbti.ts) 가
+  // 5개 고정 option fragment 를 " / " 로 이어 만든다. 이론적 상한은 ~400자
+  // 수준이지만, DB row 가 poisoning 됐을 때를 대비해 500자 cap 으로 방어.
+  personaFragment: z.string().min(1).max(500),
   memo: z.string().max(200).optional().default(''),
   recentCallbacks: z.array(recentCallbackSchema).max(10).optional().default([]),
 })

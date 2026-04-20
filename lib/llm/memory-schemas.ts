@@ -88,8 +88,12 @@ export type MemoryLogInput = z.infer<typeof memoryLogInputSchema>
  */
 export const memorySummaryInputSchema = z.object({
   petName: z.string().trim().min(1).max(24),
-  breed: z.string().max(60).nullable().optional(),
-  personaFragment: z.string().min(1),
+  // breed 는 onboarding InputSchema (app/onboarding/actions.ts) 에서 40자 cap.
+  // 두 경계 cap 이 다르면 LLM 호출 시 일관성이 깨지므로 40 으로 정렬.
+  breed: z.string().max(40).nullable().optional(),
+  // personaFragment 는 lib/pet-mbti.ts 에서 고정 조립. 방어적 500 cap
+  // (diaryInputSchema 와 동일 정책).
+  personaFragment: z.string().min(1).max(500),
   previousSummary: previousSummaryInputSchema.nullable().optional(),
   newLogs: z.array(memoryLogInputSchema).max(20).default([]),
 })
