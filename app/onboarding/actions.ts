@@ -69,7 +69,7 @@ export async function savePet(
 
   const supabase = await createClient()
   if (!supabase) {
-    return { error: 'Supabase 설정이 필요해요.' }
+    return { error: 'Supabase 설정이 필요해요. 관리자에게 문의해주세요.' }
   }
 
   const {

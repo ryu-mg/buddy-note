@@ -54,7 +54,7 @@ export async function signInWithMagicLink(
   })
 
   if (error) {
-    return { error: '잠시 문제가 생겼어요. 이메일을 다시 확인해주세요.' }
+    return { error: '메일 보내는 중에 문제가 생겼어요. 잠시 후 다시 시도해주세요.' }
   }
 
   const masked = encodeURIComponent(maskEmail(email))
@@ -70,7 +70,10 @@ export async function signInWithKakao(
 ): Promise<KakaoResult> {
   const supabase = await createClient()
   if (!supabase) {
-    return { ok: false, error: 'Supabase 환경이 설정되지 않았어요.' }
+    return {
+      ok: false,
+      error: 'Supabase 설정이 필요해요. 관리자에게 문의해주세요.',
+    }
   }
 
   const redirectTo = await absoluteCallbackURL()

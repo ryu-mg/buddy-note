@@ -190,7 +190,7 @@ export async function createLog(formData: FormData): Promise<CreateLogResult> {
   if (!adminTyped) {
     return {
       ok: false,
-      error: '서버 설정이 완료되지 않았어요.',
+      error: 'Supabase 설정이 필요해요. 관리자에게 문의해주세요.',
       code: 'db',
     }
   }
@@ -264,7 +264,7 @@ export async function createLog(formData: FormData): Promise<CreateLogResult> {
     await admin.from('logs').delete().eq('id', logId)
     return {
       ok: false,
-      error: '사진 저장 중에 문제가 생겼어요.',
+      error: '사진 저장 중에 문제가 생겼어요. 잠시 후 다시 시도해주세요.',
       code: 'db',
     }
   }

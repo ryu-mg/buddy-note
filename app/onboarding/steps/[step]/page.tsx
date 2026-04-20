@@ -24,10 +24,14 @@ import {
   NameForm,
   type NameFormValues,
 } from '@/components/onboarding/name-form'
+import {
+  clearDraft,
+  readDraft,
+  saveDraft,
+} from '@/components/onboarding/onboarding-storage'
 import { savePet, type SavePetState } from '../../actions'
 
 const TOTAL_STEPS = 7 // 0 (정보) + 5 (질문) + 1 (확정) = 7
-const DRAFT_KEY = 'buddy-note:onboarding-draft:v1'
 
 type Draft = {
   info: NameFormValues
@@ -37,46 +41,6 @@ type Draft = {
 const emptyDraft: Draft = {
   info: { name: '', species: 'dog', breed: '' },
   answers: {},
-}
-
-function loadDraft(): Draft {
-  if (typeof window === 'undefined') return emptyDraft
-  try {
-    const raw = window.sessionStorage.getItem(DRAFT_KEY)
-    if (!raw) return emptyDraft
-    const parsed = JSON.parse(raw)
-    return {
-      info: {
-        name: String(parsed?.info?.name ?? ''),
-        species: parsed?.info?.species === 'cat' ? 'cat' : 'dog',
-        breed: String(parsed?.info?.breed ?? ''),
-      },
-      answers: sanitizeAnswers(parsed?.answers),
-    }
-  } catch {
-    return emptyDraft
-  }
-}
-
-function saveDraft(draft: Draft) {
-  if (typeof window === 'undefined') return
-  try {
-    window.sessionStorage.setItem(DRAFT_KEY, JSON.stringify(draft))
-  } catch {
-    // ignore quota errors
-  }
-}
-
-function sanitizeAnswers(x: unknown): Partial<Answers> {
-  const out: Partial<Answers> = {}
-  if (!x || typeof x !== 'object') return out
-  for (const id of QUESTION_IDS) {
-    const v = (x as Record<string, unknown>)[id]
-    if (v === 'A' || v === 'B' || v === 'C' || v === 'D') {
-      out[id] = v
-    }
-  }
-  return out
 }
 
 function clampStep(n: number): number {
@@ -98,20 +62,36 @@ export default function OnboardingStepPage(props: PageProps) {
   const [hydrated, setHydrated] = useState(false)
   const [stepError, setStepError] = useState<string | null>(null)
 
-  // Hydrate once from sessionStorage (external system sync).
-  // SSR 에서는 sessionStorage 를 못 읽으므로 mount 뒤 동기화 필수.
+  // Hydrate once from localStorage (external system sync).
+  // SSR 에서는 localStorage 를 못 읽으므로 mount 뒤 동기화 필수.
   useEffect(() => {
-    /* eslint-disable react-hooks/set-state-in-effect */
-    setDraft(loadDraft())
+    const stored = readDraft()
+    if (stored) {
+      /* eslint-disable react-hooks/set-state-in-effect */
+      setDraft({
+        info: {
+          name: stored.name,
+          species: stored.species,
+          breed: stored.breed,
+        },
+        answers: stored.answers,
+      })
+      /* eslint-enable react-hooks/set-state-in-effect */
+    }
     setHydrated(true)
-    /* eslint-enable react-hooks/set-state-in-effect */
   }, [])
 
   // Persist on every draft change (post-hydration only).
   useEffect(() => {
     if (!hydrated) return
-    saveDraft(draft)
-  }, [draft, hydrated])
+    saveDraft({
+      name: draft.info.name,
+      species: draft.info.species,
+      breed: draft.info.breed,
+      answers: draft.answers,
+      lastStep: step,
+    })
+  }, [draft, hydrated, step])
 
   const setInfo = useCallback((next: NameFormValues) => {
     setDraft((d) => ({ ...d, info: next }))
@@ -355,17 +335,12 @@ function SubmitRow({
   const ready =
     isCompleteAnswers(draft.answers) && draft.info.name.trim().length > 0
 
-  // 저장 성공 시 서버에서 redirect('/') — 클라는 sessionStorage 정리만.
+  // 저장 성공 시 서버에서 redirect('/') — 클라는 localStorage 정리만.
   // redirect 후 이 컴포넌트는 언마운트되므로 useEffect cleanup 이 처리.
+  // (error 가 오면 언마운트되지 않아 draft 가 그대로 살아있다 → 재시도 가능.)
   useEffect(() => {
     return () => {
-      if (typeof window !== 'undefined') {
-        try {
-          window.sessionStorage.removeItem(DRAFT_KEY)
-        } catch {
-          /* noop */
-        }
-      }
+      clearDraft()
     }
   }, [])
 
@@ -404,6 +379,7 @@ function SubmitRow({
         <button
           type="submit"
           disabled={!ready || pending}
+          aria-busy={pending}
           className="rounded-[10px] bg-[var(--accent,#e07a5f)] px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
         >
           {pending ? '저장하는 중…' : '저장할게요'}
