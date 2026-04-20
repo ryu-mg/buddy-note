@@ -2,7 +2,9 @@
 
 import { useActionState } from 'react'
 import { useFormStatus } from 'react-dom'
+
 import { signInWithMagicLink, type LoginState } from './actions'
+import { KakaoButton } from './kakao-button'
 
 const initialState: LoginState = {}
 
@@ -83,6 +85,18 @@ export default function LoginPage() {
           링크를 클릭하면 바로 로그인돼요
         </p>
       </form>
+
+      <div
+        role="separator"
+        aria-orientation="horizontal"
+        className="flex items-center gap-3 text-xs text-zinc-400"
+      >
+        <span className="h-px flex-1 bg-zinc-200" />
+        <span>또는</span>
+        <span className="h-px flex-1 bg-zinc-200" />
+      </div>
+
+      <KakaoButton />
     </div>
   )
 }

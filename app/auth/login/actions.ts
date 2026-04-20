@@ -60,3 +60,34 @@ export async function signInWithMagicLink(
   const masked = encodeURIComponent(maskEmail(email))
   redirect(`/auth/verify?email=${masked}`)
 }
+
+export type KakaoResult =
+  | { ok: true; redirectUrl: string }
+  | { ok: false; error: string }
+
+export async function signInWithKakao(
+  _formData: FormData,
+): Promise<KakaoResult> {
+  const supabase = await createClient()
+  if (!supabase) {
+    return { ok: false, error: 'Supabase 환경이 설정되지 않았어요.' }
+  }
+
+  const redirectTo = await absoluteCallbackURL()
+
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'kakao',
+    options: {
+      redirectTo,
+    },
+  })
+
+  if (error || !data?.url) {
+    return {
+      ok: false,
+      error: '카카오 로그인 준비 중 문제가 생겼어요. 잠시 후 다시 시도해주세요.',
+    }
+  }
+
+  return { ok: true, redirectUrl: data.url }
+}
