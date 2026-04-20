@@ -5,7 +5,6 @@ import { createClient } from '@/lib/supabase/server'
 import { getSignedPhotoUrl } from '@/lib/storage'
 import { DiaryCard } from '@/components/home/diary-card'
 import { PublicToggle } from '@/components/home/public-toggle'
-import { Toaster } from '@/components/ui/sonner'
 
 export const dynamic = 'force-dynamic'
 
@@ -218,8 +217,6 @@ export default async function Home() {
           ))}
         </section>
       )}
-
-      <Toaster />
     </main>
   )
 }

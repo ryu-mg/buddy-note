@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+import { AppHeader } from "@/components/layout/app-header";
+import { Toaster } from "@/components/ui/sonner";
+
 export const metadata: Metadata = {
   title: "buddy-note",
   description: "반려동물과 쓰는 AI 일기",
@@ -28,7 +31,9 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col font-sans bg-[var(--color-bg)] text-[var(--color-ink)]">
-        {children}
+        <AppHeader />
+        <main className="flex-1">{children}</main>
+        <Toaster />
       </body>
     </html>
   );

@@ -8,7 +8,6 @@ import { toast } from 'sonner'
 import { PhaseCopy } from '@/components/log/phase-copy'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { Toaster } from '@/components/ui/sonner'
 import { stripExifClient } from '@/lib/image/exif-strip-client'
 import { LOG_TAG_VALUES } from '@/lib/llm/schemas'
 import { cn } from '@/lib/utils'
@@ -94,7 +93,6 @@ export function UploadForm({ petId, petName }: Props) {
 
   return (
     <>
-      <Toaster />
       <form onSubmit={onSubmit} className="flex flex-col gap-6">
         {/* 사진 업로드 — 폴라로이드 드롭존 */}
         <div className="flex flex-col gap-2">
