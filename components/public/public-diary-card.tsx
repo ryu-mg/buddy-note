@@ -68,7 +68,6 @@ export function PublicDiaryCard({
               fill
               sizes="(max-width: 640px) 100vw, 420px"
               className="object-cover"
-              unoptimized
             />
           </div>
         </div>

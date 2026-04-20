@@ -62,7 +62,6 @@ export function DiaryCard({
               fill
               sizes="(max-width: 768px) 90vw, 420px"
               className="object-cover"
-              unoptimized
             />
           </div>
         ) : (

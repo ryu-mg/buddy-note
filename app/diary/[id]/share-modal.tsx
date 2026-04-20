@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useCallback, useMemo, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -242,12 +243,13 @@ export function ShareModal({
             }
           >
             {currentUrl ? (
-              /* 외부 Supabase public URL — next/image unoptimized로 단순 렌더 */
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              // Supabase diary-images public URL — next/image로 최적화
+              <Image
                 src={currentUrl}
                 alt={`${petName} 공유 이미지 미리보기 (${format})`}
-                className="absolute inset-0 h-full w-full object-cover"
+                fill
+                sizes="260px"
+                className="object-cover"
               />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center px-4 text-center text-[12px] leading-[1.5] text-[var(--color-mute)]">
