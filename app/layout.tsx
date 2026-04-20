@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 import { AppHeader } from "@/components/layout/app-header";
@@ -6,12 +6,34 @@ import { Toaster } from "@/components/ui/sonner";
 
 // metadataBase: 상대 OG 경로 (예: `/og-image.png`) 를 절대 URL 로 자동 승격.
 // 없으면 Kakao/Twitter crawler 가 상대 경로를 해석 못 해 프리뷰 깨짐.
+//
+// TODO: public/icons/* 는 플레이스홀더 (terracotta 배경 + "b") — 실제 디자인
+// 아이콘 확정되면 scripts/generate-placeholder-icons.mjs 와 함께 교체.
 export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:4000',
   ),
   title: "buddy-note",
   description: "반려동물과 쓰는 AI 일기",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    title: "buddy-note",
+    statusBarStyle: "default",
+  },
+  icons: {
+    icon: [
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: "/icons/apple-touch-icon.png",
+  },
+};
+
+// Next 14+ 에서 themeColor 는 metadata 가 아닌 viewport export 로 이동.
+// DESIGN.md §3 테라코타 accent (`--color-accent-brand`).
+export const viewport: Viewport = {
+  themeColor: "#e07a5f",
 };
 
 export default function RootLayout({

@@ -1,0 +1,16 @@
+{
+  "name": "buddy-note",
+  "short_name": "buddy-note",
+  "description": "반려동물과 쓰는 AI 일기",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fafaf5",
+  "theme_color": "#e07a5f",
+  "lang": "ko",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
