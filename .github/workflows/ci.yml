@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-type-test-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Lint
+        run: bun run lint
+
+      - name: Type check
+        run: bunx tsc --noEmit
+
+      - name: Unit tests
+        run: bun run test
+
+      - name: Build
+        run: bun run build
+        env:
+          # 빌드는 NEXT_PUBLIC_SUPABASE_URL 등이 없으면 graceful fallback
+          # (lib/supabase/*, lib/llm/client.ts, lib/supabase/admin.ts 모두 null-guard).
+          # metadataBase 경고 방지용 placeholder 만 제공.
+          NEXT_PUBLIC_SITE_URL: https://buddy-note.example
+
+      # NOTE: E2E (Playwright)는 Supabase/Anthropic secret 이 필요해서 현재 CI 에서 제외.
+      # secret 주입 준비 끝나면 별도 job 으로 추가 (playwright install + test:e2e).

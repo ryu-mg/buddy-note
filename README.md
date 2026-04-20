@@ -1,5 +1,7 @@
 # buddy-note
 
+[![CI](https://github.com/ryu-mg/buddy-note/actions/workflows/ci.yml/badge.svg)](https://github.com/ryu-mg/buddy-note/actions/workflows/ci.yml)
+
 > 반려동물의 성격을 1년 동안 기억하는 AI 일기 + SNS 공유 이미지 생성 앱.
 > 챗GPT와 다르게 세션마다 강아지를 다시 설명할 필요가 없다.
 
