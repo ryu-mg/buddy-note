@@ -26,6 +26,7 @@ export function KakaoButton() {
       type="button"
       onClick={handleClick}
       disabled={pending}
+      aria-busy={pending}
       aria-label="카카오로 계속하기"
       // #FEE500 / #000 는 카카오 브랜드 가이드라인이 강제하는 색상.
       // DESIGN.md 토큰 우선 규칙에 대한 의도적 예외 (Kakao brand exception).

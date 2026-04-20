@@ -86,6 +86,7 @@ export function DeleteDiaryButton({ diaryId, petName }: DeleteDiaryButtonProps) 
             variant="destructive"
             onClick={handleConfirm}
             disabled={pending}
+            aria-busy={pending}
           >
             {pending ? '삭제 중…' : '삭제'}
           </Button>

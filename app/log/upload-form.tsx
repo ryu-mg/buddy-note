@@ -107,6 +107,8 @@ export function UploadForm({ petId, petName }: Props) {
             ref={fileInputRef}
             type="file"
             accept="image/jpeg,image/png,image/webp"
+            aria-required="true"
+            aria-describedby="photo-input-hint"
             className="sr-only"
             onChange={onFileChange}
           />
@@ -155,6 +157,7 @@ export function UploadForm({ petId, petName }: Props) {
               </div>
             )}
             <p
+              id="photo-input-hint"
               className="mt-3 text-center text-[12px] text-[var(--color-mute)]"
               style={{ fontFamily: 'var(--font-serif)' }}
             >
@@ -212,6 +215,7 @@ export function UploadForm({ petId, petName }: Props) {
             onChange={(e) => setMemo(e.target.value.slice(0, MAX_MEMO))}
             maxLength={MAX_MEMO}
             rows={3}
+            aria-describedby="memo-count"
             placeholder="오늘 있었던 일을 짧게 적어주세요"
             className={cn(
               'w-full resize-none px-3 py-2 text-[14px] leading-[1.55]',
@@ -226,6 +230,8 @@ export function UploadForm({ petId, petName }: Props) {
             }}
           />
           <p
+            id="memo-count"
+            aria-live="polite"
             className="text-right text-[11px] text-[var(--color-mute)]"
             style={{ fontFamily: 'var(--font-sans)' }}
           >
@@ -237,6 +243,7 @@ export function UploadForm({ petId, petName }: Props) {
           type="submit"
           size="lg"
           disabled={isPending || !file}
+          aria-busy={isPending}
           className="h-12 w-full text-[15px]"
         >
           {isPending ? '일기를 만드는 중...' : `${petName}의 일기 만들기`}

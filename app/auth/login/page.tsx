@@ -14,6 +14,7 @@ function SubmitButton() {
     <button
       type="submit"
       disabled={pending}
+      aria-busy={pending}
       className="w-full rounded-[10px] bg-[var(--accent,#e07a5f)] px-4 py-3 text-sm font-semibold text-white transition-opacity duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
     >
       {pending ? '보내는 중…' : '매직 링크 보내기'}
@@ -65,6 +66,9 @@ export default function LoginPage() {
             inputMode="email"
             autoComplete="email"
             required
+            aria-required="true"
+            aria-invalid={Boolean(state.error)}
+            aria-describedby={state.error ? 'login-email-error' : undefined}
             placeholder="you@example.com"
             className="w-full rounded-[8px] border border-zinc-200 bg-white px-3 py-2.5 text-sm text-[var(--ink,#1a1a1a)] placeholder:text-zinc-400 focus:border-[var(--accent,#e07a5f)] focus:outline-none focus:ring-2 focus:ring-[var(--accent,#e07a5f)]/30"
           />
@@ -72,6 +76,7 @@ export default function LoginPage() {
 
         {state.error ? (
           <p
+            id="login-email-error"
             role="alert"
             className="rounded-[8px] bg-[#fde6e0] px-3 py-2 text-sm text-[var(--error,#b04a4a)]"
           >

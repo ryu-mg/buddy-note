@@ -67,6 +67,8 @@ export function PublicToggle({
           type="button"
           onClick={handleToggle}
           disabled={pending}
+          aria-busy={pending}
+          aria-pressed={isPublic}
           className="rounded-[var(--radius-button)] border border-[var(--color-line)] bg-[var(--color-bg)] px-3 py-1.5 text-[12px] font-semibold text-[var(--color-ink-soft)] transition-colors hover:border-[var(--color-accent-brand)] hover:text-[var(--color-accent-brand)] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {pending ? '바꾸는 중…' : `${buttonLabel} 바꾸기`}

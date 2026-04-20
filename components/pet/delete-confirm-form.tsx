@@ -75,6 +75,10 @@ export function DeleteConfirmForm({
           autoCapitalize="off"
           autoCorrect="off"
           spellCheck={false}
+          required
+          aria-required="true"
+          aria-invalid={Boolean(error)}
+          aria-describedby={error ? 'delete-confirm-error' : undefined}
           value={value}
           onChange={(e) => {
             setValue(e.target.value)
@@ -88,6 +92,7 @@ export function DeleteConfirmForm({
 
       {error ? (
         <p
+          id="delete-confirm-error"
           role="alert"
           className="rounded-[var(--radius-input)] bg-[var(--color-accent-brand-soft)] px-3 py-2 text-[13px] text-[var(--color-error)]"
         >
@@ -105,10 +110,15 @@ export function DeleteConfirmForm({
         <button
           type="submit"
           disabled={!matched || pending}
+          aria-busy={pending}
+          aria-describedby={!matched ? 'delete-confirm-disabled-reason' : undefined}
           className="rounded-[var(--radius-button)] bg-[var(--color-error)] px-5 py-2.5 text-[14px] font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
         >
           {pending ? '탈퇴 처리 중…' : '영구 삭제'}
         </button>
+        <span id="delete-confirm-disabled-reason" className="sr-only">
+          위 입력란에 {confirmTarget} 를 정확히 입력하면 버튼이 활성화돼요.
+        </span>
       </div>
     </form>
   )

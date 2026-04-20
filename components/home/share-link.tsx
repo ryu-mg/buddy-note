@@ -35,7 +35,7 @@ export function ShareLink({ slug }: ShareLinkProps) {
         type="button"
         onClick={handleCopy}
         aria-label="공유 링크 복사"
-        className="inline-flex size-7 shrink-0 items-center justify-center rounded-[6px] text-[var(--color-mute)] transition-colors hover:bg-[var(--color-line)] hover:text-[var(--color-ink)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent-brand)]"
+        className="inline-flex size-11 shrink-0 items-center justify-center rounded-[6px] text-[var(--color-mute)] transition-colors hover:bg-[var(--color-line)] hover:text-[var(--color-ink)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent-brand)]"
       >
         <Copy className="size-3.5" aria-hidden="true" />
       </button>

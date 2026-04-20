@@ -51,6 +51,10 @@ export function NameForm({ value, onChange, error }: NameFormProps) {
               name="name"
               type="text"
               required
+              aria-required="true"
+              aria-invalid={Boolean(error)}
+              aria-describedby={error ? 'name-form-error' : undefined}
+              autoComplete="nickname"
               maxLength={24}
               value={value.name}
               onChange={(e) => set('name', e.target.value)}
@@ -117,6 +121,7 @@ export function NameForm({ value, onChange, error }: NameFormProps) {
 
           {error ? (
             <p
+              id="name-form-error"
               role="alert"
               className="rounded-[8px] bg-[var(--accent-soft,#fde6e0)] px-3 py-2 text-[13px] text-[var(--error,#b04a4a)]"
             >

@@ -116,6 +116,10 @@ export function PetEditForm({ pet }: PetEditFormProps) {
               id="edit-pet-name"
               type="text"
               required
+              aria-required="true"
+              aria-invalid={Boolean(error)}
+              aria-describedby={error ? 'pet-edit-error' : undefined}
+              autoComplete="nickname"
               maxLength={40}
               value={name}
               onChange={(e) => {
@@ -184,6 +188,7 @@ export function PetEditForm({ pet }: PetEditFormProps) {
 
         {error ? (
           <p
+            id="pet-edit-error"
             role="alert"
             className="rounded-[var(--radius-input)] bg-[var(--color-accent-brand-soft)] px-3 py-2 text-[13px] text-[var(--color-error)]"
           >
@@ -203,6 +208,7 @@ export function PetEditForm({ pet }: PetEditFormProps) {
           <button
             type="submit"
             disabled={!canSubmit || pending}
+            aria-busy={pending}
             className="rounded-[var(--radius-button)] bg-[var(--color-accent-brand)] px-5 py-2.5 text-[14px] font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {pending ? '저장하는 중…' : '저장'}

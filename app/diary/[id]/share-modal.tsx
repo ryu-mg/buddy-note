@@ -282,6 +282,7 @@ export function ShareModal({
             variant="outline"
             onClick={handleCopyImage}
             disabled={!currentUrl || busy}
+            aria-busy={busy}
           >
             복사
           </Button>
@@ -290,6 +291,7 @@ export function ShareModal({
             variant="outline"
             onClick={handleShareLink}
             disabled={!publicUrl || busy}
+            aria-busy={busy}
             title={
               publicUrl
                 ? undefined
@@ -302,6 +304,7 @@ export function ShareModal({
             type="button"
             onClick={handleDownload}
             disabled={!currentUrl || busy}
+            aria-busy={busy}
           >
             다운로드
           </Button>
