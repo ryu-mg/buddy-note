@@ -3,9 +3,12 @@
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
-import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
+import { createLogger } from '@/lib/logger'
 import { deletePhoto } from '@/lib/storage'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { createClient } from '@/lib/supabase/server'
+
+const log = createLogger('diary:action')
 
 export type DeleteDiaryResult =
   | { ok: true }
@@ -96,19 +99,18 @@ export async function deleteDiary(diaryId: string): Promise<DeleteDiaryResult> {
   }
 
   // 2) photos bucket — log의 원본 사진 제거 (best-effort)
-  const { data: log } = await supabase
+  const { data: logRow } = await supabase
     .from('logs')
     .select('photo_storage_path')
     .eq('id', diary.log_id)
     .maybeSingle<{ photo_storage_path: string | null }>()
 
-  if (log?.photo_storage_path) {
-    const result = await deletePhoto(log.photo_storage_path)
+  if (logRow?.photo_storage_path) {
+    const result = await deletePhoto(logRow.photo_storage_path)
     if (result.error) {
-      console.warn(
-        '[deleteDiary] photos bucket 삭제 실패 — DB 삭제는 진행:',
-        result.error,
-      )
+      log.warn('photos bucket 삭제 실패 — DB 삭제는 진행', {
+        err: result.error,
+      })
     }
   }
 
@@ -124,10 +126,7 @@ export async function deleteDiary(diaryId: string): Promise<DeleteDiaryResult> {
       .from('diary-images')
       .remove(diaryImageNames)
     if (removeError) {
-      console.warn(
-        '[deleteDiary] diary-images 삭제 실패 — DB 삭제는 진행:',
-        removeError,
-      )
+      log.warn('diary-images 삭제 실패 — DB 삭제는 진행', { err: removeError })
     }
   }
 
@@ -137,7 +136,7 @@ export async function deleteDiary(diaryId: string): Promise<DeleteDiaryResult> {
     .delete()
     .eq('id', diary.id)
   if (diaryDeleteError) {
-    console.error('[deleteDiary] diaries delete 실패:', diaryDeleteError)
+    log.error('diaries delete 실패', { err: diaryDeleteError })
     return {
       ok: false,
       error: '기록을 지우는 중에 문제가 생겼어요. 잠시 후 다시 시도해주세요.',
@@ -152,7 +151,7 @@ export async function deleteDiary(diaryId: string): Promise<DeleteDiaryResult> {
     .eq('id', diary.log_id)
   if (logDeleteError) {
     // diary 는 이미 지워졌음. log 삭제 실패는 치명적이지 않음 — 로그만.
-    console.warn('[deleteDiary] logs delete 실패 (diary는 이미 삭제됨):', logDeleteError)
+    log.warn('logs delete 실패 (diary는 이미 삭제됨)', { err: logDeleteError })
   }
 
   // 6) cache 무효화 — 홈, 상세, 공개 프로필

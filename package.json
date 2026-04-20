@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start -p 4000",
     "lint": "eslint",
-    "test": "bun test",
+    "test": "bun test lib/",
     "test:e2e": "playwright test"
   },
   "dependencies": {

@@ -10,6 +10,7 @@ import { stripExifServer } from '@/lib/image/exif-strip-server'
 import { renderAllFormats } from '@/lib/image/render-3-formats'
 import { generateDiary } from '@/lib/llm/generate-diary'
 import { LOG_TAG_VALUES, logTagSchema } from '@/lib/llm/schemas'
+import { createLogger } from '@/lib/logger'
 import { checkLimit, diaryRatelimit } from '@/lib/rate-limit'
 import {
   getSignedPhotoUrl,
@@ -28,6 +29,8 @@ import type { LogTag, RecentCallback } from '@/types/database'
  * 국소 cast 한다 (`lib/supabase/server.ts` 가 이미 untyped 라 패턴 일치).
  */
 type UntypedSupabase = SupabaseClient
+
+const log = createLogger('log:action')
 
 /**
  * /log Server Action — architecture.md §4 happy path.
@@ -173,7 +176,7 @@ export async function createLog(formData: FormData): Promise<CreateLogResult> {
   try {
     cleanBuffer = await stripExifServer(Buffer.from(arrayBuffer))
   } catch (err) {
-    console.error('[createLog] EXIF strip failed:', err)
+    log.error('EXIF strip failed', { err })
     return {
       ok: false,
       error: '사진을 읽는 중에 문제가 생겼어요. 다른 사진으로 해볼까요?',
@@ -208,7 +211,7 @@ export async function createLog(formData: FormData): Promise<CreateLogResult> {
     .single()
 
   if (logInsertError || !logRow) {
-    console.error('[createLog] log insert failed:', logInsertError)
+    log.error('log insert failed', { err: logInsertError })
     return {
       ok: false,
       error: '기록을 저장하지 못했어요. 잠시 후 다시 시도해주세요.',
@@ -256,7 +259,7 @@ export async function createLog(formData: FormData): Promise<CreateLogResult> {
     .eq('id', logId)
 
   if (updateLogError) {
-    console.error('[createLog] log update failed:', updateLogError)
+    log.error('log update failed', { err: updateLogError })
     // 경로/URL 업데이트 실패는 치명적 — 롤백
     await admin.from('logs').delete().eq('id', logId)
     return {
@@ -279,7 +282,7 @@ export async function createLog(formData: FormData): Promise<CreateLogResult> {
     }
   } catch (err) {
     // 테이블/행이 아직 없을 수 있음 — 조용히 진행.
-    console.warn('[createLog] memory summary fetch skipped:', err)
+    log.warn('memory summary fetch skipped', { err })
   }
 
   // 9) LLM 일기 생성 — fallback 내장 (항상 ok=true)
@@ -303,7 +306,7 @@ export async function createLog(formData: FormData): Promise<CreateLogResult> {
       diaryBody: diaryResult.data.body,
     })
   } catch (err) {
-    console.warn('[createLog] satori render failed — continuing without images:', err)
+    log.warn('satori render failed — continuing without images', { err })
     renderedImages = null
   }
 
@@ -357,7 +360,7 @@ export async function createLog(formData: FormData): Promise<CreateLogResult> {
     .single()
 
   if (diaryInsertError || !diaryRow) {
-    console.error('[createLog] diary insert failed:', diaryInsertError)
+    log.error('diary insert failed', { err: diaryInsertError })
     // v1 cleanup 정책: log + photo는 남겨둔다 (재시도 여지 있음, orphan 수동 청소).
     return {
       ok: false,

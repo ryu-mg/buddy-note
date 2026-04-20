@@ -23,6 +23,7 @@ type GlobalErrorProps = {
  */
 export default function GlobalError({ error, reset }: GlobalErrorProps) {
   useEffect(() => {
+    // TODO: client error → Sentry
     console.error(error)
   }, [error])
 

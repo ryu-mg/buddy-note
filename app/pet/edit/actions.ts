@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
+import { createLogger } from '@/lib/logger'
 import {
   buildPersonaPromptFragment,
   isCompleteAnswers,
@@ -11,6 +12,8 @@ import {
   type OptionKey,
 } from '@/lib/pet-mbti'
 import { createClient } from '@/lib/supabase/server'
+
+const log = createLogger('pet:edit')
 
 export type UpdatePetResult =
   | { ok: true }
@@ -131,7 +134,7 @@ export async function updatePet(
     .eq('id', pet.id)
 
   if (updateError) {
-    console.error('[updatePet] update failed:', updateError)
+    log.error('update failed', { err: updateError })
     return {
       ok: false,
       error: '저장 중에 문제가 생겼어요. 잠시 후 다시 시도해주세요.',

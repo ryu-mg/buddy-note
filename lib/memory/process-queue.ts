@@ -8,7 +8,10 @@ import type {
   PreviousSummaryInput,
   RecentCallback,
 } from '@/lib/llm/memory-schemas'
+import { createLogger } from '@/lib/logger'
 import { createAdminClient } from '@/lib/supabase/admin'
+
+const log = createLogger('memory:queue')
 
 /**
  * pg_cron → /api/memory/process → this module.
@@ -393,16 +396,16 @@ async function processOneRow(
         { p_pet_id: pet.id },
       )
       if (releaseError) {
-        console.error(
-          '[processOneRow] advisory lock release failed:',
-          releaseError.message,
-        )
+        log.error('advisory lock release failed', {
+          petId: pet.id,
+          err: releaseError.message,
+        })
       }
     } catch (releaseErr) {
-      console.error(
-        '[processOneRow] advisory lock release threw:',
-        releaseErr instanceof Error ? releaseErr.message : releaseErr,
-      )
+      log.error('advisory lock release threw', {
+        petId: pet.id,
+        err: releaseErr instanceof Error ? releaseErr.message : releaseErr,
+      })
     }
   }
 }

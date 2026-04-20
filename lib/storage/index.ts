@@ -1,7 +1,10 @@
 import 'server-only'
 
+import { createLogger } from '@/lib/logger'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient as createServerSupabase } from '@/lib/supabase/server'
+
+const log = createLogger('storage')
 
 /**
  * Supabase Storage buckets.
@@ -46,7 +49,7 @@ export async function uploadPhoto(
   })
 
   if (error) {
-    console.error('[storage.uploadPhoto]', error)
+    log.error('uploadPhoto failed', { err: error })
     return { error: '사진을 올리는 중에 문제가 생겼어요.' }
   }
 
@@ -72,7 +75,7 @@ export async function getSignedPhotoUrl(
     .createSignedUrl(path, expiresInSeconds)
 
   if (error || !data?.signedUrl) {
-    console.error('[storage.getSignedPhotoUrl]', error)
+    log.error('getSignedPhotoUrl failed', { err: error })
     return { error: '사진 링크를 만들지 못했어요.' }
   }
 
@@ -107,7 +110,7 @@ export async function uploadDiaryImage(
     })
 
   if (error) {
-    console.error('[storage.uploadDiaryImage]', error)
+    log.error('uploadDiaryImage failed', { err: error })
     return { error: '공유 이미지를 저장하지 못했어요.' }
   }
 
@@ -129,7 +132,7 @@ export async function deletePhoto(path: string): Promise<{ error?: string }> {
 
   const { error } = await admin.storage.from(PHOTOS_BUCKET).remove([path])
   if (error) {
-    console.error('[storage.deletePhoto]', error)
+    log.error('deletePhoto failed', { err: error })
     return { error: '사진을 지우지 못했어요.' }
   }
 

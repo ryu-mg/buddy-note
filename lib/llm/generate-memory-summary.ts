@@ -13,6 +13,9 @@ import {
   type PreviousSummaryInput,
 } from '@/lib/llm/memory-schemas'
 import { sanitizeUserText } from '@/lib/llm/sanitize'
+import { createLogger } from '@/lib/logger'
+
+const log = createLogger('llm:memory')
 
 /**
  * `pet_memory_summary` 갱신 결과.
@@ -270,7 +273,7 @@ export async function generateMemorySummary(
     }
   } catch (err) {
     const reason = err instanceof Error ? err.message : 'unknown-llm-error'
-    console.error('[generateMemorySummary] LLM call failed:', reason)
+    log.error('LLM call failed', { reason })
     return fallbackResult(
       safeInput.previousSummary ?? null,
       `llm-error: ${reason}`,

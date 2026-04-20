@@ -1,10 +1,13 @@
 import { NextResponse } from 'next/server'
 
+import { createLogger } from '@/lib/logger'
 import {
   DEFAULT_BATCH_SIZE,
   processQueueBatch,
 } from '@/lib/memory/process-queue'
 import { checkLimit, workerRatelimit } from '@/lib/rate-limit'
+
+const log = createLogger('memory:route')
 
 /**
  * Memory-updater worker endpoint.
@@ -48,7 +51,7 @@ function timingSafeEqual(a: string, b: string): boolean {
 
 function unauthorized(reason: string): NextResponse<ErrorBody> {
   // 구체 원인은 log 에만, 응답은 일반화 (정찰 방지).
-  console.warn('[/api/memory/process] auth failed:', reason)
+  log.warn('auth failed', { reason })
   return NextResponse.json<ErrorBody>(
     { ok: false, error: 'unauthorized' },
     { status: 401 },
@@ -97,7 +100,7 @@ export async function POST(request: Request): Promise<Response> {
   if (!response.ok) {
     // env 미설정 또는 claim RPC 실패 — 500 으로 돌려보낸다 (pg_cron 은 body 를
     // cron.job_run_details.return_message 로 기록하므로 원인이 남음).
-    console.error('[/api/memory/process] batch failed:', response)
+    log.error('batch failed', { response })
     return NextResponse.json<ErrorBody>(
       { ok: false, error: response.error },
       { status: 500 },

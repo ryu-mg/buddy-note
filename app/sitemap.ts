@@ -1,6 +1,9 @@
 import type { MetadataRoute } from 'next'
 
+import { createLogger } from '@/lib/logger'
 import { createClient } from '@/lib/supabase/server'
+
+const log = createLogger('sitemap')
 
 // 매 시간 sitemap 재생성 — 새 공개 프로필이 빠르게 색인되도록.
 // 정적인 루트 2개 + 공개 강아지 프로필만 포함 (RLS가 anon 으로도 public 만 반환).
@@ -47,7 +50,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .eq('is_public', true)
 
   if (error) {
-    console.warn('[sitemap] 공개 프로필 쿼리 실패, static 만 반환:', error.message)
+    log.warn('공개 프로필 쿼리 실패, static 만 반환', { err: error.message })
     return staticEntries()
   }
 

@@ -2,8 +2,11 @@
 
 import { revalidatePath } from 'next/cache'
 
+import { createLogger } from '@/lib/logger'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
+
+const log = createLogger('pet:delete')
 
 export type DeleteAccountResult =
   | { ok: true }
@@ -28,7 +31,7 @@ const PHOTOS_BUCKET = 'photos'
  *   7. pets      (user_id = user.id)
  *   8. auth user 삭제 (admin.auth.admin.deleteUser)
  *
- * 부분 실패 시: console.error 로 기록 + 사용자에게 "일부가 남았어요" 안내.
+ * 부분 실패 시: logger 로 기록 + 사용자에게 "일부가 남았어요" 안내.
  * 치명적 순서(pets 삭제 전에 diaries/logs/memory 가 이미 삭제됐는지)는
  * 가능하면 유지하지만, ON DELETE CASCADE 가 중복 안전망.
  *
@@ -61,7 +64,7 @@ export async function deleteAccount(
     .returns<{ id: string; name: string }[]>()
 
   if (petsError) {
-    console.error('[deleteAccount] pets fetch failed:', petsError)
+    log.error('pets fetch failed', { err: petsError })
     return {
       ok: false,
       error: '프로필 정보를 불러오지 못했어요. 잠시 후 다시 시도해주세요.',
@@ -111,7 +114,7 @@ export async function deleteAccount(
         .delete()
         .in('pet_id', petIds)
       if (error) {
-        console.error('[deleteAccount] diaries delete failed:', error)
+        log.error('diaries delete failed', { err: error })
         return {
           ok: false,
           error:
@@ -124,7 +127,7 @@ export async function deleteAccount(
     {
       const { error } = await admin.from('logs').delete().in('pet_id', petIds)
       if (error) {
-        console.error('[deleteAccount] logs delete failed:', error)
+        log.error('logs delete failed', { err: error })
         return {
           ok: false,
           error:
@@ -140,7 +143,7 @@ export async function deleteAccount(
         .delete()
         .in('pet_id', petIds)
       if (error) {
-        console.error('[deleteAccount] pet_memory_summary delete failed:', error)
+        log.error('pet_memory_summary delete failed', { err: error })
         return {
           ok: false,
           error:
@@ -158,10 +161,7 @@ export async function deleteAccount(
       if (error) {
         // queue 잔류는 치명적이지 않음 (pet 삭제 후 orphan FK 는 cron 에서
         // 정리 가능). 로깅만 하고 진행.
-        console.warn(
-          '[deleteAccount] memory_update_queue delete soft-failed:',
-          error,
-        )
+        log.warn('memory_update_queue delete soft-failed', { err: error })
       }
     }
   }
@@ -172,21 +172,18 @@ export async function deleteAccount(
       .from(PHOTOS_BUCKET)
       .list(user.id, { limit: 1000 })
     if (listError) {
-      console.warn('[deleteAccount] photos list soft-failed:', listError)
+      log.warn('photos list soft-failed', { err: listError })
     } else if (files && files.length > 0) {
       const paths = files.map((f) => `${user.id}/${f.name}`)
       const { error: removeError } = await admin.storage
         .from(PHOTOS_BUCKET)
         .remove(paths)
       if (removeError) {
-        console.warn(
-          '[deleteAccount] photos remove soft-failed:',
-          removeError,
-        )
+        log.warn('photos remove soft-failed', { err: removeError })
       }
     }
   } catch (err) {
-    console.warn('[deleteAccount] photos cleanup exception:', err)
+    log.warn('photos cleanup exception', { err })
   }
 
   // TODO: orphan diary-images cleanup.
@@ -204,7 +201,7 @@ export async function deleteAccount(
       .delete()
       .eq('user_id', user.id)
     if (petsDeleteError) {
-      console.error('[deleteAccount] pets delete failed:', petsDeleteError)
+      log.error('pets delete failed', { err: petsDeleteError })
       return {
         ok: false,
         error:
@@ -219,10 +216,7 @@ export async function deleteAccount(
   //    시 빈 계정이 될 수 있으니 사용자에게 고지.
   const { error: authDeleteError } = await admin.auth.admin.deleteUser(user.id)
   if (authDeleteError) {
-    console.error(
-      '[deleteAccount] auth user delete failed:',
-      authDeleteError,
-    )
+    log.error('auth user delete failed', { err: authDeleteError })
     // 그래도 세션은 정리해둔다 (다음 로그인 시 다시 가입 흐름으로 탈 수 있게).
     try {
       await supabase.auth.signOut()

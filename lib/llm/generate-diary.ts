@@ -10,6 +10,9 @@ import {
   type DiaryOutput,
   type RecentCallbackInput,
 } from '@/lib/llm/schemas'
+import { createLogger } from '@/lib/logger'
+
+const log = createLogger('llm:diary')
 
 /**
  * Diary 생성 결과. 실패해도 fallback 템플릿으로 **항상 success shape** 반환
@@ -233,7 +236,7 @@ export async function generateDiary(input: DiaryInput): Promise<DiaryResult> {
     }
   } catch (err) {
     const reason = err instanceof Error ? err.message : 'unknown-llm-error'
-    console.error('[generateDiary] LLM call failed:', reason)
+    log.error('LLM call failed', { reason })
     return fallbackResult(safeInput, `llm-error: ${reason}`, start)
   }
 }

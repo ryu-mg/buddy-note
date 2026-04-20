@@ -10,7 +10,7 @@ type ErrorProps = {
 
 export default function Error({ error, reset }: ErrorProps) {
   useEffect(() => {
-    // TODO: Sentry wiring 이후 이 지점에서 report
+    // TODO: client error → Sentry (Sentry wiring 이후 이 지점에서 report)
     console.error(error)
   }, [error])
 
