@@ -4,7 +4,12 @@ import "./globals.css";
 import { AppHeader } from "@/components/layout/app-header";
 import { Toaster } from "@/components/ui/sonner";
 
+// metadataBase: 상대 OG 경로 (예: `/og-image.png`) 를 절대 URL 로 자동 승격.
+// 없으면 Kakao/Twitter crawler 가 상대 경로를 해석 못 해 프리뷰 깨짐.
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:4000',
+  ),
   title: "buddy-note",
   description: "반려동물과 쓰는 AI 일기",
 };

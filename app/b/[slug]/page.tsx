@@ -100,13 +100,20 @@ export async function generateMetadata({
       ]
     : undefined
 
+  // `metadataBase` (app/layout.tsx) 가 상대 경로를 자동 절대화 — `/b/${slug}` 로 충분.
+  const path = `/b/${slug}`
+
   return {
     title,
     description,
+    alternates: {
+      canonical: path,
+    },
     openGraph: {
       title,
       description,
       type: 'profile',
+      url: path,
       images,
     },
     twitter: {
