@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 
 import { createClient } from '@/lib/supabase/server'
 
+import { EmptyState } from '@/components/empty/empty-state'
 import { PublicDiaryCard } from '@/components/public/public-diary-card'
 
 type PageProps = {
@@ -160,14 +161,12 @@ export default async function PublicProfilePage({ params }: PageProps) {
 
       {/* Feed */}
       {diaries.length === 0 ? (
-        <section className="mx-auto flex w-full max-w-md flex-col items-center gap-3 py-10 text-center">
-          <p className="text-[15px] text-[var(--color-ink-soft)]">
-            아직 공개된 일기가 없어요.
-          </p>
-          <p className="text-[13px] text-[var(--color-mute)]">
-            곧 첫 이야기가 올라올 거예요.
-          </p>
-        </section>
+        <EmptyState
+          title={`${pet.name} 아직 첫 일기를 준비 중이에요`}
+          hint="다음에 다시 놀러 와주세요."
+          tone="neutral"
+          cta={null}
+        />
       ) : (
         <section
           aria-label={`${pet.name}의 일기 모음`}
