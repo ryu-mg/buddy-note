@@ -4,6 +4,7 @@ import { notFound, redirect } from 'next/navigation'
 
 import { createClient } from '@/lib/supabase/server'
 import { getSignedPhotoUrl } from '@/lib/storage'
+import { DeleteDiaryButton } from '@/components/diary/delete-diary-button'
 
 import { ShareModal } from './share-modal'
 
@@ -216,6 +217,10 @@ export default async function DiaryPage({ params }: PageProps) {
             </p>
           </div>
         ) : null}
+
+        <div className="mt-6 flex justify-center">
+          <DeleteDiaryButton diaryId={diary.id} petName={diary.pet.name} />
+        </div>
       </section>
     </main>
   )
