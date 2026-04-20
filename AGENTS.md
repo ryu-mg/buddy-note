@@ -176,7 +176,7 @@ new-project/
 │   ├── pet-mbti.ts                   # 5문항 + persona_prompt_fragment builder
 │   ├── slug.ts                       # Korean 초중종성 romanize + nanoid fallback
 │   └── utils.ts                      # shadcn cn()
-├── middleware.ts                     # Supabase session refresh (⚠ Next 16 proxy.ts deprecation warning)
+├── proxy.ts                          # Supabase session refresh (Next 16 file convention; helper는 `lib/supabase/middleware.ts` 유지)
 ├── supabase/
 │   ├── config.toml                   # local CLI config (Seoul region)
 │   ├── migrations/
@@ -310,8 +310,8 @@ supabase db push                      # 적용
 | D6 | 페르소나 기억 = 제품 해자 | 챗GPT와 가장 큰 차별점, 데이터 lock-in 강함 | High (제품 정체성 근본 변경) |
 | D7 | 공개 프로필 URL `/b/[slug]`를 v1에 포함 | 바이럴 루프 코어 asset (CEO review expansion) | Low (URL 비활성화) |
 | D8 | LLM fallback template을 v1에 포함 | Eng+Design review 독립 합의로 승격 | Low (feature flag off) |
-| D9 | middleware.ts 유지 (Next 16 deprecation warning 감수) | Supabase 공식 가이드가 아직 middleware 기준 | Low (이름만 rename when Supabase 가이드 업데이트됨) |
-| D10 | 카카오 로그인 v1 필수 (Codex는 v2로 제안했으나 오판) | 한국 시장 UX 마찰 완화 | Medium (비즈앱 승인 대기) |
+| D9 | proxy.ts 마이그레이션 완료 (2026-04-20) — Supabase SSR helper는 파일명 유지(`lib/supabase/middleware.ts`), 루트 파일 컨벤션만 `proxy.ts`로 rename + `export function proxy` | Next 16 deprecation warning 제거 (codemod `@next/codemod middleware-to-proxy`와 동일 형태) | Low (되돌리려면 rename) |
+| D10 | 카카오 로그인 v1 필수 (Codex는 v2로 제안했으나 오판; 코드 반영 완료 2026-04-20, Supabase Dashboard 활성화는 Kakao 비즈앱 승인(C1) 후) | 한국 시장 UX 마찰 완화 | Medium (비즈앱 승인 대기) |
 
 ### 수용된 리스크 (사용자 의도 결정)
 - ~~**LLM 실패 시 fallback 없음**~~ → 뒤집힘, D8 참조
@@ -344,7 +344,7 @@ supabase db push                      # 적용
 - **외부 아티팩트 먼저 읽기** — CEO plan + eng review + design review를 읽으면 "왜"가 다 나옴
 
 ### Next.js 16 breaking changes
-- `middleware.ts` → `proxy.ts` 권장 (v1은 middleware 유지, D9 참조)
+- `middleware.ts` → `proxy.ts` 마이그레이션 완료 (D9 참조). 루트는 `proxy.ts`에서 `export function proxy(request: NextRequest)` + `export const config`. Supabase helper `lib/supabase/middleware.ts` 파일명은 유지 (무관한 모듈)
 - React 19 기본, 서버 컴포넌트 async
 - `cookies()`, `headers()`, `params`, `searchParams` 모두 **async** — `await` 필수
 - Turbopack stable, webpack fallback 필요 시 명시
@@ -408,3 +408,4 @@ gstack 파일 경로는 `~/.claude/skills/gstack/...` (global path).
 
 - **2026-04-19** — 위키 ingest + office-hours + CEO review (SCOPE EXPANSION) + eng review + design review (폴라로이드 확정) + LLM fallback v1 승격
 - **2026-04-20** — Week 1 Day 1 vertical slice 완성 (schema + shadcn + auth + onboarding, 4-agent 병렬). AGENTS.md SSOT 확립, CLAUDE.md symlink
+- **2026-04-20** — Next 16 `middleware.ts` → `proxy.ts` 마이그레이션 (D9 해제). `export function proxy()` + 동일 matcher, Supabase SSR helper는 `lib/supabase/middleware.ts` 그대로 유지

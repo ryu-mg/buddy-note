@@ -55,7 +55,7 @@
 | Layer | Runtime | 위치 | 비고 |
 |---|---|---|---|
 | UI | React 19 RSC + Client Islands | Vercel Edge | Turbopack |
-| Middleware | Node/Edge | Vercel Edge | `middleware.ts` (v1), `proxy.ts` (Next 17+) |
+| Proxy | Node/Edge | Vercel Edge | `proxy.ts` (Next 16 file convention, helper는 `lib/supabase/middleware.ts`) |
 | Server Actions | Node | Vercel Serverless | `'use server'` |
 | DB | Postgres 16 | Supabase AWS Seoul | Forward-only migration |
 | Auth | Supabase GoTrue | Supabase Seoul | 이메일 magic link (v1), 카카오 OAuth (v1.5) |
