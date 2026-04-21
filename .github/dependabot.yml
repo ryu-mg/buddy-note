@@ -1,0 +1,33 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Asia/Seoul
+    open-pull-requests-limit: 5
+    groups:
+      next:
+        patterns:
+          - next
+          - react
+          - react-dom
+          - eslint-config-next
+      supabase:
+        patterns:
+          - "@supabase/*"
+      observability:
+        patterns:
+          - "@sentry/*"
+          - "@vercel/analytics"
+          - "@vercel/speed-insights"
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+      time: "09:00"
+      timezone: Asia/Seoul
+    open-pull-requests-limit: 3
