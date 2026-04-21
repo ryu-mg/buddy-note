@@ -37,13 +37,15 @@ const TOTAL_STEPS = 7 // 0 (정보) + 1 (관계) + 4 (질문) + 1 (확정)
 
 type Draft = {
   info: NameFormValues
-  guardianRelationship: string
+  companionRelationship: string
+  profilePhotoDataUrl: string
   answers: Partial<Answers>
 }
 
 const emptyDraft: Draft = {
   info: { name: '', breed: '' },
-  guardianRelationship: '',
+  companionRelationship: '',
+  profilePhotoDataUrl: '',
   answers: {},
 }
 
@@ -77,7 +79,8 @@ export default function OnboardingStepPage(props: PageProps) {
           name: stored.name,
           breed: stored.breed,
         },
-        guardianRelationship: stored.guardianRelationship,
+        companionRelationship: stored.companionRelationship,
+        profilePhotoDataUrl: stored.profilePhotoDataUrl ?? '',
         answers: stored.answers,
       })
       /* eslint-enable react-hooks/set-state-in-effect */
@@ -91,7 +94,8 @@ export default function OnboardingStepPage(props: PageProps) {
     saveDraft({
       name: draft.info.name,
       breed: draft.info.breed,
-      guardianRelationship: draft.guardianRelationship,
+      companionRelationship: draft.companionRelationship,
+      profilePhotoDataUrl: draft.profilePhotoDataUrl,
       answers: draft.answers,
       lastStep: step,
     })
@@ -102,8 +106,13 @@ export default function OnboardingStepPage(props: PageProps) {
     setStepError(null)
   }, [])
 
-  const setGuardianRelationship = useCallback((next: string) => {
-    setDraft((d) => ({ ...d, guardianRelationship: next }))
+  const setProfilePhotoDataUrl = useCallback((next: string) => {
+    setDraft((d) => ({ ...d, profilePhotoDataUrl: next }))
+    setStepError(null)
+  }, [])
+
+  const setCompanionRelationship = useCallback((next: string) => {
+    setDraft((d) => ({ ...d, companionRelationship: next }))
     setStepError(null)
   }, [])
 
@@ -123,10 +132,13 @@ export default function OnboardingStepPage(props: PageProps) {
   // Validate step 0 before advancing.
   const canAdvance = useMemo(() => {
     if (step === 0) {
-      return draft.info.name.trim().length > 0
+      return (
+        draft.info.name.trim().length > 0 &&
+        draft.info.breed.trim().length > 0
+      )
     }
     if (step === 1) {
-      return draft.guardianRelationship.trim().length > 0
+      return draft.companionRelationship.trim().length > 0
     }
     if (step >= 2 && step <= 5) {
       const id = QUESTION_IDS[step - 2]
@@ -141,8 +153,12 @@ export default function OnboardingStepPage(props: PageProps) {
       setStepError('이름을 적어주세요.')
       return
     }
-    if (step === 1 && !draft.guardianRelationship.trim()) {
-      setStepError('보호자 호칭을 적어주세요.')
+    if (step === 0 && !draft.info.breed.trim()) {
+      setStepError('견종을 적어주세요.')
+      return
+    }
+    if (step === 1 && !draft.companionRelationship.trim()) {
+      setStepError('반려인 호칭을 적어주세요.')
       return
     }
     if (step >= 2 && step <= 5) {
@@ -203,12 +219,18 @@ export default function OnboardingStepPage(props: PageProps) {
         className="motion-safe:animate-[slide-up_300ms_cubic-bezier(0.2,0.9,0.3,1)_both] motion-reduce:animate-none"
       >
         {step === 0 ? (
-          <NameForm value={draft.info} onChange={setInfo} error={stepError} />
+          <NameForm
+            value={draft.info}
+            profilePhotoDataUrl={draft.profilePhotoDataUrl}
+            onChange={setInfo}
+            onProfilePhotoChange={setProfilePhotoDataUrl}
+            error={stepError}
+          />
         ) : step === 1 ? (
           <RelationshipForm
             petName={draft.info.name}
-            value={draft.guardianRelationship}
-            onChange={setGuardianRelationship}
+            value={draft.companionRelationship}
+            onChange={setCompanionRelationship}
             error={stepError}
           />
         ) : step >= 2 && step <= 5 ? (
@@ -261,12 +283,13 @@ function ConfirmStep({ draft }: { draft: Draft }) {
   const ready =
     isCompleteAnswers(draft.answers) &&
     draft.info.name.trim().length > 0 &&
-    draft.guardianRelationship.trim().length > 0
+    draft.info.breed.trim().length > 0 &&
+    draft.companionRelationship.trim().length > 0
   const fragment = ready
     ? buildPersonaPromptFragment({
         name: draft.info.name,
         breed: draft.info.breed,
-        guardianRelationship: draft.guardianRelationship,
+        companionRelationship: draft.companionRelationship,
         answers: draft.answers as Answers,
       })
     : ''
@@ -312,7 +335,7 @@ function ConfirmStep({ draft }: { draft: Draft }) {
           </>
         ) : (
           <p className="mt-5 rounded-[8px] bg-[var(--accent-soft,#fde6e0)] px-3 py-2 text-[13px] text-[var(--error,#b04a4a)]">
-            앞 단계에서 이름, 보호자 호칭, 4문항을 마저 채워주세요.
+            앞 단계에서 이름, 견종, 반려인 호칭, 4문항을 마저 채워주세요.
           </p>
         )}
       </article>
@@ -375,7 +398,8 @@ function SubmitRow({
   const ready =
     isCompleteAnswers(draft.answers) &&
     draft.info.name.trim().length > 0 &&
-    draft.guardianRelationship.trim().length > 0
+    draft.info.breed.trim().length > 0 &&
+    draft.companionRelationship.trim().length > 0
 
   // 저장 성공 시 서버에서 redirect('/') — 클라는 localStorage 정리만.
   // redirect 후 이 컴포넌트는 언마운트되므로 useEffect cleanup 이 처리.
@@ -392,8 +416,13 @@ function SubmitRow({
       <input type="hidden" name="breed" value={draft.info.breed} />
       <input
         type="hidden"
-        name="guardianRelationship"
-        value={draft.guardianRelationship}
+        name="companionRelationship"
+        value={draft.companionRelationship}
+      />
+      <input
+        type="hidden"
+        name="profilePhotoDataUrl"
+        value={draft.profilePhotoDataUrl}
       />
       {QUESTION_IDS.map((id) => (
         <input

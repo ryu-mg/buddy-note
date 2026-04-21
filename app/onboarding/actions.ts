@@ -2,7 +2,9 @@
 
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
+import { stripExifServer } from '@/lib/image/exif-strip-server'
 import { createClient } from '@/lib/supabase/server'
+import { uploadProfilePhoto } from '@/lib/storage'
 import {
   buildPersonaPromptFragment,
   calculatePersonality,
@@ -25,12 +27,17 @@ const InputSchema = z.object({
     .trim()
     .min(1, '이름을 적어주세요.')
     .max(24, '이름은 24자 이내로 적어주세요.'),
-  breed: z.string().trim().max(40, '품종은 40자 이내로 적어주세요.').default(''),
-  guardianRelationship: z
+  breed: z
     .string()
     .trim()
-    .min(1, '보호자 호칭을 적어주세요.')
-    .max(20, '보호자 호칭은 20자 이내로 적어주세요.'),
+    .min(1, '견종을 적어주세요.')
+    .max(40, '견종은 40자 이내로 적어주세요.'),
+  companionRelationship: z
+    .string()
+    .trim()
+    .min(1, '반려인 호칭을 적어주세요.')
+    .max(20, '반려인 호칭은 20자 이내로 적어주세요.'),
+  profilePhotoDataUrl: z.string().optional().default(''),
   q1: OptionSchema,
   q2: OptionSchema,
   q3: OptionSchema,
@@ -44,7 +51,8 @@ export async function savePet(
   const raw = {
     name: formData.get('name'),
     breed: formData.get('breed') ?? '',
-    guardianRelationship: formData.get('guardianRelationship'),
+    companionRelationship: formData.get('companionRelationship'),
+    profilePhotoDataUrl: formData.get('profilePhotoDataUrl') ?? '',
     q1: formData.get('q1'),
     q2: formData.get('q2'),
     q3: formData.get('q3'),
@@ -57,7 +65,7 @@ export async function savePet(
     return { error: first }
   }
 
-  const { name, breed, guardianRelationship } = parsed.data
+  const { name, breed, companionRelationship, profilePhotoDataUrl } = parsed.data
   const answers: Answers = {
     q1: parsed.data.q1 as OptionKey,
     q2: parsed.data.q2 as OptionKey,
@@ -84,7 +92,7 @@ export async function savePet(
   const persona_prompt_fragment = buildPersonaPromptFragment({
     name,
     breed,
-    guardianRelationship,
+    companionRelationship,
     answers,
   })
   const personality = calculatePersonality(answers)
@@ -132,24 +140,70 @@ export async function savePet(
     return { error: '이름이 너무 많이 겹쳐요. 다른 이름으로 해볼까요?' }
   }
 
-  const { error: insertError } = await supabase.from('pets').insert({
-    user_id: user.id,
-    name,
-    species: 'dog',
-    breed,
-    guardian_relationship: guardianRelationship,
-    personality_code: personality.code,
-    personality_label: personality.label,
-    slug: finalSlug,
-    persona_answers,
-    persona_prompt_fragment,
-  })
+  const { data: pet, error: insertError } = await supabase
+    .from('pets')
+    .insert({
+      user_id: user.id,
+      name,
+      species: 'dog',
+      breed,
+      companion_relationship: companionRelationship,
+      personality_code: personality.code,
+      personality_label: personality.label,
+      slug: finalSlug,
+      persona_answers,
+      persona_prompt_fragment,
+    })
+    .select('id')
+    .single<{ id: string }>()
 
-  if (insertError) {
+  if (insertError || !pet) {
     return {
       error: '저장 중에 문제가 생겼어요. 잠시 후 다시 시도해주세요.',
     }
   }
 
+  let photoFailed = false
+  if (profilePhotoDataUrl.trim()) {
+    const decoded = decodeDataUrlImage(profilePhotoDataUrl)
+    if (decoded) {
+      try {
+        const stripped = await stripExifServer(decoded)
+        const upload = await uploadProfilePhoto({
+          userId: user.id,
+          petId: pet.id,
+          buffer: stripped,
+          contentType: 'image/jpeg',
+        })
+
+        if ('path' in upload) {
+          const { error: photoUpdateError } = await supabase
+            .from('pets')
+            .update({ profile_photo_storage_path: upload.path })
+            .eq('id', pet.id)
+          photoFailed = Boolean(photoUpdateError)
+        } else {
+          photoFailed = true
+        }
+      } catch {
+        photoFailed = true
+      }
+    } else {
+      photoFailed = true
+    }
+  }
+
+  if (photoFailed) redirect('/pet?photo=failed')
   redirect('/')
+}
+
+function decodeDataUrlImage(dataUrl: string): Buffer | null {
+  const match = /^data:image\/(?:jpeg|jpg|png|webp);base64,([A-Za-z0-9+/=]+)$/.exec(
+    dataUrl.trim(),
+  )
+  if (!match?.[1]) return null
+
+  const buffer = Buffer.from(match[1], 'base64')
+  if (buffer.length === 0 || buffer.length > 8 * 1024 * 1024) return null
+  return buffer
 }

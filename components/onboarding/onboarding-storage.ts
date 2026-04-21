@@ -21,7 +21,10 @@ const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000 // 7일
 export type OnboardingDraft = {
   name: string
   breed: string
-  guardianRelationship: string
+  companionRelationship: string
+  /** Deprecated draft key kept for older localStorage payloads. */
+  guardianRelationship?: string
+  profilePhotoDataUrl?: string
   answers: Partial<Answers>
   lastStep: number
   savedAt: string // ISO
@@ -84,14 +87,29 @@ export function readDraft(): OnboardingDraft | null {
 
     const name = typeof obj.name === 'string' ? obj.name : ''
     const breed = typeof obj.breed === 'string' ? obj.breed : ''
-    const guardianRelationship =
-      typeof obj.guardianRelationship === 'string'
-        ? obj.guardianRelationship
+    const companionRelationship =
+      typeof obj.companionRelationship === 'string'
+        ? obj.companionRelationship
+        : typeof obj.guardianRelationship === 'string'
+          ? obj.guardianRelationship
+          : ''
+    const profilePhotoDataUrl =
+      typeof obj.profilePhotoDataUrl === 'string' &&
+      obj.profilePhotoDataUrl.startsWith('data:image/')
+        ? obj.profilePhotoDataUrl
         : ''
     const answers = sanitizeAnswers(obj.answers)
     const lastStep = clampStep(obj.lastStep)
 
-    return { name, breed, guardianRelationship, answers, lastStep, savedAt }
+    return {
+      name,
+      breed,
+      companionRelationship,
+      profilePhotoDataUrl,
+      answers,
+      lastStep,
+      savedAt,
+    }
   } catch {
     return null
   }

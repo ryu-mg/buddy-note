@@ -1,3 +1,7 @@
+'use client'
+
+import { useState } from 'react'
+
 export type NameFormValues = {
   name: string
   breed: string
@@ -5,14 +9,48 @@ export type NameFormValues = {
 
 type NameFormProps = {
   value: NameFormValues
+  profilePhotoDataUrl?: string
   onChange: (next: NameFormValues) => void
+  onProfilePhotoChange: (next: string) => void
   /** 서버 혹은 부모에서 내려오는 에러 메시지 (선택) */
   error?: string | null
 }
 
-export function NameForm({ value, onChange, error }: NameFormProps) {
+const MAX_PROFILE_PHOTO_BYTES = 8 * 1024 * 1024
+
+export function NameForm({
+  value,
+  profilePhotoDataUrl,
+  onChange,
+  onProfilePhotoChange,
+  error,
+}: NameFormProps) {
+  const [photoError, setPhotoError] = useState<string | null>(null)
   const set = <K extends keyof NameFormValues>(key: K, v: NameFormValues[K]) =>
     onChange({ ...value, [key]: v })
+
+  async function handlePhotoChange(file: File | null) {
+    setPhotoError(null)
+    if (!file) {
+      onProfilePhotoChange('')
+      return
+    }
+    if (!file.type.startsWith('image/')) {
+      setPhotoError('이미지 파일만 올릴 수 있어요.')
+      return
+    }
+    if (file.size > MAX_PROFILE_PHOTO_BYTES) {
+      setPhotoError('대표 사진은 8MB 이하로 올려주세요.')
+      return
+    }
+
+    try {
+      const dataUrl = await fileToSquareJpegDataUrl(file)
+      onProfilePhotoChange(dataUrl)
+    } catch {
+      setPhotoError('사진을 읽지 못했어요. 다른 사진으로 다시 시도해주세요.')
+    }
+  }
 
   return (
     <section
@@ -27,13 +65,52 @@ export function NameForm({ value, onChange, error }: NameFormProps) {
           id="step0-title"
           className="mt-3 text-[20px] font-bold leading-[1.35] text-[var(--ink,#1a1a1a)]"
         >
-          우리 아이를 소개해주세요
+          버디를 소개해주세요
         </h1>
-        <p className="mt-1.5 text-[14px] text-[var(--ink-soft,#3f3f3f)]">
-          MVP에서는 강아지 기록부터 차근차근 시작할게요.
-        </p>
 
         <div className="mt-6 flex flex-col gap-5">
+          <div className="flex flex-col items-center gap-3">
+            <div
+              aria-label="대표 사진 미리보기"
+              className="relative grid size-28 place-items-center overflow-hidden rounded-full border border-[var(--color-line)] bg-white"
+            >
+              {profilePhotoDataUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={profilePhotoDataUrl}
+                  alt=""
+                  className="size-full object-cover"
+                />
+              ) : (
+                <span aria-hidden className="relative block size-16">
+                  <span className="absolute left-1/2 top-1 block size-7 -translate-x-1/2 rounded-full bg-[var(--color-line)]" />
+                  <span className="absolute bottom-1 left-1/2 block h-8 w-14 -translate-x-1/2 rounded-t-full bg-[var(--color-line)]" />
+                </span>
+              )}
+            </div>
+            <label
+              htmlFor="pet-profile-photo"
+              className="inline-flex min-h-10 cursor-pointer items-center justify-center rounded-[var(--radius-button)] border border-[var(--color-line)] bg-white px-4 text-[13px] font-medium text-[var(--color-ink)] transition-colors hover:bg-[var(--color-bg)]"
+            >
+              대표 사진 선택
+            </label>
+            <input
+              id="pet-profile-photo"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="sr-only"
+              onChange={(e) => void handlePhotoChange(e.target.files?.[0] ?? null)}
+            />
+            {photoError ? (
+              <p
+                role="alert"
+                className="text-center text-[12px] text-[var(--color-error)]"
+              >
+                {photoError}
+              </p>
+            ) : null}
+          </div>
+
           <div className="flex flex-col gap-1.5">
             <label
               htmlFor="pet-name"
@@ -63,16 +140,18 @@ export function NameForm({ value, onChange, error }: NameFormProps) {
               htmlFor="pet-breed"
               className="text-[13px] font-medium text-[var(--ink,#1a1a1a)]"
             >
-              품종 <span className="font-normal text-[var(--mute,#6b7280)]">(믹스도 괜찮아요)</span>
+              견종
             </label>
             <input
               id="pet-breed"
               name="breed"
               type="text"
+              required
+              aria-required="true"
               maxLength={40}
               value={value.breed}
               onChange={(e) => set('breed', e.target.value)}
-              placeholder="예) 푸들, 시츄-푸들 믹스"
+              placeholder="예) 푸들"
               className="w-full rounded-[8px] border border-[var(--line,#e5e7eb)] bg-white px-3 py-2.5 text-[15px] text-[var(--ink,#1a1a1a)] placeholder:text-zinc-400 focus:border-[var(--accent,#e07a5f)] focus:outline-none focus:ring-2 focus:ring-[var(--accent,#e07a5f)]/30"
             />
           </div>
@@ -90,4 +169,60 @@ export function NameForm({ value, onChange, error }: NameFormProps) {
       </article>
     </section>
   )
+}
+
+function fileToSquareJpegDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const image = new Image()
+    const objectUrl = URL.createObjectURL(file)
+
+    image.onload = () => {
+      try {
+        const side = Math.min(image.naturalWidth, image.naturalHeight)
+        if (!side) {
+          reject(new Error('empty image'))
+          return
+        }
+
+        const canvas = document.createElement('canvas')
+        canvas.width = 512
+        canvas.height = 512
+        const ctx = canvas.getContext('2d')
+        if (!ctx) {
+          reject(new Error('missing canvas context'))
+          return
+        }
+
+        const sx = (image.naturalWidth - side) / 2
+        const sy = (image.naturalHeight - side) / 2
+        ctx.drawImage(image, sx, sy, side, side, 0, 0, 512, 512)
+
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              reject(new Error('canvas encode failed'))
+              return
+            }
+            const reader = new FileReader()
+            reader.onload = () => {
+              if (typeof reader.result === 'string') resolve(reader.result)
+              else reject(new Error('file reader failed'))
+            }
+            reader.onerror = () => reject(reader.error ?? new Error('file reader failed'))
+            reader.readAsDataURL(blob)
+          },
+          'image/jpeg',
+          0.86,
+        )
+      } finally {
+        URL.revokeObjectURL(objectUrl)
+      }
+    }
+
+    image.onerror = () => {
+      URL.revokeObjectURL(objectUrl)
+      reject(new Error('image load failed'))
+    }
+    image.src = objectUrl
+  })
 }

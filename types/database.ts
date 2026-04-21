@@ -78,6 +78,8 @@ export interface PetRow {
   species: PetSpecies;
   breed: string | null;
   guardian_relationship: string | null;
+  companion_relationship: string | null;
+  profile_photo_storage_path: string | null;
   personality_code: string | null;
   personality_label: string | null;
   persona_answers: PersonaAnswers;
@@ -92,13 +94,23 @@ export interface PetRow {
 
 export type PetInsert = Omit<
   PetRow,
-  'id' | 'created_at' | 'updated_at' | 'is_public' | 'persona_answers' | 'deceased_at'
+  | 'id'
+  | 'created_at'
+  | 'updated_at'
+  | 'is_public'
+  | 'persona_answers'
+  | 'deceased_at'
+  | 'guardian_relationship'
+  | 'companion_relationship'
+  | 'profile_photo_storage_path'
 > & {
   id?: string;
   created_at?: string;
   updated_at?: string;
   is_public?: boolean;
   guardian_relationship?: string | null;
+  companion_relationship?: string | null;
+  profile_photo_storage_path?: string | null;
   personality_code?: string | null;
   personality_label?: string | null;
   persona_answers?: PersonaAnswers;

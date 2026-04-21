@@ -103,16 +103,16 @@ describe('calculatePersonality', () => {
 describe('buildPersonaPromptFragment', () => {
   const answers: Answers = { q1: 'A', q2: 'A', q3: 'B', q4: 'B' }
 
-  it('이름, 품종, 보호자 관계, 성격 결과가 모두 들어간다', () => {
+  it('이름, 견종, 반려인 호칭, 성격 결과가 모두 들어간다', () => {
     const out = buildPersonaPromptFragment({
       name: '마루',
       breed: '푸들',
-      guardianRelationship: '누나',
+      companionRelationship: '누나',
       answers,
     })
 
     expect(out).toContain('나는 마루, 푸들이야.')
-    expect(out).toContain('누나는 내 보호자야.')
+    expect(out).toContain('누나는 내 반려인이야.')
     expect(out).toContain('ENFP · 문앞 탐험가')
   })
 
@@ -120,7 +120,7 @@ describe('buildPersonaPromptFragment', () => {
     const out = buildPersonaPromptFragment({
       name: '마루',
       breed: '푸들',
-      guardianRelationship: '누나',
+      companionRelationship: '누나',
       answers,
     })
     const sepCount = (out.match(/ \/ /g) || []).length
@@ -131,17 +131,17 @@ describe('buildPersonaPromptFragment', () => {
     const out = buildPersonaPromptFragment({
       name: '마루',
       breed: '푸들',
-      guardianRelationship: '누나',
+      companionRelationship: '누나',
       answers,
     })
 
     expect(out).toBe(
-      '나는 마루, 푸들이야. 누나는 내 보호자야.\n' +
+      '나는 마루, 푸들이야. 누나는 내 반려인이야.\n' +
         '내 성격 유형은 ENFP · 문앞 탐험가.\n' +
         '나를 한 줄로 말하면:\n' +
         '처음 보는 친구에게도 먼저 다가가 인사하는 외향적인 쪽이고' +
         ' / 새 장난감과 새 장소를 만나면 궁금해서 먼저 탐험하고' +
-        ' / 보호자 표정과 목소리에 민감하게 반응하는 다정한 쪽이고' +
+        ' / 반려인 표정과 목소리에 민감하게 반응하는 다정한 쪽이고' +
         ' / 바뀐 흐름에도 금방 맞추는 유연한 타입이야.',
     )
   })

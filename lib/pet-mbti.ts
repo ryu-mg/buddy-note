@@ -61,7 +61,7 @@ export const QUESTIONS: Question[] = [
     id: 'q1',
     axis: 'ei',
     headline: '처음 보는 친구가 다가올 때',
-    prompt: '우리 아이는 보통 어떻게 반응해요?',
+    prompt: '버디는 보통 어떻게 반응해요?',
     options: [
       {
         key: 'A',
@@ -72,8 +72,8 @@ export const QUESTIONS: Question[] = [
       {
         key: 'B',
         letter: 'I',
-        label: '보호자 곁에서 천천히 살핀다',
-        prompt_fragment: '낯선 친구 앞에서는 보호자 곁에서 천천히 살피는 신중한 쪽이고',
+        label: '반려인 곁에서 천천히 살핀다',
+        prompt_fragment: '낯선 친구 앞에서는 반려인 곁에서 천천히 살피는 신중한 쪽이고',
       },
     ],
   },
@@ -81,7 +81,7 @@ export const QUESTIONS: Question[] = [
     id: 'q2',
     axis: 'sn',
     headline: '새 장난감이나 새 장소를 만났을 때',
-    prompt: '우리 아이에게 더 가까운 모습은요?',
+    prompt: '버디에게 더 가까운 모습은요?',
     options: [
       {
         key: 'A',
@@ -100,8 +100,8 @@ export const QUESTIONS: Question[] = [
   {
     id: 'q3',
     axis: 'tf',
-    headline: '하고 싶은 것과 보호자 반응이 다를 때',
-    prompt: '우리 아이는 어느 쪽에 가까워요?',
+    headline: '하고 싶은 것과 반려인 반응이 다를 때',
+    prompt: '버디는 어느 쪽에 가까워요?',
     options: [
       {
         key: 'A',
@@ -112,8 +112,8 @@ export const QUESTIONS: Question[] = [
       {
         key: 'B',
         letter: 'F',
-        label: '보호자 표정과 목소리를 먼저 본다',
-        prompt_fragment: '보호자 표정과 목소리에 민감하게 반응하는 다정한 쪽이고',
+        label: '반려인 표정과 목소리를 먼저 본다',
+        prompt_fragment: '반려인 표정과 목소리에 민감하게 반응하는 다정한 쪽이고',
       },
     ],
   },
@@ -121,7 +121,7 @@ export const QUESTIONS: Question[] = [
     id: 'q4',
     axis: 'jp',
     headline: '하루 루틴이 바뀌었을 때',
-    prompt: '우리 아이는 어떻게 받아들여요?',
+    prompt: '버디는 어떻게 받아들여요?',
     options: [
       {
         key: 'A',
@@ -194,10 +194,10 @@ export function calculatePersonality(answers: Answers): PersonalityResult {
 }
 
 /**
- * 4문항 답 + 보호자 관계 + 이름/품종을 1인칭 자기소개 문장으로 조립.
+ * 4문항 답 + 반려인 호칭 + 이름/견종을 1인칭 자기소개 문장으로 조립.
  *
  * 예시 출력:
- * "나는 마루, 푸들이야. 누나는 내 보호자야.
+ * "나는 마루, 푸들이야. 누나는 내 반려인이야.
  * 내 성격 유형은 ENFP · 문앞 탐험가.
  * 나를 한 줄로 말하면:
  * 처음 보는 친구에게도 먼저 다가가 인사하는 외향적인 쪽이고 / ..."
@@ -205,12 +205,12 @@ export function calculatePersonality(answers: Answers): PersonalityResult {
 export function buildPersonaPromptFragment(input: {
   name: string
   breed: string
-  guardianRelationship: string
+  companionRelationship: string
   answers: Answers
 }): string {
   const name = input.name.trim()
   const breed = input.breed.trim()
-  const guardianRelationship = input.guardianRelationship.trim()
+  const companionRelationship = input.companionRelationship.trim()
   const personality = calculatePersonality(input.answers)
 
   const fragments = QUESTION_IDS.map((id) => {
@@ -225,8 +225,8 @@ export function buildPersonaPromptFragment(input: {
 
   const joined = fragments.join(' / ')
   const subject = breed ? `${name}, ${breed}` : name
-  const guardian = guardianRelationship || '보호자'
-  return `나는 ${subject}${josaYa(subject)}. ${guardian}${josaNeun(guardian)} 내 보호자야.\n내 성격 유형은 ${personality.code} · ${personality.label}.\n나를 한 줄로 말하면:\n${joined}.`
+  const companion = companionRelationship || '반려인'
+  return `나는 ${subject}${josaYa(subject)}. ${companion}${josaNeun(companion)} 내 반려인이야.\n내 성격 유형은 ${personality.code} · ${personality.label}.\n나를 한 줄로 말하면:\n${joined}.`
 }
 
 // 마지막 음절에 받침이 있으면 '이야', 없으면 '야'. 한글이 아니면 '야'로 폴백.

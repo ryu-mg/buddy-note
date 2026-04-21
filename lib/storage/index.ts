@@ -23,6 +23,13 @@ type UploadPhotoArgs = {
   ext: string
 }
 
+type UploadProfilePhotoArgs = {
+  userId: string
+  petId: string
+  buffer: Buffer
+  contentType?: string
+}
+
 /**
  * Upload a pet photo into the private `photos` bucket.
  *
@@ -51,6 +58,34 @@ export async function uploadPhoto(
   if (error) {
     log.error('uploadPhoto failed', { err: error })
     return { error: '사진을 올리는 중에 문제가 생겼어요.' }
+  }
+
+  return { path }
+}
+
+/**
+ * Upload a pet profile photo into the private `photos` bucket.
+ *
+ * Path convention: `{userId}/profile/{petId}.jpg`. Profile photos are
+ * overwriteable because the pet has exactly one representative image.
+ */
+export async function uploadProfilePhoto(
+  args: UploadProfilePhotoArgs,
+): Promise<{ path: string } | { error: string }> {
+  const { userId, petId, buffer, contentType = 'image/jpeg' } = args
+  const admin = createAdminClient()
+  if (!admin) return { error: 'Supabase 설정이 필요해요.' }
+
+  const path = `${userId}/profile/${petId}.jpg`
+
+  const { error } = await admin.storage.from(PHOTOS_BUCKET).upload(path, buffer, {
+    contentType,
+    upsert: true,
+  })
+
+  if (error) {
+    log.error('uploadProfilePhoto failed', { err: error })
+    return { error: '대표 사진을 저장하지 못했어요.' }
   }
 
   return { path }

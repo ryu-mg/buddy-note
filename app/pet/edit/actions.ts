@@ -31,13 +31,13 @@ const InputSchema = z.object({
   breed: z
     .string()
     .trim()
-    .max(40, '품종은 40자 이내로 적어주세요.')
-    .default(''),
-  guardianRelationship: z
+    .min(1, '견종을 적어주세요.')
+    .max(40, '견종은 40자 이내로 적어주세요.'),
+  companionRelationship: z
     .string()
     .trim()
-    .min(1, '보호자 호칭을 적어주세요.')
-    .max(20, '보호자 호칭은 20자 이내로 적어주세요.'),
+    .min(1, '반려인 호칭을 적어주세요.')
+    .max(20, '반려인 호칭은 20자 이내로 적어주세요.'),
   q1: OptionSchema,
   q2: OptionSchema,
   q3: OptionSchema,
@@ -53,7 +53,7 @@ const InputSchema = z.object({
  *   바뀌면 기존 공유 링크가 죽는다 (D7, architecture.md §5 "PUBLIC 상태
  *   유지" 논리와 동일). 슬러그 개명이 필요하면 별도 명시적 UX 로 풀 것.
  *
- * persona_prompt_fragment 는 새 이름/품종/답변으로 **매 저장 시 재생성**.
+ * persona_prompt_fragment 는 새 이름/견종/답변으로 **매 저장 시 재생성**.
  * 이 프래그먼트는 LLM 프롬프트에 주입되는 부분이라 이름 바꾸면 자연스레
  * 다음 일기부터 새 이름으로 말한다.
  */
@@ -63,7 +63,7 @@ export async function updatePet(
   const raw = {
     name: formData.get('name'),
     breed: formData.get('breed') ?? '',
-    guardianRelationship: formData.get('guardianRelationship'),
+    companionRelationship: formData.get('companionRelationship'),
     q1: formData.get('q1'),
     q2: formData.get('q2'),
     q3: formData.get('q3'),
@@ -76,7 +76,7 @@ export async function updatePet(
     return { ok: false, error: first, code: 'validation' }
   }
 
-  const { name, breed, guardianRelationship } = parsed.data
+  const { name, breed, companionRelationship } = parsed.data
   const answers: Answers = {
     q1: parsed.data.q1 as OptionKey,
     q2: parsed.data.q2 as OptionKey,
@@ -125,7 +125,7 @@ export async function updatePet(
   const persona_prompt_fragment = buildPersonaPromptFragment({
     name,
     breed,
-    guardianRelationship,
+    companionRelationship,
     answers,
   })
   const personality = calculatePersonality(answers)
@@ -138,7 +138,7 @@ export async function updatePet(
     .update({
       name,
       breed,
-      guardian_relationship: guardianRelationship,
+      companion_relationship: companionRelationship,
       personality_code: personality.code,
       personality_label: personality.label,
       persona_answers,

@@ -136,7 +136,7 @@ function AnonymousLanding() {
         <p className="mt-1 text-[15px] leading-[1.65] text-[var(--color-ink-soft)]">
           사진 한 장으로 일기가 되고, 일기가 쌓이면
           <br />
-          우리 아이가 점점 더 자기 자신 같아져요.
+          버디가 점점 더 자기 자신 같아져요.
         </p>
       </div>
 

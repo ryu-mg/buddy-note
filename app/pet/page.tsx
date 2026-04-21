@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 
+import { getSignedPhotoUrl } from '@/lib/storage'
 import { createClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
@@ -11,24 +13,18 @@ type PetOverview = {
   breed: string | null
   slug: string
   is_public: boolean
+  companion_relationship: string | null
   guardian_relationship: string | null
+  profile_photo_storage_path: string | null
   personality_code: string | null
   personality_label: string | null
-  persona_prompt_fragment: string | null
-  created_at: string
 }
 
-/**
- * /pet — 반려동물 프로필 오버뷰 (소유자 뷰).
- *
- * - 인증 없으면 /auth/login
- * - pet 없으면 /onboarding
- * - 폴라로이드 카드로 이름·품종·생성일 + persona 5줄 trait.
- * - "프로필 수정" / "계정 탈퇴" 액션 2개.
- *
- * 공개 여부는 표시만. 토글은 홈 헤더의 PublicToggle 에서 계속 담당.
- */
-export default async function PetOverviewPage() {
+type PageProps = {
+  searchParams?: Promise<{ photo?: string }>
+}
+
+export default async function PetOverviewPage({ searchParams }: PageProps) {
   const supabase = await createClient()
   if (!supabase) redirect('/auth/login')
 
@@ -40,7 +36,18 @@ export default async function PetOverviewPage() {
   const { data: pet } = await supabase
     .from('pets')
     .select(
-      'id, name, breed, slug, is_public, guardian_relationship, personality_code, personality_label, persona_prompt_fragment, created_at',
+      [
+        'id',
+        'name',
+        'breed',
+        'slug',
+        'is_public',
+        'companion_relationship',
+        'guardian_relationship',
+        'profile_photo_storage_path',
+        'personality_code',
+        'personality_label',
+      ].join(', '),
     )
     .eq('user_id', user.id)
     .limit(1)
@@ -48,159 +55,129 @@ export default async function PetOverviewPage() {
 
   if (!pet) redirect('/onboarding')
 
-  const traits = splitPersonaFragment(pet.persona_prompt_fragment)
-  const createdLabel = formatDate(pet.created_at)
+  const resolvedSearchParams = searchParams ? await searchParams : {}
+  const photoFailed = resolvedSearchParams.photo === 'failed'
+  const photoUrl = pet.profile_photo_storage_path
+    ? await getSignedProfilePhotoUrl(pet.profile_photo_storage_path)
+    : null
+  const personalityLabel =
+    pet.personality_code && pet.personality_label
+      ? `${pet.personality_code} · ${pet.personality_label}`
+      : '성격 미정'
+  const detailLabel = [pet.breed, personalityLabel].filter(Boolean).join(' · ')
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-2xl flex-col gap-8 px-4 pb-20 pt-8 sm:px-6 md:pt-10">
-      <header className="flex flex-col gap-1">
-        <p className="text-[12px] font-medium uppercase tracking-[0.14em] text-[var(--color-mute)]">
-          프로필
-        </p>
-        <h1 className="text-[24px] font-semibold leading-[1.25] text-[var(--color-ink)]">
-          {pet.name}의 프로필
+    <main className="mx-auto flex min-h-screen w-full max-w-md flex-col bg-[var(--color-bg)] pb-24">
+      <header className="relative flex min-h-16 items-center justify-center border-b border-[var(--color-line)] px-4">
+        <Link
+          href="/"
+          aria-label="홈으로 돌아가기"
+          className="absolute left-2 grid size-11 place-items-center rounded-full text-[26px] leading-none text-[var(--color-ink-soft)] transition-colors hover:text-[var(--color-accent-brand)]"
+        >
+          <ChevronLeft aria-hidden className="size-6" strokeWidth={1.8} />
+        </Link>
+        <h1 className="text-[18px] font-semibold text-[var(--color-ink)]">
+          마이페이지
         </h1>
-        <p className="text-[13px] leading-[1.5] text-[var(--color-mute)]">
-          성격은 언제든 다시 답할 수 있어요.
-        </p>
       </header>
 
-      <section
-        aria-label="프로필 요약"
-        className="mx-auto w-full max-w-md motion-safe:[transform:rotate(-0.6deg)] motion-reduce:rotate-0"
-      >
-        <article className="rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-paper)] px-6 py-7 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_-12px_rgba(0,0,0,0.08)]">
-          <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-[var(--color-mute)]">
-            우리 아이
-          </p>
-          <h2 className="mt-3 text-[22px] font-bold leading-[1.3] text-[var(--color-ink)]">
-            {pet.name}
-          </h2>
-          {pet.breed ? (
-            <p className="mt-1 text-[14px] text-[var(--color-ink-soft)]">
-              {pet.breed}
+      {photoFailed ? (
+        <p
+          role="status"
+          className="mx-4 mt-4 rounded-[var(--radius-input)] bg-[var(--color-accent-brand-soft)] px-3 py-2 text-[13px] text-[var(--color-error)]"
+        >
+          프로필은 저장됐지만 대표 사진 저장만 실패했어요. 나중에 다시 설정해주세요.
+        </p>
+      ) : null}
+
+      <section aria-label="버디 프로필" className="px-4 py-6">
+        <div className="flex items-center gap-4">
+          <ProfileAvatar src={photoUrl} name={pet.name} />
+          <div className="min-w-0 flex-1">
+            <h2 className="truncate text-[20px] font-semibold leading-[1.25] text-[var(--color-ink)]">
+              {pet.name}
+            </h2>
+            <p className="mt-1 font-mono text-[13px] text-[var(--color-mute)]">
+              @{pet.slug}
             </p>
-          ) : null}
-          <dl className="mt-5 flex flex-col gap-2 text-[13px]">
-            <div className="flex items-baseline gap-3">
-              <dt className="w-20 shrink-0 text-[var(--color-mute)]">함께한 날</dt>
-              <dd className="text-[var(--color-ink-soft)]">{createdLabel} 부터</dd>
-            </div>
-            {pet.guardian_relationship ? (
-              <div className="flex items-baseline gap-3">
-                <dt className="w-20 shrink-0 text-[var(--color-mute)]">보호자</dt>
-                <dd className="text-[var(--color-ink-soft)]">
-                  {pet.guardian_relationship}
-                </dd>
-              </div>
-            ) : null}
-            {pet.personality_code && pet.personality_label ? (
-              <div className="flex items-baseline gap-3">
-                <dt className="w-20 shrink-0 text-[var(--color-mute)]">성격</dt>
-                <dd className="text-[var(--color-ink-soft)]">
-                  {pet.personality_code} · {pet.personality_label}
-                </dd>
-              </div>
-            ) : null}
-            <div className="flex items-baseline gap-3">
-              <dt className="w-20 shrink-0 text-[var(--color-mute)]">공개 주소</dt>
-              <dd className="text-[var(--color-ink-soft)]">
-                <span className="font-mono text-[12px]">/b/{pet.slug}</span>
-                <span className="ml-2 text-[12px] text-[var(--color-mute)]">
-                  · {pet.is_public ? '공개중' : '비공개'}
-                </span>
-              </dd>
-            </div>
-          </dl>
-        </article>
-      </section>
-
-      <section aria-labelledby="persona-title" className="flex flex-col gap-3">
-        <div className="flex flex-col gap-1">
-          <h2
-            id="persona-title"
-            className="text-[16px] font-semibold text-[var(--color-ink)]"
-          >
-            {pet.name}의 성격
-          </h2>
-          <p className="text-[12px] text-[var(--color-mute)]">
-            4문항으로 기록한 우리 아이의 MBTI 한 줄 소개에요.
-          </p>
+            <p className="mt-2 truncate text-[13px] leading-[1.45] text-[var(--color-ink-soft)]">
+              {detailLabel}
+            </p>
+          </div>
         </div>
-
-        {traits.length > 0 ? (
-          <ol className="flex flex-col gap-1.5 rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-bg)] px-4 py-4">
-            {traits.map((t, i) => (
-              <li
-                key={i}
-                className="flex items-baseline gap-3 text-[14px] leading-[1.6] text-[var(--color-ink)]"
-              >
-                <span
-                  aria-hidden
-                  className="w-5 shrink-0 text-[11px] font-medium text-[var(--color-mute)]"
-                >
-                  {String(i + 1).padStart(2, '0')}
-                </span>
-                <span
-                  className="flex-1"
-                  style={{ fontFamily: 'var(--font-serif)' }}
-                >
-                  {t}
-                </span>
-              </li>
-            ))}
-          </ol>
-        ) : (
-          <p className="rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-bg)] px-4 py-4 text-[13px] text-[var(--color-mute)]">
-            아직 성격 정보가 비어있어요. 프로필을 수정해서 다시 답해주세요.
-          </p>
-        )}
       </section>
 
-      <section
-        aria-label="프로필 작업"
-        className="flex flex-col items-stretch gap-3 pt-2"
-      >
-        <Link
-          href="/pet/edit"
-          className="inline-flex items-center justify-center rounded-[var(--radius-button)] bg-[var(--color-accent-brand)] px-5 py-3 text-[15px] font-semibold text-white transition-opacity duration-200 hover:opacity-90"
-        >
-          프로필 수정
-        </Link>
-        <Link
-          href="/pet/delete"
-          className="inline-flex items-center justify-center rounded-[var(--radius-button)] px-5 py-2.5 text-[13px] font-medium text-[var(--color-mute)] underline-offset-4 transition-colors hover:text-[var(--color-error)] hover:underline"
-        >
-          계정 탈퇴
-        </Link>
-      </section>
+      <nav aria-label="마이페이지 메뉴" className="border-t border-[var(--color-line)]">
+        <MenuRow href="/pet/edit" label="버디 정보 수정" />
+        <MenuRow href="/pet/edit#personality" label="성격 다시 답하기" />
+        <MenuRow
+          href="/pet/edit#public"
+          label="공개 프로필 설정"
+          value={pet.is_public ? '공개중' : '비공개'}
+        />
+        <MenuRow href="/pet/edit#companion" label="반려인 호칭 수정" />
+        <MenuRow href="/pet/delete" label="계정 탈퇴" tone="danger" />
+      </nav>
     </main>
   )
 }
 
-/**
- * persona_prompt_fragment 예:
- *   "나는 마루, 푸들이야. 나를 한 줄로 말하면:\n에너지 폭발, … / 꼬리부터 … / …."
- *
- * 앞 인트로(콜론까지) 제거하고 마지막 마침표를 떼낸 뒤 " / " 로 split.
- * 포맷이 예상과 다르면 빈 배열을 돌려 호출 측이 fallback 문구 표시.
- */
-function splitPersonaFragment(raw: string | null): string[] {
-  if (!raw) return []
-  const idx = raw.indexOf(':')
-  const body = idx >= 0 ? raw.slice(idx + 1) : raw
-  const trimmed = body.trim().replace(/\.$/, '')
-  if (!trimmed) return []
-  return trimmed
-    .split(' / ')
-    .map((s) => s.trim())
-    .filter((s) => s.length > 0)
+async function getSignedProfilePhotoUrl(path: string): Promise<string | null> {
+  const result = await getSignedPhotoUrl(path)
+  return 'url' in result ? result.url : null
 }
 
-function formatDate(iso: string): string {
-  const d = new Date(iso)
-  if (Number.isNaN(d.getTime())) return ''
-  return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(
-    d.getDate(),
-  ).padStart(2, '0')}`
+function ProfileAvatar({ src, name }: { src: string | null; name: string }) {
+  return (
+    <div className="grid size-[74px] shrink-0 place-items-center overflow-hidden rounded-full bg-white ring-1 ring-[var(--color-line)]">
+      {src ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={src} alt={`${name} 대표 사진`} className="size-full object-cover" />
+      ) : (
+        <span aria-hidden className="relative block size-12">
+          <span className="absolute left-1/2 top-0 block size-6 -translate-x-1/2 rounded-full bg-[var(--color-line)]" />
+          <span className="absolute bottom-0 left-1/2 block h-7 w-11 -translate-x-1/2 rounded-t-full bg-[var(--color-line)]" />
+        </span>
+      )}
+    </div>
+  )
+}
+
+function MenuRow({
+  href,
+  label,
+  value,
+  tone = 'default',
+}: {
+  href: string
+  label: string
+  value?: string
+  tone?: 'default' | 'danger'
+}) {
+  return (
+    <Link
+      href={href}
+      className="flex min-h-[54px] items-center gap-3 border-b border-[var(--color-line)] px-4 text-[16px] transition-colors hover:bg-[var(--color-paper)]"
+    >
+      <span
+        className={
+          tone === 'danger'
+            ? 'min-w-0 flex-1 text-[var(--color-error)]'
+            : 'min-w-0 flex-1 text-[var(--color-ink-soft)]'
+        }
+      >
+        {label}
+      </span>
+      {value ? (
+        <span className="shrink-0 text-[12px] text-[var(--color-mute)]">
+          {value}
+        </span>
+      ) : null}
+      <ChevronRight
+        aria-hidden
+        className="size-5 shrink-0 text-[var(--color-accent-brand)]"
+        strokeWidth={1.8}
+      />
+    </Link>
+  )
 }

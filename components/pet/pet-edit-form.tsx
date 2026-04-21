@@ -20,7 +20,7 @@ type PetEditFormProps = {
     id: string
     name: string
     breed: string
-    guardianRelationship: string
+    companionRelationship: string
     persona_answers: PersonaAnswers
   }
 }
@@ -35,7 +35,7 @@ function toAnswers(input: PersonaAnswers): Partial<Answers> {
 }
 
 /**
- * PetEditForm — 이름/품종/보호자 호칭/4문항을 한 화면에서 수정.
+ * PetEditForm — 이름/견종/반려인 호칭/4문항을 한 화면에서 수정.
  *
  * 온보딩 스텝퍼와 달리 여기서는 scroll-form UX (모든 질문을 한 번에 본다).
  * 수정은 반복 작업일 가능성이 낮아 단일 페이지가 마찰이 적다.
@@ -45,8 +45,8 @@ export function PetEditForm({ pet }: PetEditFormProps) {
   const [pending, startTransition] = useTransition()
   const [name, setName] = useState(pet.name)
   const [breed, setBreed] = useState(pet.breed)
-  const [guardianRelationship, setGuardianRelationship] = useState(
-    pet.guardianRelationship,
+  const [companionRelationship, setCompanionRelationship] = useState(
+    pet.companionRelationship,
   )
   const [answers, setAnswers] = useState<Partial<Answers>>(() =>
     toAnswers(pet.persona_answers),
@@ -55,9 +55,10 @@ export function PetEditForm({ pet }: PetEditFormProps) {
 
   const canSubmit = useMemo(() => {
     if (name.trim().length === 0) return false
-    if (guardianRelationship.trim().length === 0) return false
+    if (breed.trim().length === 0) return false
+    if (companionRelationship.trim().length === 0) return false
     return QUESTION_IDS.every((id) => Boolean(answers[id]))
-  }, [name, guardianRelationship, answers])
+  }, [name, breed, companionRelationship, answers])
 
   function setAnswer(id: QuestionId, v: OptionKey) {
     setAnswers((a) => ({ ...a, [id]: v }))
@@ -71,7 +72,7 @@ export function PetEditForm({ pet }: PetEditFormProps) {
     const fd = new FormData()
     fd.set('name', name.trim())
     fd.set('breed', breed.trim())
-    fd.set('guardianRelationship', guardianRelationship.trim())
+    fd.set('companionRelationship', companionRelationship.trim())
     for (const id of QUESTION_IDS) {
       fd.set(id, answers[id] ?? '')
     }
@@ -97,6 +98,7 @@ export function PetEditForm({ pet }: PetEditFormProps) {
       >
         <section
           aria-labelledby="edit-basic-title"
+          id="companion"
           className="flex flex-col gap-4 rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-bg)] px-5 py-5"
         >
           <div className="flex flex-col gap-0.5">
@@ -142,41 +144,40 @@ export function PetEditForm({ pet }: PetEditFormProps) {
               htmlFor="edit-pet-breed"
               className="text-[13px] font-medium text-[var(--color-ink)]"
             >
-              품종{' '}
-              <span className="font-normal text-[var(--color-mute)]">
-                (믹스도 괜찮아요)
-              </span>
+              견종
             </label>
             <input
               id="edit-pet-breed"
               type="text"
+              required
+              aria-required="true"
               maxLength={40}
               value={breed}
               onChange={(e) => {
                 setBreed(e.target.value)
                 setError(null)
               }}
-              placeholder="예) 푸들, 시츄-푸들 믹스"
+              placeholder="예) 푸들"
               className="w-full rounded-[var(--radius-input)] border border-[var(--color-line)] bg-white px-3 py-2.5 text-[15px] text-[var(--color-ink)] placeholder:text-zinc-400 focus:border-[var(--color-accent-brand)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-brand)]/30"
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
             <label
-              htmlFor="edit-guardian-relationship"
+              htmlFor="edit-companion-relationship"
               className="text-[13px] font-medium text-[var(--color-ink)]"
             >
-              보호자 호칭
+              반려인 호칭
             </label>
             <input
-              id="edit-guardian-relationship"
+              id="edit-companion-relationship"
               type="text"
               required
               aria-required="true"
               maxLength={20}
-              value={guardianRelationship}
+              value={companionRelationship}
               onChange={(e) => {
-                setGuardianRelationship(e.target.value)
+                setCompanionRelationship(e.target.value)
                 setError(null)
               }}
               placeholder="예) 누나"
@@ -187,6 +188,7 @@ export function PetEditForm({ pet }: PetEditFormProps) {
 
         <section
           aria-labelledby="edit-persona-title"
+          id="personality"
           className="flex flex-col gap-4"
         >
           <div className="flex flex-col gap-0.5">
