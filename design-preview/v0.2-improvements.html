@@ -1,0 +1,3148 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>buddy-note v0.2 — UI/UX 개선 프리뷰</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700&family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ============================================================
+       Tokens (DESIGN.md v0.1 + 제안된 v0.2 변경)
+    ============================================================ */
+    :root {
+      --color-paper: #fafaf5;
+      --color-ink: #1a1a1a;
+      --color-ink-soft: #3f3f3f;
+      --color-mute: #6b7280;
+      --color-line: #e5e7eb;
+      --color-bg: #ffffff;
+      --color-accent-brand: #e07a5f;
+      --color-accent-brand-soft: #fde6e0;
+      --color-success: #4a7c59;
+      --color-error: #b04a4a;
+      --color-warn: #d4a256;
+
+      /* v0.2 제안 — mood palette (D-10) */
+      --mood-bright: #e07a5f;
+      --mood-calm: #a8b5a0;
+      --mood-tired: #9ca3af;
+      --mood-curious: #d4a256;
+      --mood-grumpy: #8a6fa3;
+      --mood-lonely: #5a7a8a;
+
+      /* v0.2 제안 — warm-dark (D-14) */
+      --wd-bg: #2a241f;
+      --wd-paper: #342c25;
+      --wd-ink: #f4eee5;
+      --wd-ink-soft: #c9bfb0;
+      --wd-mute: #8a8073;
+      --wd-line: rgba(244, 238, 229, 0.08);
+
+      /* Milestone cream */
+      --cream: #f4e4c1;
+
+      --radius-card: 12px;
+      --radius-button: 10px;
+      --radius-input: 8px;
+      --radius-pill: 9999px;
+
+      --font-sans: "Pretendard Variable", "Pretendard", -apple-system, BlinkMacSystemFont, "Noto Sans KR", sans-serif;
+      --font-serif: "Nanum Myeongjo", "Gowun Batang", "Apple SD Gothic Neo", serif;
+      --ease-soft-out: cubic-bezier(0.2, 0.9, 0.3, 1);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      background: #efece6;
+      color: var(--color-ink);
+      font-family: var(--font-sans);
+      display: flex;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ============================================================
+       Sidebar navigation
+    ============================================================ */
+    .nav {
+      width: 240px;
+      min-width: 240px;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      overflow-y: auto;
+      background: #1a1a1a;
+      padding: 22px 0 32px;
+    }
+    .nav-logo {
+      padding: 0 18px 8px;
+      color: var(--color-accent-brand);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+    .nav-sub {
+      padding: 0 18px 14px;
+      color: rgba(255,255,255,0.42);
+      font-size: 11px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .nav-section {
+      padding: 18px 18px 6px;
+      color: rgba(255,255,255,0.34);
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+    }
+    .nav a {
+      display: block;
+      padding: 9px 18px;
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
+      font-size: 12.5px;
+      border-left: 2px solid transparent;
+      transition: all 150ms var(--ease-soft-out);
+    }
+    .nav a:hover { color: #fff; background: rgba(255,255,255,0.05); }
+    .nav a.active {
+      color: var(--color-accent-brand);
+      background: rgba(224,122,95,0.1);
+      border-left-color: var(--color-accent-brand);
+    }
+    .nav-tag {
+      display: inline-block;
+      padding: 1px 5px;
+      margin-left: 4px;
+      background: rgba(224,122,95,0.15);
+      color: var(--color-accent-brand);
+      font-size: 9px;
+      border-radius: 3px;
+      letter-spacing: 0.04em;
+      vertical-align: middle;
+    }
+
+    /* ============================================================
+       Canvas
+    ============================================================ */
+    .canvas {
+      flex: 1;
+      padding: 40px 48px 80px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .section {
+      display: none;
+      width: 100%;
+      max-width: 1080px;
+      animation: section-in 300ms var(--ease-soft-out);
+    }
+    .section.active { display: block; }
+    @keyframes section-in {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .section-head {
+      margin-bottom: 24px;
+    }
+    .section-head .eyebrow {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--color-accent-brand);
+    }
+    .section-head h1 {
+      margin: 8px 0 6px;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--color-ink);
+      font-family: var(--font-serif);
+    }
+    .section-head .lead {
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--color-ink-soft);
+      max-width: 720px;
+    }
+    .section-head .tag-row {
+      margin-top: 10px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 500;
+      background: var(--color-accent-brand-soft);
+      color: var(--color-accent-brand);
+    }
+    .pill.neutral { background: var(--color-line); color: var(--color-mute); }
+    .pill.warn { background: rgba(212, 162, 86, 0.12); color: var(--color-warn); }
+
+    /* Two-column before/after */
+    .compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      margin-top: 16px;
+    }
+    @media (max-width: 900px) { .compare { grid-template-columns: 1fr; } }
+    .col-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-mute);
+      margin-bottom: 10px;
+    }
+    .col-label.after { color: var(--color-accent-brand); }
+
+    /* Phone frame */
+    .phone {
+      width: 100%;
+      max-width: 390px;
+      margin: 0 auto;
+      background: var(--color-bg);
+      border: 1px solid var(--color-line);
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: 0 2px 4px -1px rgba(0,0,0,0.04), 0 24px 60px -20px rgba(0,0,0,0.18);
+    }
+    .phone-body {
+      position: relative;
+      min-height: 720px;
+      background: var(--color-bg);
+      overflow: hidden;
+    }
+    .status-bar {
+      height: 22px;
+      background: var(--color-bg);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 18px;
+      font-size: 10px;
+      color: var(--color-mute);
+    }
+    .status-bar .dots {
+      display: inline-flex; gap: 3px;
+    }
+    .status-bar .dots span {
+      width: 3px; height: 3px; border-radius: 50%;
+      background: var(--color-mute);
+    }
+
+    .bottom-nav {
+      position: absolute; left: 0; right: 0; bottom: 0;
+      height: 56px;
+      border-top: 1px solid var(--color-line);
+      background: var(--color-bg);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+    .bottom-nav.three-tab { grid-template-columns: 1fr 1fr 1fr; }
+    .bottom-nav div {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: var(--color-mute);
+      gap: 3px;
+    }
+    .bottom-nav div.active { color: var(--color-accent-brand); }
+    .bottom-nav svg { display: block; }
+
+    /* Paw print marker (D-17) */
+    .paw-cell {
+      position: relative;
+    }
+    .paw-marker {
+      color: var(--color-accent-brand);
+      width: 14px;
+      height: 14px;
+      display: inline-block;
+    }
+    .paw-marker.today {
+      color: var(--color-accent-brand);
+      transform: scale(1.1);
+    }
+    .paw-marker.mood-calm { color: var(--mood-calm); }
+    .paw-marker.mood-curious { color: var(--mood-curious); }
+    .paw-marker.mood-tired { color: var(--mood-tired); }
+    .paw-marker.mood-bright { color: var(--mood-bright); }
+    .paw-marker.mood-grumpy { color: var(--mood-grumpy); }
+    .paw-marker.mood-lonely { color: var(--mood-lonely); }
+
+    /* Character counter (D-18) */
+    .char-counter {
+      text-align: right;
+      font-size: 11px;
+      color: var(--color-mute);
+      font-family: ui-monospace, monospace;
+      margin-top: 4px;
+    }
+    .char-counter.warn { color: var(--color-warn); }
+    .char-counter.error { color: var(--color-error); }
+
+    /* Free description step (D-18) */
+    .free-desc-card {
+      background: var(--color-paper);
+      padding: 24px 22px 26px;
+      border: 1px solid var(--color-line);
+      border-radius: 12px;
+      transform: rotate(-0.6deg);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 8px 24px -12px rgba(0,0,0,0.08);
+    }
+    .free-desc-card .eyebrow {
+      font-size: 11px; color: var(--color-mute); letter-spacing: 0.14em; text-transform: uppercase;
+    }
+    .free-desc-card h2 {
+      margin: 10px 0 6px;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--color-ink);
+    }
+    .free-desc-card .hint {
+      font-size: 14px;
+      color: var(--color-ink-soft);
+      line-height: 1.55;
+      margin: 0 0 14px;
+    }
+    .free-desc-card textarea {
+      width: 100%;
+      background: #fff;
+      border: 1px solid var(--color-line);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 15px;
+      font-family: var(--font-serif);
+      line-height: 1.7;
+      resize: none;
+      min-height: 130px;
+    }
+    .free-desc-card textarea:focus {
+      outline: 2px solid var(--color-accent-brand);
+      outline-offset: 1px;
+      border-color: var(--color-accent-brand);
+    }
+
+    /* Nav tab preview swatch (D-16) */
+    .nav-preview {
+      background: var(--color-bg);
+      border: 1px solid var(--color-line);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    }
+    .nav-preview-hdr {
+      padding: 10px 16px;
+      font-size: 11px;
+      color: var(--color-mute);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      background: var(--color-paper);
+      border-bottom: 1px solid var(--color-line);
+    }
+    .nav-preview .bottom-nav {
+      position: static;
+      height: 64px;
+    }
+    .nav-preview .bottom-nav div {
+      font-size: 12px;
+    }
+
+    /* Polaroid primitive */
+    .polaroid {
+      background: var(--color-paper);
+      padding: 10px 10px 22px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 12px 28px -16px rgba(0,0,0,0.18);
+      ring: 1px solid var(--color-line);
+      outline: 1px solid var(--color-line);
+      outline-offset: -1px;
+      transition: transform 200ms var(--ease-soft-out);
+    }
+    .polaroid .photo {
+      width: 100%; aspect-ratio: 4/5; background: #c8beb2;
+      position: relative; overflow: hidden;
+    }
+    .polaroid .photo.mood-dog-1 { background: linear-gradient(135deg, #e8d9c5 0%, #c9a787 100%); }
+    .polaroid .photo.mood-dog-2 { background: linear-gradient(135deg, #d4b792 0%, #8f6f4e 100%); }
+    .polaroid .photo.mood-dog-3 { background: linear-gradient(135deg, #f0e4d2 0%, #a88561 100%); }
+    .polaroid .photo .dog-silhouette {
+      position: absolute; inset: 0; display: grid; place-items: center;
+      opacity: 0.42;
+    }
+    .polaroid .caption {
+      margin-top: 10px; font-size: 12px;
+      display: flex; justify-content: space-between; align-items: baseline;
+    }
+    .polaroid .caption .name { font-family: var(--font-serif); color: var(--color-ink); }
+    .polaroid .caption .date { color: var(--color-mute); font-size: 10px; letter-spacing: 0.08em; }
+
+    /* Notes card */
+    .note {
+      background: #fff;
+      border: 1px solid var(--color-line);
+      border-radius: 12px;
+      padding: 16px 18px;
+      margin-top: 16px;
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--color-ink-soft);
+    }
+    .note strong { color: var(--color-ink); }
+    .note ul { margin: 8px 0 0; padding-left: 18px; }
+    .note li { margin-bottom: 4px; }
+    .note .spec-key {
+      display: inline-block;
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 11.5px;
+      background: var(--color-paper);
+      padding: 1px 5px;
+      border-radius: 3px;
+      color: var(--color-accent-brand);
+    }
+
+    /* Copy diff table */
+    .copy-diff {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    }
+    .copy-diff th {
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--color-mute);
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--color-line);
+      background: var(--color-paper);
+    }
+    .copy-diff td {
+      padding: 12px 16px;
+      font-size: 13.5px;
+      line-height: 1.55;
+      border-bottom: 1px solid var(--color-line);
+      color: var(--color-ink);
+      vertical-align: top;
+    }
+    .copy-diff td.location { font-size: 12px; color: var(--color-mute); }
+    .copy-diff td.before { color: var(--color-mute); text-decoration: line-through; text-decoration-color: rgba(107,114,128,0.3); }
+    .copy-diff td.after { color: var(--color-ink); font-weight: 500; }
+    .copy-diff td.after::before { content: '→  '; color: var(--color-accent-brand); font-weight: 700; }
+
+    /* App header */
+    .app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px 10px;
+    }
+    .app-header .logo { font-size: 13px; font-weight: 700; letter-spacing: 0.1em; color: var(--color-ink); }
+
+    /* =====  D-1  홈 버디 카드  ===== */
+    .home-before {
+      padding: 16px;
+    }
+    .home-before .eyebrow {
+      font-size: 11px; color: var(--color-mute); letter-spacing: 0.14em; text-transform: uppercase;
+    }
+    .home-before h1 {
+      font-size: 22px; font-weight: 600; margin: 10px 0 4px;
+    }
+    .home-before .sub {
+      font-size: 12px; color: var(--color-mute); margin-bottom: 16px;
+    }
+    .calendar-grid {
+      display: grid; grid-template-columns: repeat(7, 1fr);
+      gap: 4px; margin-top: 12px;
+    }
+    .calendar-grid .dow { font-size: 10px; color: var(--color-mute); text-align: center; padding: 6px 0; }
+    .calendar-grid .cell {
+      aspect-ratio: 1;
+      border: 1px solid var(--color-line);
+      border-radius: 6px;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      color: var(--color-ink);
+      gap: 3px;
+    }
+    .calendar-grid .cell.out { border: 0; color: var(--color-line); }
+    .calendar-grid .cell.dot::after {
+      content: ''; width: 4px; height: 4px; border-radius: 50%;
+      background: var(--color-accent-brand);
+    }
+    .calendar-grid .cell.today { box-shadow: inset 0 0 0 1px var(--color-accent-brand); }
+    .calendar-grid .cell.future { opacity: 0.3; }
+
+    /* Buddy Card (AFTER) */
+    .buddy-card {
+      margin: 14px 16px;
+      background: var(--color-paper);
+      border-radius: 16px;
+      padding: 18px 18px 16px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 10px 24px -14px rgba(0,0,0,0.15);
+      position: relative;
+    }
+    .buddy-card::before {
+      content: '';
+      position: absolute; inset: 0;
+      border-radius: 16px;
+      background: repeating-linear-gradient(45deg, transparent 0 2px, rgba(0,0,0,0.012) 2px 3px);
+      pointer-events: none;
+    }
+    .buddy-card .avatar-row {
+      display: flex; gap: 14px; align-items: center;
+    }
+    .buddy-card .avatar {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: linear-gradient(135deg, #e0b193 0%, #b37d5a 100%);
+      display: grid; place-items: center;
+      font-family: var(--font-serif);
+      font-weight: 700;
+      font-size: 22px;
+      color: #fff;
+      border: 2px solid #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      flex-shrink: 0;
+    }
+    .buddy-card .avatar.has-photo {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23e8d0b4'/%3E%3Cstop offset='100%25' stop-color='%23a8805c'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' fill='url(%23g)'/%3E%3Cpath d='M22 38 Q32 28 42 38 Q42 48 32 48 Q22 48 22 38Z' fill='%23b07850'/%3E%3Ccircle cx='26' cy='36' r='2' fill='%23fff'/%3E%3Ccircle cx='38' cy='36' r='2' fill='%23fff'/%3E%3Cpath d='M30 42 Q32 44 34 42' stroke='%23fff' stroke-width='1' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-size: cover;
+      color: transparent;
+    }
+    .buddy-card .avatar-info { min-width: 0; flex: 1; }
+    .buddy-card .name {
+      font-family: var(--font-serif);
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--color-ink);
+      line-height: 1.1;
+    }
+    .buddy-card .mbti-row {
+      display: flex; align-items: center; gap: 8px;
+      margin-top: 4px;
+      font-size: 12px;
+      color: var(--color-accent-brand);
+      font-weight: 500;
+    }
+    .buddy-card .mbti-row .dot {
+      width: 3px; height: 3px; border-radius: 50%; background: var(--color-accent-brand);
+    }
+    .buddy-card .greeting {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px dashed var(--color-line);
+      font-family: var(--font-serif);
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--color-ink);
+    }
+    .buddy-card .greeting .quote {
+      color: var(--color-accent-brand);
+      margin-right: 3px;
+    }
+    .buddy-card .stats {
+      margin-top: 14px;
+      font-size: 11.5px;
+      color: var(--color-mute);
+      letter-spacing: 0.04em;
+    }
+    .buddy-card .stats b {
+      font-family: var(--font-serif);
+      color: var(--color-ink);
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    /* Timeline preview (D-7) */
+    .timeline {
+      padding: 0 16px 80px;
+    }
+    .timeline .month-hdr {
+      font-family: var(--font-serif);
+      font-size: 20px;
+      color: var(--color-ink);
+      padding: 20px 0 12px;
+      border-bottom: 1px solid var(--color-line);
+      margin-bottom: 14px;
+      font-weight: 700;
+    }
+    .timeline .day-row {
+      display: flex;
+      gap: 14px;
+      padding: 12px 0;
+      border-bottom: 1px dashed rgba(0,0,0,0.05);
+    }
+    .timeline .day-date {
+      flex-shrink: 0;
+      width: 48px;
+      text-align: right;
+      font-size: 11px;
+      color: var(--color-mute);
+      padding-top: 6px;
+    }
+    .timeline .day-date strong {
+      display: block;
+      font-family: var(--font-serif);
+      font-size: 18px;
+      color: var(--color-ink);
+      font-weight: 700;
+    }
+    .timeline .thumb {
+      width: 56px; height: 70px;
+      background: var(--color-paper);
+      padding: 4px 4px 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      transform: rotate(-1.2deg);
+      flex-shrink: 0;
+      border: 1px solid var(--color-line);
+    }
+    .timeline .thumb .ph {
+      width: 100%; height: 42px;
+      background: linear-gradient(135deg, #e8d9c5, #b79472);
+    }
+    .timeline .thumb.milestone {
+      background: var(--cream);
+      transform: rotate(-0.6deg) scale(1.12);
+    }
+    .timeline .day-meta {
+      min-width: 0; flex: 1;
+    }
+    .timeline .day-meta h3 {
+      font-size: 14px;
+      font-weight: 600;
+      margin: 0 0 2px;
+      color: var(--color-ink);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .timeline .day-meta p {
+      font-size: 12px;
+      font-family: var(--font-serif);
+      color: var(--color-ink-soft);
+      line-height: 1.5;
+      margin: 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .timeline .day-meta .mood-dot {
+      display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+      vertical-align: middle; margin-right: 4px;
+    }
+    .timeline .milestone-banner {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--cream);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      color: #7a5c2c;
+      margin: 8px 0 4px;
+      font-weight: 500;
+    }
+
+    /* D-3 찰칵 */
+    .shutter-demo {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1.6;
+      max-width: 360px;
+      margin: 0 auto;
+      background: var(--color-ink);
+      overflow: hidden;
+      border-radius: 28px;
+    }
+    .shutter-demo .ph-polaroid {
+      position: absolute;
+      left: 50%; top: 50%;
+      transform: translate(-50%, -50%) scale(0) rotate(-6deg);
+      width: 70%;
+      background: var(--color-paper);
+      padding: 10px 10px 26px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+      animation: polaroid-land 3.2s var(--ease-soft-out) infinite;
+    }
+    .shutter-demo .ph-polaroid .photo {
+      width: 100%; aspect-ratio: 1; background: linear-gradient(135deg, #d4b792, #8f6f4e);
+    }
+    .shutter-demo .ph-polaroid .cap {
+      margin-top: 8px;
+      font-family: var(--font-serif);
+      font-size: 12px;
+      display: flex; justify-content: space-between;
+    }
+    .shutter-demo .flash {
+      position: absolute; inset: 0;
+      background: #fff;
+      opacity: 0;
+      animation: shutter-flash 3.2s var(--ease-soft-out) infinite;
+    }
+    .shutter-demo .saved {
+      position: absolute;
+      left: 50%; bottom: 20%;
+      transform: translate(-50%, 0);
+      font-family: var(--font-serif);
+      font-size: 20px;
+      color: #fff;
+      opacity: 0;
+      animation: saved-fade 3.2s var(--ease-soft-out) infinite;
+      letter-spacing: 0.02em;
+    }
+    @keyframes shutter-flash {
+      0%, 4% { opacity: 0; }
+      6% { opacity: 0.9; }
+      16% { opacity: 0; }
+      100% { opacity: 0; }
+    }
+    @keyframes polaroid-land {
+      0%, 10% { transform: translate(-50%, -50%) scale(0.3) rotate(-12deg); opacity: 0; }
+      22% { transform: translate(-50%, -50%) scale(1.05) rotate(-2deg); opacity: 1; }
+      32%, 70% { transform: translate(-50%, -50%) scale(1) rotate(-1.2deg); opacity: 1; }
+      88%, 100% { transform: translate(-50%, -55%) scale(1) rotate(-1.2deg); opacity: 0; }
+    }
+    @keyframes saved-fade {
+      0%, 32% { opacity: 0; transform: translate(-50%, 12px); }
+      42%, 72% { opacity: 1; transform: translate(-50%, 0); }
+      88%, 100% { opacity: 0; }
+    }
+    .shutter-timeline {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+    }
+    .shutter-timeline .step {
+      background: #fff;
+      border: 1px solid var(--color-line);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 11px;
+    }
+    .shutter-timeline .step b { color: var(--color-accent-brand); display: block; margin-bottom: 3px; font-size: 10px; letter-spacing: 0.06em; }
+    .shutter-timeline .step span { color: var(--color-ink-soft); }
+
+    /* D-4 illustrations */
+    .illus-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 14px;
+    }
+    @media (max-width: 800px) { .illus-grid { grid-template-columns: 1fr; } }
+    .illus-card {
+      background: #fff;
+      border: 1px solid var(--color-line);
+      border-radius: 12px;
+      padding: 32px 20px 20px;
+      text-align: center;
+    }
+    .illus-card svg { display: block; margin: 0 auto 16px; }
+    .illus-card h3 {
+      font-family: var(--font-serif);
+      font-size: 18px;
+      margin: 6px 0 4px;
+    }
+    .illus-card p {
+      font-size: 12.5px;
+      color: var(--color-mute);
+      line-height: 1.55;
+      margin: 0;
+    }
+
+    /* D-5 public profile */
+    .public-hero {
+      padding: 32px 18px 24px;
+      text-align: center;
+      position: relative;
+    }
+    .polaroid-stack-wrap {
+      position: relative;
+      width: 80%;
+      margin: 12px auto 20px;
+      height: 220px;
+    }
+    .polaroid-stack-wrap .pf {
+      position: absolute;
+      top: 0; left: 50%;
+      width: 60%;
+      background: var(--color-paper);
+      padding: 8px 8px 20px;
+      box-shadow: 0 8px 22px -8px rgba(0,0,0,0.25);
+      outline: 1px solid var(--color-line);
+    }
+    .polaroid-stack-wrap .pf .ph {
+      width: 100%; aspect-ratio: 1; background: #b79472;
+    }
+    .polaroid-stack-wrap .pf.p1 { transform: translate(-50%, 0) rotate(-6deg); z-index: 1; }
+    .polaroid-stack-wrap .pf.p1 .ph { background: linear-gradient(135deg, #e8d9c5, #a8805c); }
+    .polaroid-stack-wrap .pf.p2 { transform: translate(-50%, 4px) rotate(-1.2deg); z-index: 3; }
+    .polaroid-stack-wrap .pf.p2 .ph { background: linear-gradient(135deg, #d4b792, #8f6f4e); }
+    .polaroid-stack-wrap .pf.p3 { transform: translate(-50%, 8px) rotate(4deg); z-index: 2; }
+    .polaroid-stack-wrap .pf.p3 .ph { background: linear-gradient(135deg, #c9a787, #7a5c3e); }
+    .public-hero .name {
+      font-family: var(--font-serif);
+      font-size: 42px;
+      font-weight: 700;
+      margin: 4px 0;
+      color: var(--color-ink);
+    }
+    .public-hero .traits {
+      display: inline-flex; align-items: center; gap: 8px;
+      margin: 6px 0;
+      font-size: 14px;
+      color: var(--color-accent-brand);
+      font-weight: 500;
+    }
+    .public-hero .traits::before, .public-hero .traits::after {
+      content: ''; width: 24px; height: 1px; background: var(--color-accent-brand);
+    }
+    .public-hero .stats {
+      font-size: 12px;
+      color: var(--color-mute);
+      margin-top: 8px;
+    }
+    .public-hero .stats b {
+      font-family: var(--font-serif); color: var(--color-ink); font-weight: 700;
+    }
+
+    /* D-6 typography */
+    .type-scale {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      margin-top: 12px;
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px 28px;
+      border: 1px solid var(--color-line);
+    }
+    .type-scale .row {
+      display: grid;
+      grid-template-columns: 110px 1fr;
+      gap: 20px;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px dashed var(--color-line);
+    }
+    .type-scale .row:last-child { border: 0; }
+    .type-scale .meta {
+      font-size: 11px;
+      color: var(--color-mute);
+      letter-spacing: 0.06em;
+    }
+    .type-scale .meta b { display: block; color: var(--color-accent-brand); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; }
+    .type-scale .sample.sans { font-family: var(--font-sans); font-weight: 700; color: var(--color-ink); }
+    .type-scale .sample.serif { font-family: var(--font-serif); font-weight: 700; color: var(--color-ink); }
+    .type-scale .sample.serif-body { font-family: var(--font-serif); font-weight: 400; color: var(--color-ink); }
+
+    /* D-8 onboarding reveal */
+    .reveal-step {
+      padding: 32px 20px;
+      text-align: center;
+    }
+    .reveal-step .avatar-xl {
+      width: 120px; height: 120px; border-radius: 50%;
+      margin: 0 auto 14px;
+      background: linear-gradient(135deg, #e0b193 0%, #b37d5a 100%);
+      display: grid; place-items: center;
+      color: #fff;
+      font-family: var(--font-serif);
+      font-weight: 700;
+      font-size: 42px;
+      border: 3px solid #fff;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      animation: avatar-in 500ms var(--ease-soft-out) both;
+    }
+    .reveal-step .prefix {
+      font-size: 14px;
+      color: var(--color-mute);
+      margin: 8px 0 4px;
+      animation: fade-up 400ms var(--ease-soft-out) 200ms both;
+    }
+    .reveal-step .code {
+      font-family: var(--font-serif);
+      font-size: 64px;
+      font-weight: 700;
+      line-height: 1;
+      color: var(--color-ink);
+      margin: 6px 0;
+      animation: zoom-in 500ms var(--ease-soft-out) 400ms both;
+      letter-spacing: 0.02em;
+    }
+    .reveal-step .label {
+      font-family: var(--font-serif);
+      font-size: 18px;
+      color: var(--color-accent-brand);
+      margin: 8px 0 20px;
+      animation: fade-up 400ms var(--ease-soft-out) 600ms both;
+    }
+    .reveal-step .traits-card {
+      background: var(--color-paper);
+      border-radius: 12px;
+      padding: 18px 22px;
+      margin: 0 0 20px;
+      text-align: left;
+      animation: slide-up 500ms var(--ease-soft-out) 800ms both;
+      border: 1px solid var(--color-line);
+    }
+    .reveal-step .traits-card h4 {
+      font-size: 13px;
+      color: var(--color-mute);
+      font-weight: 500;
+      margin: 0 0 10px;
+    }
+    .reveal-step .traits-card ul {
+      margin: 0; padding: 0; list-style: none;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .reveal-step .traits-card li {
+      font-size: 14.5px;
+      line-height: 1.5;
+      color: var(--color-ink);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .reveal-step .traits-card li::before {
+      content: ''; width: 4px; height: 4px; border-radius: 50%;
+      background: var(--color-accent-brand);
+      flex-shrink: 0;
+    }
+    .reveal-step .btn-primary {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      background: var(--color-accent-brand);
+      color: #fff;
+      font-weight: 600;
+      border-radius: 10px;
+      font-size: 14px;
+      border: 0;
+      animation: fade-up 400ms var(--ease-soft-out) 1000ms both;
+    }
+    .reveal-step .btn-ghost {
+      display: block;
+      margin: 8px auto 0;
+      background: transparent;
+      border: 0;
+      font-size: 13px;
+      color: var(--color-mute);
+      text-decoration: underline;
+      animation: fade-up 400ms var(--ease-soft-out) 1100ms both;
+    }
+    @keyframes avatar-in { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+    @keyframes fade-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes zoom-in { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    @keyframes slide-up { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Replay button */
+    .replay-btn {
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: #fff;
+      border: 1px solid var(--color-line);
+      color: var(--color-ink-soft);
+      font-size: 11px;
+      cursor: pointer;
+      margin-left: auto;
+    }
+    .replay-btn:hover { background: var(--color-paper); }
+    .section-head .row { display: flex; align-items: center; gap: 12px; }
+
+    /* D-10 mood palette */
+    .mood-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
+      margin-top: 14px;
+    }
+    @media (max-width: 800px) { .mood-grid { grid-template-columns: repeat(3, 1fr); } }
+    .mood-swatch {
+      background: #fff;
+      border: 1px solid var(--color-line);
+      border-radius: 10px;
+      padding: 14px;
+      text-align: center;
+    }
+    .mood-swatch .chip {
+      width: 44px; height: 44px; border-radius: 50%;
+      margin: 0 auto 10px;
+    }
+    .mood-swatch .name { font-size: 12.5px; font-weight: 600; color: var(--color-ink); }
+    .mood-swatch .hex { font-size: 10px; color: var(--color-mute); font-family: ui-monospace, monospace; margin-top: 2px; }
+    .mood-map-preview {
+      margin-top: 20px;
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid var(--color-line);
+    }
+    .mood-map {
+      display: grid;
+      grid-template-columns: repeat(14, 1fr);
+      gap: 4px;
+      margin-top: 8px;
+    }
+    .mood-map .m { aspect-ratio: 1; border-radius: 3px; background: var(--color-line); }
+
+    /* D-11 callback */
+    .callback-strip {
+      margin: 14px 16px;
+      background: var(--color-paper);
+      border-radius: 10px;
+      padding: 14px 16px;
+      border-left: 3px solid var(--color-accent-brand);
+    }
+    .callback-strip .eyebrow {
+      font-size: 10px; color: var(--color-accent-brand); font-weight: 600;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .callback-strip .quote {
+      font-family: var(--font-serif);
+      font-size: 14.5px;
+      line-height: 1.65;
+      color: var(--color-ink);
+    }
+    .callback-strip .quote::before { content: '"'; color: var(--color-accent-brand); margin-right: 3px; }
+    .callback-strip .quote::after { content: '"'; color: var(--color-accent-brand); }
+
+    /* D-12 milestone */
+    .milestone-card {
+      width: 100%; max-width: 380px;
+      margin: 0 auto;
+      background: var(--color-paper);
+      aspect-ratio: 9/16;
+      padding: 30px 28px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      box-shadow: 0 20px 60px -20px rgba(0,0,0,0.3);
+      outline: 1px solid var(--color-line);
+    }
+    .milestone-card .day {
+      font-family: var(--font-serif);
+      font-size: 72px;
+      color: var(--color-accent-brand);
+      font-weight: 700;
+      line-height: 0.95;
+    }
+    .milestone-card .day small {
+      display: inline; font-size: 28px;
+    }
+    .milestone-card .subtitle {
+      font-family: var(--font-serif);
+      font-size: 20px;
+      color: var(--color-ink);
+      margin-top: 4px;
+      margin-bottom: 20px;
+    }
+    .milestone-card .stack-mini {
+      position: relative;
+      height: 140px;
+      margin: 10px 0 30px;
+    }
+    .milestone-card .stack-mini .sp {
+      position: absolute;
+      background: #fff;
+      padding: 4px 4px 12px;
+      width: 36%;
+      left: 50%;
+      outline: 1px solid var(--color-line);
+    }
+    .milestone-card .stack-mini .sp .ph { width: 100%; aspect-ratio: 1; background: #b79472; }
+    .milestone-card .stack-mini .s1 { transform: translate(-90%, 0) rotate(-8deg); }
+    .milestone-card .stack-mini .s1 .ph { background: linear-gradient(135deg, #e8d9c5, #a8805c); }
+    .milestone-card .stack-mini .s2 { transform: translate(-50%, -8px) rotate(-1deg); z-index: 2; }
+    .milestone-card .stack-mini .s2 .ph { background: linear-gradient(135deg, #d4b792, #8f6f4e); }
+    .milestone-card .stack-mini .s3 { transform: translate(-10%, 4px) rotate(6deg); }
+    .milestone-card .stack-mini .s3 .ph { background: linear-gradient(135deg, #c9a787, #7a5c3e); }
+    .milestone-card .pet-mbti {
+      font-size: 13px;
+      color: var(--color-accent-brand);
+      font-weight: 500;
+      margin-top: auto;
+    }
+    .milestone-card .count {
+      font-size: 12px;
+      color: var(--color-mute);
+      margin-top: 4px;
+    }
+    .milestone-card .quote {
+      font-family: var(--font-serif);
+      font-size: 15px;
+      color: var(--color-ink);
+      line-height: 1.55;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--color-line);
+    }
+    .milestone-card .brand {
+      position: absolute;
+      bottom: 16px;
+      right: 20px;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      color: var(--color-mute);
+    }
+
+    /* D-13 conversational upload */
+    .conv-upload {
+      padding: 24px 20px 80px;
+    }
+    .conv-bubble {
+      display: flex; gap: 10px;
+      align-items: flex-start;
+      margin-bottom: 14px;
+    }
+    .conv-bubble .mini-avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: linear-gradient(135deg, #e0b193 0%, #b37d5a 100%);
+      flex-shrink: 0;
+    }
+    .conv-bubble .text {
+      background: var(--color-paper);
+      padding: 10px 14px;
+      border-radius: 14px 14px 14px 2px;
+      font-family: var(--font-serif);
+      font-size: 14px;
+      color: var(--color-ink);
+      max-width: 80%;
+    }
+    .conv-choices {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      margin-left: 38px; margin-bottom: 16px;
+    }
+    .conv-choice {
+      padding: 7px 14px;
+      border-radius: 999px;
+      background: #fff;
+      border: 1px solid var(--color-line);
+      font-size: 12.5px;
+      color: var(--color-ink-soft);
+      cursor: pointer;
+    }
+    .conv-choice.active {
+      background: var(--color-accent-brand-soft);
+      border-color: var(--color-accent-brand);
+      color: var(--color-ink);
+    }
+    .conv-photo-drop {
+      margin-left: 38px;
+      background: var(--color-paper);
+      padding: 10px 10px 22px;
+      outline: 1px solid var(--color-line);
+      transform: rotate(-1.2deg);
+      width: 180px;
+    }
+    .conv-photo-drop .ph {
+      aspect-ratio: 1;
+      background: linear-gradient(135deg, #d4b792, #8f6f4e);
+    }
+    .conv-photo-drop .hint {
+      text-align: center; font-size: 11px; color: var(--color-mute);
+      padding: 6px 0 0; font-family: var(--font-serif);
+    }
+
+    /* D-14 warm-dark */
+    .theme-toggle {
+      display: inline-flex;
+      background: #fff;
+      border: 1px solid var(--color-line);
+      border-radius: 999px;
+      padding: 3px;
+      margin-bottom: 14px;
+    }
+    .theme-toggle button {
+      padding: 5px 14px;
+      background: transparent;
+      border: 0;
+      border-radius: 999px;
+      font-size: 12px;
+      color: var(--color-mute);
+      cursor: pointer;
+    }
+    .theme-toggle button.active {
+      background: var(--color-ink);
+      color: #fff;
+    }
+    .warm-dark {
+      background: var(--wd-bg);
+      color: var(--wd-ink);
+    }
+    .warm-dark .status-bar {
+      background: var(--wd-bg);
+      color: var(--wd-mute);
+    }
+    .warm-dark .buddy-card {
+      background: var(--wd-paper);
+      color: var(--wd-ink);
+    }
+    .warm-dark .buddy-card .name { color: var(--wd-ink); }
+    .warm-dark .buddy-card .greeting { color: var(--wd-ink-soft); border-top-color: var(--wd-line); }
+    .warm-dark .buddy-card .stats { color: var(--wd-mute); }
+    .warm-dark .buddy-card .stats b { color: var(--wd-ink); }
+    .warm-dark .bottom-nav {
+      background: var(--wd-bg);
+      border-top-color: var(--wd-line);
+    }
+    .warm-dark .bottom-nav div { color: var(--wd-mute); }
+    .warm-dark .bottom-nav div.active { color: var(--color-accent-brand); }
+    .warm-dark .timeline .month-hdr { color: var(--wd-ink); border-bottom-color: var(--wd-line); }
+    .warm-dark .timeline .day-date { color: var(--wd-mute); }
+    .warm-dark .timeline .day-date strong { color: var(--wd-ink); }
+    .warm-dark .timeline .day-meta h3 { color: var(--wd-ink); }
+    .warm-dark .timeline .day-meta p { color: var(--wd-ink-soft); }
+    .warm-dark .timeline .thumb { background: #483a2e; border-color: var(--wd-line); }
+    .warm-dark .callback-strip { background: #3a3128; }
+    .warm-dark .callback-strip .quote { color: var(--wd-ink); }
+
+    /* D-15 cursor */
+    .cursor-demo {
+      background: #fff;
+      border: 1px solid var(--color-line);
+      border-radius: 12px;
+      padding: 40px;
+      text-align: center;
+      margin-top: 16px;
+    }
+    .cursor-zone {
+      background: #efece6;
+      border-radius: 8px;
+      padding: 60px 20px;
+      font-family: var(--font-serif);
+      color: var(--color-ink);
+      cursor: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cg transform='rotate(-15 12 12)'%3E%3Cellipse cx='12' cy='4' rx='5' ry='3.5' fill='%23e07a5f'/%3E%3Crect x='11' y='6' width='2' height='14' fill='%23555' /%3E%3C/g%3E%3C/svg%3E") 12 2, pointer;
+    }
+    .cursor-zone:hover { background: var(--color-paper); }
+    .cursor-zone .hover-polaroid {
+      display: inline-block;
+      background: #fff;
+      padding: 10px 10px 22px;
+      outline: 1px solid var(--color-line);
+      transform: rotate(-1.2deg);
+      transition: transform 400ms var(--ease-soft-out);
+      margin-top: 12px;
+    }
+    .cursor-zone .hover-polaroid:hover {
+      transform: rotate(0deg) translateY(-4px);
+      animation: pin-drop 320ms var(--ease-soft-out);
+    }
+    @keyframes pin-drop {
+      0% { transform: rotate(-1.2deg) translateY(0); }
+      35% { transform: rotate(-1.2deg) translateY(4px); }
+      70% { transform: rotate(0) translateY(-2px); }
+      100% { transform: rotate(0) translateY(-4px); }
+    }
+    .cursor-zone .hover-polaroid .ph {
+      width: 120px; aspect-ratio: 4/5;
+      background: linear-gradient(135deg, #d4b792, #8f6f4e);
+    }
+
+    /* Overview index */
+    .tier-card {
+      background: #fff;
+      border: 1px solid var(--color-line);
+      border-radius: 12px;
+      padding: 16px 18px;
+      margin-bottom: 12px;
+    }
+    .tier-card h3 {
+      font-family: var(--font-serif);
+      font-size: 16px;
+      margin: 0 0 8px;
+    }
+    .tier-card .ticket {
+      display: grid;
+      grid-template-columns: 80px 1fr auto;
+      gap: 12px;
+      padding: 8px 0;
+      border-top: 1px dashed var(--color-line);
+      align-items: center;
+      font-size: 13px;
+    }
+    .tier-card .ticket:first-of-type { border-top: 0; }
+    .tier-card .ticket .id {
+      font-family: ui-monospace, monospace;
+      font-size: 11px;
+      color: var(--color-accent-brand);
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+    .tier-card .ticket .effort {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: var(--color-paper);
+      color: var(--color-mute);
+      font-weight: 500;
+    }
+
+    .diagnosis-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      margin-top: 12px;
+    }
+    @media (max-width: 800px) { .diagnosis-grid { grid-template-columns: 1fr; } }
+    .diag-card {
+      background: #fff;
+      border: 1px solid var(--color-line);
+      border-radius: 10px;
+      padding: 16px 18px;
+    }
+    .diag-card .num {
+      font-family: var(--font-serif);
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--color-accent-brand);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .diag-card h4 {
+      font-size: 14px;
+      margin: 0 0 4px;
+      font-weight: 600;
+    }
+    .diag-card p {
+      font-size: 12.5px;
+      line-height: 1.55;
+      color: var(--color-mute);
+      margin: 0;
+    }
+
+    /* Footer note */
+    .footnote {
+      margin-top: 48px;
+      font-size: 11.5px;
+      color: var(--color-mute);
+      text-align: center;
+      line-height: 1.7;
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-logo">buddy-note</div>
+    <div class="nav-sub">v0.2 UI/UX 개선 프리뷰</div>
+
+    <div class="nav-section">개요</div>
+    <a href="#overview" class="active" data-target="overview">진단 & 로드맵</a>
+
+    <div class="nav-section">Tier 1 — 즉시</div>
+    <a href="#d1" data-target="d1">D-1 · 홈 버디 카드</a>
+    <a href="#d2" data-target="d2">D-2 · 카피 1인칭</a>
+    <a href="#d3" data-target="d3">D-3 · 찰칵 moment</a>
+    <a href="#d4" data-target="d4">D-4 · 브랜드 일러스트</a>
+    <a href="#d5" data-target="d5">D-5 · 공개 프로필</a>
+
+    <div class="nav-section">Tier 2 — 깊이</div>
+    <a href="#d6" data-target="d6">D-6 · 명조체 확장 <span class="nav-tag">DS</span></a>
+    <a href="#d7" data-target="d7">D-7 · 타임라인</a>
+    <a href="#d8" data-target="d8">D-8 · Onboarding 리빌</a>
+    <a href="#d9" data-target="d9">D-9 · 빈 상태 통합</a>
+    <a href="#d10" data-target="d10">D-10 · 감정 스티커 <span class="nav-tag">DS</span></a>
+
+    <div class="nav-section">Tier 3 — Moat</div>
+    <a href="#d11" data-target="d11">D-11 · 오늘의 callback</a>
+    <a href="#d12" data-target="d12">D-12 · 마일스톤 recap</a>
+    <a href="#d13" data-target="d13">D-13 · 대화형 upload</a>
+    <a href="#d14" data-target="d14">D-14 · 야간 warm-dark <span class="nav-tag">DS</span></a>
+    <a href="#d15" data-target="d15">D-15 · 커스텀 커서</a>
+
+    <div class="nav-section">추가 요청 · 4/22</div>
+    <a href="#d16" data-target="d16">D-16 · 하단 3-탭 재편</a>
+    <a href="#d17" data-target="d17">D-17 · 발자국 마커 🐾</a>
+    <a href="#d18" data-target="d18">D-18 · 온보딩 자유 기술</a>
+  </nav>
+
+  <main class="canvas">
+
+  <!-- ============================= -->
+  <!-- OVERVIEW -->
+  <!-- ============================= -->
+  <section id="overview" class="section active">
+    <div class="section-head">
+      <div class="eyebrow">프리뷰 문서</div>
+      <h1>UI/UX 개선 로드맵 v0.2</h1>
+      <p class="lead">
+        현재 buddy-note는 브랜드 정체성(폴라로이드·테라코타·명조체)은 단단하지만 화면에서 "강아지"라는 주인공이 안 보입니다.
+        이 문서는 <code>DESIGN_TODOS.md</code>에 정리된 15개 티켓을 화면으로 보여줍니다. 좌측 네비에서 각 티켓을 확인하세요.
+      </p>
+    </div>
+
+    <h2 style="font-family: var(--font-serif); font-size: 20px; margin-top: 20px;">근본 진단 4가지</h2>
+    <div class="diagnosis-grid">
+      <div class="diag-card">
+        <div class="num">01</div>
+        <h4>캐릭터 엔진인데 캐릭터가 없음</h4>
+        <p>제품은 "강아지의 성격을 1년 동안 기억"하는데, 홈/프로필 어디에도 주인공인 강아지의 존재감이 배치되어 있지 않다.</p>
+      </div>
+      <div class="diag-card">
+        <div class="num">02</div>
+        <h4>따뜻함이 기울기 1.2도에만 의존</h4>
+        <p>"귀엽지만 sloppy하지 않음"이 이상이지만, UI 실행은 "정확함"으로 과하게 기움. 카피·카드 기울기에만 warmth가 고립.</p>
+      </div>
+      <div class="diag-card">
+        <div class="num">03</div>
+        <h4>톤 분열 (Diary ↔ UI)</h4>
+        <p>Diary는 강아지 1인칭인데 UI 카피는 보호자 3인칭("사진 한 장을 올려주세요"). 대화하는 앱이 아닌 도구 앱 느낌.</p>
+      </div>
+      <div class="diag-card">
+        <div class="num">04</div>
+        <h4>감정 moment 부재</h4>
+        <p>빈 상태·완료·마일스톤에 셀레브레이션이 없음. 재방문 동기가 약하고 moat(persona 기억)가 UI에 투명.</p>
+      </div>
+    </div>
+
+    <h2 style="font-family: var(--font-serif); font-size: 20px; margin-top: 32px;">티켓 스냅샷 (15)</h2>
+
+    <div class="tier-card">
+      <h3>🟢 Tier 1 — 즉시 효과, 브랜드 규율 내 (5개)</h3>
+      <div class="ticket"><span class="id">D-1</span><span>홈 Hero "오늘의 버디 카드" — 주인공 배치</span><span class="effort">M · 2-3일</span></div>
+      <div class="ticket"><span class="id">D-2</span><span>UI 카피 1인칭 리라이트 — 강아지 voice로 bending</span><span class="effort">S · 0.5일</span></div>
+      <div class="ticket"><span class="id">D-3</span><span>Diary 완료 "찰칵" moment — 폴라로이드 인쇄 셀레브레이션</span><span class="effort">S · 1일</span></div>
+      <div class="ticket"><span class="id">D-4</span><span>브랜드 SVG 일러스트 3개 — 이모지 대체재</span><span class="effort">M · 1-2일</span></div>
+      <div class="ticket"><span class="id">D-5</span><span>공개 프로필 Hero 재설계 — 바이럴 자산 강화</span><span class="effort">M · 2일</span></div>
+    </div>
+
+    <div class="tier-card">
+      <h3>🟡 Tier 2 — 브랜드 살짝 확장, 깊이 (5개)</h3>
+      <div class="ticket"><span class="id">D-6</span><span>명조체 key moment 확장 <span class="nav-tag" style="background: rgba(224,122,95,0.12);">design-system</span></span><span class="effort">XS</span></div>
+      <div class="ticket"><span class="id">D-7</span><span>캘린더 → 폴라로이드 타임라인</span><span class="effort">L · 3-4일</span></div>
+      <div class="ticket"><span class="id">D-8</span><span>Onboarding Step 6 리빌 재설계</span><span class="effort">S · 1일</span></div>
+      <div class="ticket"><span class="id">D-9</span><span>빈 상태 & 에러 일러스트 통합</span><span class="effort">S · 1일</span></div>
+      <div class="ticket"><span class="id">D-10</span><span>감정 스티커 (캘린더 점 대체) <span class="nav-tag" style="background: rgba(224,122,95,0.12);">design-system</span></span><span class="effort">M · 2-3일</span></div>
+    </div>
+
+    <div class="tier-card">
+      <h3>🔴 Tier 3 — Moat, 10x (5개)</h3>
+      <div class="ticket"><span class="id">D-11</span><span>"오늘의 callback" 홈 모듈 — moat를 UI로</span><span class="effort">L · 3일</span></div>
+      <div class="ticket"><span class="id">D-12</span><span>마일스톤 자동 recap 폴라로이드</span><span class="effort">L · 3-4일</span></div>
+      <div class="ticket"><span class="id">D-13</span><span>Upload = 대화형 UX</span><span class="effort">M · 2일</span></div>
+      <div class="ticket"><span class="id">D-14</span><span>야간 warm-dark 모드 <span class="nav-tag" style="background: rgba(224,122,95,0.12);">design-system</span></span><span class="effort">S · 1일</span></div>
+      <div class="ticket"><span class="id">D-15</span><span>커스텀 커서 & pin hover</span><span class="effort">XS</span></div>
+    </div>
+
+    <div class="tier-card" style="border-color: var(--color-accent-brand); background: linear-gradient(to bottom, rgba(224,122,95,0.03), transparent);">
+      <h3>🟢 추가 요청 (4/22 반영) — Tier 1 편입 (3개)</h3>
+      <div class="ticket"><span class="id">D-16</span><span>하단 네비게이션 3-탭 재편 (주간 / 월간 / 내 정보)</span><span class="effort">S · 1일</span></div>
+      <div class="ticket"><span class="id">D-17</span><span>캘린더 기록 마커 → 강아지 발자국 SVG</span><span class="effort">XS · 0.5일</span></div>
+      <div class="ticket"><span class="id">D-18</span><span>Onboarding 자유 기술 단계 (최대 200자)</span><span class="effort">S · 1일</span></div>
+    </div>
+
+    <div class="note" style="margin-top: 28px;">
+      <strong>시작 순서 권장:</strong> D-4 (일러스트) → D-6 (명조체 확장) → D-2 (카피) → D-1 (홈 hero) → D-3 (찰칵) → D-5 (공개 프로필).
+      이 6개로 Tier 1 + 의존성 일부까지 커버. 검증 후 Tier 2 병렬 진행.
+    </div>
+  </section>
+
+  <!-- ============================= -->
+  <!-- D-1 홈 버디 카드 -->
+  <!-- ============================= -->
+  <section id="d1" class="section">
+    <div class="section-head">
+      <div class="eyebrow">D-1 · Tier 1 · 2-3일</div>
+      <h1>홈 Hero "오늘의 버디 카드"</h1>
+      <p class="lead">
+        로그인 후 홈 첫 뷰에서 유저가 <b>2초 안에 "내 강아지"를 만나야</b> 합니다. 현재는 캘린더 그리드와 작은 점들뿐 — persona가 UI에 전혀 드러나지 않습니다.
+      </p>
+      <div class="tag-row">
+        <span class="pill">주인공 배치</span>
+        <span class="pill">시간대/성격 인사</span>
+        <span class="pill">아바타 첫 등장</span>
+      </div>
+    </div>
+
+    <div class="compare">
+      <div>
+        <div class="col-label">Before — 현재</div>
+        <div class="phone">
+          <div class="phone-body">
+            <div class="status-bar"><span>9:41</span><div class="dots"><span></span><span></span><span></span></div></div>
+            <div class="home-before">
+              <div class="eyebrow">calendar</div>
+              <h1>마루의 이야기 234일째</h1>
+              <div class="sub">ENFP · 냄새 탐정</div>
+              <div style="display: flex; justify-content: space-between; margin-top: 20px; align-items: center;">
+                <span style="font-size: 13px; color: var(--color-ink-soft);">이전</span>
+                <b style="font-size: 18px;">2026년 4월</b>
+                <span style="font-size: 13px; color: var(--color-ink-soft);">다음</span>
+              </div>
+              <div class="calendar-grid" style="margin-top: 12px;">
+                <div class="dow">일</div><div class="dow">월</div><div class="dow">화</div><div class="dow">수</div><div class="dow">목</div><div class="dow">금</div><div class="dow">토</div>
+                <div class="cell out">29</div><div class="cell out">30</div><div class="cell out">31</div>
+                <div class="cell">1</div><div class="cell dot">2</div><div class="cell">3</div><div class="cell">4</div>
+                <div class="cell dot">5</div><div class="cell">6</div><div class="cell dot">7</div><div class="cell">8</div><div class="cell">9</div><div class="cell dot">10</div><div class="cell">11</div>
+                <div class="cell">12</div><div class="cell dot">13</div><div class="cell">14</div><div class="cell dot">15</div><div class="cell">16</div><div class="cell dot">17</div><div class="cell">18</div>
+                <div class="cell dot">19</div><div class="cell">20</div><div class="cell today dot">21</div><div class="cell future">22</div><div class="cell future">23</div><div class="cell future">24</div><div class="cell future">25</div>
+                <div class="cell future">26</div><div class="cell future">27</div><div class="cell future">28</div><div class="cell future">29</div><div class="cell future">30</div><div class="cell out future">1</div><div class="cell out future">2</div>
+              </div>
+            </div>
+            <div class="bottom-nav">
+              <div class="active">홈</div>
+              <div>마이페이지</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="col-label after">After — D-1 적용</div>
+        <div class="phone">
+          <div class="phone-body">
+            <div class="status-bar"><span>9:41</span><div class="dots"><span></span><span></span><span></span></div></div>
+            <div class="app-header">
+              <span class="logo" style="font-family: var(--font-serif);">buddy-note</span>
+              <span style="font-size: 11px; color: var(--color-mute); letter-spacing: 0.1em; text-transform: uppercase;">4월 21일 화</span>
+            </div>
+
+            <div class="buddy-card">
+              <div class="avatar-row">
+                <div class="avatar has-photo">마</div>
+                <div class="avatar-info">
+                  <div class="name">마루</div>
+                  <div class="mbti-row">
+                    <span>ENFP</span><span class="dot"></span><span>냄새 탐정</span><span class="dot"></span><span>엄마 껌딱지</span>
+                  </div>
+                </div>
+              </div>
+              <div class="greeting">
+                <span class="quote">"</span>오늘도 일찍 깼네. 밥 줄 거지?<span class="quote">"</span>
+              </div>
+              <div class="stats">
+                <b>234</b>일째 · 기록 <b>47</b>장
+              </div>
+            </div>
+
+            <div style="padding: 8px 16px 0; display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 11px; color: var(--color-mute); letter-spacing: 0.14em; text-transform: uppercase;">이번 주</span>
+              <span style="font-size: 11px; color: var(--color-accent-brand);">월간 보기 →</span>
+            </div>
+
+            <!-- Mini timeline preview -->
+            <div class="timeline" style="padding: 8px 16px 80px;">
+              <div class="day-row">
+                <div class="day-date"><strong>21</strong>오늘</div>
+                <div class="thumb" style="background: var(--color-accent-brand-soft); display: grid; place-items: center; font-size: 10px; color: var(--color-accent-brand); text-align: center; padding: 6px;">아직<br/>없음</div>
+                <div class="day-meta">
+                  <h3 style="color: var(--color-mute); font-weight: 400;">오늘 이야기 남겨줄래?</h3>
+                </div>
+              </div>
+              <div class="day-row">
+                <div class="day-date"><strong>19</strong>토</div>
+                <div class="thumb"><div class="ph"></div></div>
+                <div class="day-meta">
+                  <h3><span class="mood-dot" style="background: var(--mood-curious);"></span>공원에서 토끼 닮은 바람</h3>
+                  <p>비가 올 줄 알았는데 너무 쨍해서 오히려 놀랐어. 공원 한바퀴 돌다가…</p>
+                </div>
+              </div>
+              <div class="day-row">
+                <div class="day-date"><strong>17</strong>목</div>
+                <div class="thumb"><div class="ph" style="background: linear-gradient(135deg, #c4a57a, #6b4c2e);"></div></div>
+                <div class="day-meta">
+                  <h3><span class="mood-dot" style="background: var(--mood-calm);"></span>저녁 낮잠 습관</h3>
+                  <p>요즘 저녁 6시쯤 되면 잠깐 꾸벅꾸벅. 엄마가 '아가야' 하면서 깨워…</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="bottom-nav three-tab">
+              <div class="active">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h3M8 18h3" stroke-width="2.2"/></svg>
+                <span>주간</span>
+              </div>
+              <div>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                <span>월간</span>
+              </div>
+              <div>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+                <span>내 정보</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>핵심 변경점</strong>
+      <ul>
+        <li>상단 <span class="spec-key">buddy-card</span> — 아바타 + 이름(명조체) + MBTI 칩 + 1인칭 인사 + 스탯</li>
+        <li>인사 문구는 시간대(아침/낮/저녁/밤) × 성격(E/I, F/T) 조합으로 <span class="spec-key">lib/greeting.ts</span>에서 선택</li>
+        <li>캘린더 그리드 → 타임라인 (D-7 연결). 월간 뷰는 <span class="spec-key">/logs</span>로 이관</li>
+        <li>mood 컬러 dot (D-10 연결)로 기록마다 감정 시각화</li>
+        <li>Bottom nav "마이페이지" → "내 정보" (D-2 카피)</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============================= -->
+  <!-- D-2 카피 -->
+  <!-- ============================= -->
+  <section id="d2" class="section">
+    <div class="section-head">
+      <div class="eyebrow">D-2 · Tier 1 · 0.5일</div>
+      <h1>UI 카피 1인칭 리라이트</h1>
+      <p class="lead">
+        Diary는 강아지 1인칭인데 UI는 3인칭. "강아지와 대화하는 앱" 감각을 못 받습니다.
+        마이크로카피를 <b>대리인 → 직접 대화</b>로 bending — 이모지나 과한 친근함 없이.
+      </p>
+      <div class="tag-row">
+        <span class="pill">0 코스트, 즉시 효과</span>
+        <span class="pill">Tier 1 우선</span>
+      </div>
+    </div>
+
+    <table class="copy-diff">
+      <thead>
+        <tr><th>위치</th><th>카피 (before → after)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="location">upload / photo label</td><td><div class="before" style="text-decoration: line-through; color: var(--color-mute);">오늘의 사진</div><div class="after" style="color: var(--color-ink); font-weight: 500;">→ 오늘 뭐 했어?</div></td></tr>
+        <tr><td class="location">upload / placeholder</td><td><div style="text-decoration: line-through; color: var(--color-mute);">사진 한 장을 올려주세요</div><div style="color: var(--color-ink); font-weight: 500;">→ 사진 한 장 보여줄래?</div></td></tr>
+        <tr><td class="location">upload / hint (filled)</td><td><div style="text-decoration: line-through; color: var(--color-mute);">마음에 들면 아래 버튼을 눌러주세요</div><div style="color: var(--color-ink); font-weight: 500;">→ 이거면 돼. 아래 버튼 눌러줘.</div></td></tr>
+        <tr><td class="location">upload / memo label</td><td><div style="text-decoration: line-through; color: var(--color-mute);">남겨두고 싶은 메모 (선택)</div><div style="color: var(--color-ink); font-weight: 500;">→ 엄마가 한 마디 (선택) <span style="font-size: 10px; color: var(--color-mute);">※ companion_relationship 동적 삽입</span></div></td></tr>
+        <tr><td class="location">upload / submit</td><td><div style="text-decoration: line-through; color: var(--color-mute);">마루의 일기 만들기</div><div style="color: var(--color-ink); font-weight: 500;">→ 오늘 이야기 만들어줘</div></td></tr>
+        <tr><td class="location">PhaseCopy phase 0</td><td><div style="text-decoration: line-through; color: var(--color-mute);">사진을 살펴보는 중이에요</div><div style="color: var(--color-ink); font-weight: 500;">→ 사진 들여다보는 중…</div></td></tr>
+        <tr><td class="location">PhaseCopy phase 2</td><td><div style="text-decoration: line-through; color: var(--color-mute);">마루의 말투로 적는 중이에요</div><div style="color: var(--color-ink); font-weight: 500;">→ 나 평소처럼 적어볼게</div></td></tr>
+        <tr><td class="location">diary / 자세히 보기</td><td><div style="text-decoration: line-through; color: var(--color-mute);">자세히 보기</div><div style="color: var(--color-ink); font-weight: 500;">→ 그날 이야기 보기</div></td></tr>
+        <tr><td class="location">diary / 다시 만들기</td><td><div style="text-decoration: line-through; color: var(--color-mute);">다시 만들기</div><div style="color: var(--color-ink); font-weight: 500;">→ 다시 해볼래</div></td></tr>
+        <tr><td class="location">calendar / 미래 메시지</td><td><div style="text-decoration: line-through; color: var(--color-mute);">아직 오지 않은 날은 기록할 수 없어요.</div><div style="color: var(--color-ink); font-weight: 500;">→ 아직 오지 않은 날이에요. 그때 만나요.</div></td></tr>
+        <tr><td class="location">diary fallback banner</td><td><div style="text-decoration: line-through; color: var(--color-mute);">AI가 잠시 놓쳤어요. 이건 임시 일기예요.</div><div style="color: var(--color-ink); font-weight: 500;">→ 내가 오늘 말이 잘 안 떠올랐어. 잠깐 임시로 적어둘게.</div></td></tr>
+        <tr><td class="location">empty / 공개 프로필</td><td><div style="text-decoration: line-through; color: var(--color-mute);">아직 첫 일기를 준비 중이에요 / 다음에 다시 놀러 와주세요.</div><div style="color: var(--color-ink); font-weight: 500;">→ 아직 준비 중 / 조금 있다 다시 올래?</div></td></tr>
+        <tr><td class="location">bottom nav</td><td><div style="text-decoration: line-through; color: var(--color-mute);">홈 / 마이페이지</div><div style="color: var(--color-ink); font-weight: 500;">→ 홈 / 내 정보</div></td></tr>
+        <tr><td class="location">overlay cancel</td><td><div style="text-decoration: line-through; color: var(--color-mute);">뒤로 갈래요</div><div style="color: var(--color-ink); font-weight: 500;">→ 조금 있다 다시 할래</div></td></tr>
+      </tbody>
+    </table>
+
+    <div class="note">
+      <strong>보이스 가이드라인</strong> (신규 <span class="spec-key">docs/copy-voice.md</span> 생성)
+      <ul>
+        <li><b>주어 생략 선호</b> (한국어 자연스러움). 강아지가 주체일 땐 "나"</li>
+        <li>강아지 말투 = 반말. 보호자 도구 카피 = 높임 OK. 중간층(시스템 알림)은 강아지 voice</li>
+        <li>금지 단어: "저장하겠습니다", "로딩 중", "처리하는 중", "오류가 발생했습니다"</li>
+        <li>에러 = 사과 + 회복 액션. 강아지 voice 권장</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============================= -->
+  <!-- D-3 찰칵 -->
+  <!-- ============================= -->
+  <section id="d3" class="section">
+    <div class="section-head">
+      <div class="row">
+        <div>
+          <div class="eyebrow">D-3 · Tier 1 · 1일</div>
+          <h1>Diary 완료 "찰칵" moment</h1>
+        </div>
+        <button class="replay-btn" onclick="replayShutter()">↻ 다시 재생</button>
+      </div>
+      <p class="lead">
+        현재 LLM 생성 완료 → 즉시 <span class="spec-key">router.push()</span>. 큰 작업을 마쳤는데 셀레브레이션 없음.
+        1.4초 의식 — <b>플래시 → 폴라로이드 착지 → "저장됐어"</b> — 을 추가해 재방문 동기를 심습니다.
+      </p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 360px 1fr; gap: 40px; align-items: start;">
+      <div>
+        <div class="col-label after">Live preview · 3.2s 루프</div>
+        <div class="shutter-demo" id="shutterDemo">
+          <div class="flash"></div>
+          <div class="ph-polaroid">
+            <div class="photo"></div>
+            <div class="cap"><span>4월 21일</span><span>마루</span></div>
+          </div>
+          <div class="saved">저장됐어</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="col-label after">타임라인 · 1.4초</div>
+        <div class="shutter-timeline">
+          <div class="step"><b>0ms</b><span>overlay fade-out</span></div>
+          <div class="step"><b>200ms</b><span>흰 플래시 ⚡<br/>opacity 0→0.9→0</span></div>
+          <div class="step"><b>500ms</b><span>폴라로이드 착지<br/>scale + rotate</span></div>
+          <div class="step"><b>900ms</b><span>"저장됐어"<br/>명조체 페이드인</span></div>
+          <div class="step"><b>1400ms</b><span>router.push<br/>→ diary 상세</span></div>
+        </div>
+
+        <div class="note">
+          <strong>애니메이션 스펙</strong>
+          <ul>
+            <li><b>플래시</b> — 300ms, 흰 overlay opacity 0 → 0.9 → 0 (카메라 셔터 느낌)</li>
+            <li><b>착지</b> — 400ms, <span class="spec-key">cubic-bezier(0.2, 0.9, 0.3, 1)</span>, scale(0.9)→(1.05)→(1), rotate(-6°)→(-2°)→(-1.2°)</li>
+            <li><b>Haptic</b> — <span class="spec-key">navigator.vibrate([10, 50, 10])</span> (셔터 → 인쇄 → 착지)</li>
+            <li><b>prefers-reduced-motion</b> — 200ms crossfade만, 텍스트 즉시 노출</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================= -->
+  <!-- D-4 일러스트 -->
+  <!-- ============================= -->
+  <section id="d4" class="section">
+    <div class="section-head">
+      <div class="eyebrow">D-4 · Tier 1 · 1-2일</div>
+      <h1>브랜드 SVG 일러스트 3개</h1>
+      <p class="lead">
+        이모지 금지는 옳지만, 텍스트만으로는 빈 상태·에러·완료의 따뜻함이 약합니다.
+        <b>캐릭터 표정 3종</b>을 2px 단일 stroke + <span class="spec-key">currentColor</span>로 제작해 어느 배경색에도 적응하게 합니다.
+      </p>
+    </div>
+
+    <div class="illus-grid">
+      <div class="illus-card">
+        <!-- buddy-resting -->
+        <svg width="140" height="140" viewBox="0 0 96 96" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-ink);">
+          <ellipse cx="48" cy="80" rx="32" ry="4" fill="currentColor" opacity="0.1" stroke="none" />
+          <path d="M18 64 Q20 50 32 48 L60 48 Q78 48 80 58 Q82 68 72 72 L32 72 Q20 72 18 64 Z" />
+          <path d="M26 48 Q20 36 26 30 Q32 32 34 42" />
+          <path d="M72 48 Q72 38 80 32 Q84 38 80 48" />
+          <circle cx="40" cy="56" r="1.5" fill="currentColor" />
+          <path d="M48 60 Q50 62 52 60" />
+          <path d="M80 60 Q88 58 92 62" />
+        </svg>
+        <h3>buddy-resting</h3>
+        <p>빈 상태용. 공개 프로필에 일기 0개일 때, 홈 첫 방문 시 "첫 폴라로이드를 기다리는 중"</p>
+      </div>
+
+      <div class="illus-card">
+        <!-- buddy-tilted -->
+        <svg width="140" height="140" viewBox="0 0 96 96" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-ink);">
+          <ellipse cx="48" cy="84" rx="20" ry="3" fill="currentColor" opacity="0.1" stroke="none" />
+          <g transform="rotate(-8 48 50)">
+            <path d="M30 50 Q30 28 48 26 Q66 28 66 50 L66 72 Q56 80 48 80 Q40 80 30 72 Z" />
+            <path d="M28 32 Q20 20 26 12 Q36 16 38 30" />
+            <path d="M68 32 Q76 20 70 12 Q60 16 58 30" />
+            <circle cx="40" cy="48" r="1.8" fill="currentColor" />
+            <circle cx="56" cy="48" r="1.8" fill="currentColor" />
+            <ellipse cx="48" cy="58" rx="3" ry="2" fill="currentColor" />
+            <path d="M48 60 L48 64" />
+            <path d="M44 66 Q48 68 52 66" />
+          </g>
+          <path d="M72 18 Q78 14 82 18" />
+        </svg>
+        <h3>buddy-tilted</h3>
+        <p>에러/혼란. 404, global-error, diary fallback 배너 옆 — "뭐가 잘 안 됐어" 카피와 함께</p>
+      </div>
+
+      <div class="illus-card">
+        <!-- buddy-happy -->
+        <svg width="140" height="140" viewBox="0 0 96 96" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-ink);">
+          <ellipse cx="48" cy="86" rx="22" ry="3" fill="currentColor" opacity="0.1" stroke="none" />
+          <path d="M30 48 Q30 26 48 24 Q66 26 66 48 L66 72 Q58 80 48 80 Q38 80 30 72 Z" />
+          <path d="M28 30 Q20 20 26 10 Q36 14 38 28" />
+          <path d="M68 30 Q76 20 70 10 Q60 14 58 28" />
+          <path d="M38 44 Q40 42 42 44" />
+          <path d="M54 44 Q56 42 58 44" />
+          <ellipse cx="48" cy="56" rx="3" ry="2" fill="currentColor" />
+          <path d="M44 62 Q48 66 52 62 M52 62 Q56 66 56 60" />
+          <path d="M72 66 Q84 58 90 62 Q88 70 78 72" />
+        </svg>
+        <h3>buddy-happy</h3>
+        <p>성공/완료. D-3 "찰칵" overlay "저장됐어" 옆 40×40. 마일스톤 배너 액센트</p>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>스펙</strong>
+      <ul>
+        <li>viewBox <span class="spec-key">96×96</span>, 실제 사용 <span class="spec-key">48-120px</span></li>
+        <li>단일 stroke <span class="spec-key">2px</span>, fill은 <span class="spec-key">currentColor</span> + opacity로 그림자만</li>
+        <li>React component (<span class="spec-key">components/illustrations/*.tsx</span>), 외부 SVG 파일 X</li>
+        <li><span class="spec-key">role="img" aria-label</span> 필수. 장식용은 <span class="spec-key">aria-hidden</span></li>
+        <li>다크모드 자동 반전 (currentColor 상속)</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============================= -->
+  <!-- D-5 공개 프로필 -->
+  <!-- ============================= -->
+  <section id="d5" class="section">
+    <div class="section-head">
+      <div class="eyebrow">D-5 · Tier 1 · 2일</div>
+      <h1>공개 프로필 (<code>/b/[slug]</code>) Hero 재설계</h1>
+      <p class="lead">
+        공개 프로필은 바이럴 루프의 <b>코어 자산</b>입니다. 현재 hero는 "이름 + N일째" 한 줄.
+        방문자가 첫 2초 안에 이 강아지를 이해하고, 스크린샷 그대로 카카오톡에 붙여도 예쁘도록.
+      </p>
+    </div>
+
+    <div class="compare">
+      <div>
+        <div class="col-label">Before — 현재</div>
+        <div style="background: #fff; border-radius: 12px; padding: 40px 28px; border: 1px solid var(--color-line); text-align: center; min-height: 420px;">
+          <div style="font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--color-mute);">buddy-note</div>
+          <h1 style="font-family: var(--font-serif); font-size: 44px; font-weight: 700; margin: 12px 0 4px;">마루</h1>
+          <p style="font-size: 13px; color: var(--color-mute); margin: 0;">마루의 이야기 234일째</p>
+          <div style="margin-top: 64px; display: grid; grid-template-columns: 1fr 1fr; gap: 18px; padding: 0 12px;">
+            <div style="background: var(--color-paper); aspect-ratio: 4/5; transform: rotate(-1.2deg); padding: 6px 6px 12px;"><div style="width: 100%; aspect-ratio: 4/5; background: linear-gradient(135deg, #e8d9c5, #a8805c);"></div></div>
+            <div style="background: var(--color-paper); aspect-ratio: 4/5; transform: rotate(0.8deg); padding: 6px 6px 12px;"><div style="width: 100%; aspect-ratio: 4/5; background: linear-gradient(135deg, #c4a57a, #6b4c2e);"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="col-label after">After — D-5 적용</div>
+        <div style="background: #fff; border-radius: 12px; padding: 16px 20px 40px; border: 1px solid var(--color-line); min-height: 420px;">
+          <div style="text-align: center; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--color-mute); padding-top: 12px;">buddy-note</div>
+
+          <div class="polaroid-stack-wrap">
+            <div class="pf p1"><div class="ph"></div></div>
+            <div class="pf p3"><div class="ph"></div></div>
+            <div class="pf p2"><div class="ph"></div></div>
+          </div>
+
+          <div style="text-align: center;">
+            <div style="font-family: var(--font-serif); font-size: 48px; font-weight: 700; line-height: 1.1; color: var(--color-ink);">마루</div>
+            <div class="traits" style="display: inline-flex; align-items: center; gap: 8px; margin: 10px 0 0; font-size: 13px; color: var(--color-accent-brand); font-weight: 500;">
+              <span style="width: 20px; height: 1px; background: currentColor;"></span>
+              ENFP · 냄새 탐정 · 엄마 껌딱지
+              <span style="width: 20px; height: 1px; background: currentColor;"></span>
+            </div>
+            <div style="font-size: 12px; color: var(--color-mute); margin-top: 10px;">
+              <b style="font-family: var(--font-serif); color: var(--color-ink); font-weight: 700;">234</b>일 ·
+              폴라로이드 <b style="font-family: var(--font-serif); color: var(--color-ink); font-weight: 700;">47</b>장
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>보안 체크 — RLS 정책 재검토 필수</strong>
+      <ul>
+        <li>fetchPublicPet select에 <span class="spec-key">personality_code, personality_label</span> 추가 (현재 이미 있음, 확인용)</li>
+        <li><b>절대 노출 금지:</b> <span class="spec-key">persona_prompt_fragment</span>, <span class="spec-key">persona_answers</span>, <span class="spec-key">user_id</span>, <span class="spec-key">pet_memory_summary</span></li>
+        <li>PublicPet type에 persona 컬럼 포함 X — type-level enforce</li>
+        <li>일기 0개일 때 <b>buddy-resting</b> 일러스트 (D-4 연결)</li>
+        <li>Hero에 모든 정보가 first viewport (390×844)에 보여야 함</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============================= -->
+  <!-- D-6 명조체 -->
+  <!-- ============================= -->
+  <section id="d6" class="section">
+    <div class="section-head">
+      <div class="eyebrow">D-6 · Tier 2 · 0.5일 · <span class="nav-tag" style="background: rgba(224,122,95,0.12);">design-system</span></div>
+      <h1>명조체 key moment 확장</h1>
+      <p class="lead">
+        현재 명조체는 <span class="spec-key">diary.body</span>에만 적용. "쓰여진 기록" 메타포가 body에만 갇혀 있습니다.
+        <b>감정 moment</b> — 강아지 이름, 마일스톤 숫자, 완료 confirmation — 에 명조체를 extend하면 identity가 2배 또렷해집니다.
+      </p>
+    </div>
+
+    <h3 style="font-family: var(--font-serif); margin-top: 16px;">적용 스케일</h3>
+    <div class="type-scale">
+      <div class="row">
+        <div class="meta"><b>Sans Body</b>24 / 1.35</div>
+        <div class="sample sans" style="font-size: 24px; line-height: 1.35;">마루의 이야기 234일째</div>
+      </div>
+      <div class="row" style="background: var(--color-accent-brand-soft); border-radius: 8px; padding: 16px 14px;">
+        <div class="meta"><b>→ Serif</b>28 / 1.2</div>
+        <div class="sample serif" style="font-size: 28px; line-height: 1.2;">마루의 이야기 234일째</div>
+      </div>
+      <div class="row">
+        <div class="meta"><b>Sans XL</b>36</div>
+        <div class="sample sans" style="font-size: 36px;">마루</div>
+      </div>
+      <div class="row" style="background: var(--color-accent-brand-soft); border-radius: 8px; padding: 16px 14px;">
+        <div class="meta"><b>→ Serif XL</b>48</div>
+        <div class="sample serif" style="font-size: 48px;">마루</div>
+      </div>
+      <div class="row" style="background: var(--color-accent-brand-soft); border-radius: 8px; padding: 16px 14px;">
+        <div class="meta"><b>→ Serif Milestone</b>72 / bold</div>
+        <div class="sample serif" style="font-size: 72px; line-height: 1; color: var(--color-accent-brand);">100일</div>
+      </div>
+      <div class="row" style="background: var(--color-accent-brand-soft); border-radius: 8px; padding: 16px 14px;">
+        <div class="meta"><b>→ Serif 완료</b>20 / 명조체</div>
+        <div class="sample serif-body" style="font-size: 20px;">저장됐어</div>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>DESIGN.md §2 추가 섹션 (<span class="spec-key">[design-system]</span> PR)</strong>
+      <pre style="font-size: 11px; background: var(--color-paper); padding: 10px 12px; border-radius: 6px; overflow-x: auto; margin-top: 8px;">
+**Emotional / Name 강조:** Nanum Myeongjo
+—  강아지 이름 (홈 hero, 공개 프로필, 마이페이지)
+—  마일스톤 숫자 (N일째, 기록 47장)
+—  완료 confirmation ("저장됐어")
+—  섹션 구분자 (월 label, 타임라인 sticky header)
+본문 텍스트와 스탯·인터랙티브 UI는 계속 sans.</pre>
+    </div>
+  </section>
+
+  <!-- ============================= -->
+  <!-- D-7 타임라인 -->
+  <!-- ============================= -->
+  <section id="d7" class="section">
+    <div class="section-head">
+      <div class="eyebrow">D-7 · Tier 2 · 3-4일</div>
+      <h1>캘린더 → 폴라로이드 타임라인</h1>
+      <p class="lead">
+        42칸 그리드 + 작은 점 = "관리 도구" 느낌. 쌓임의 감정이 없습니다.
+        세로 스크롤 <b>지층</b>으로 바꾸면 기록이 쌓일수록 두꺼워지는 시각적 피드백이 됩니다.
+      </p>
+    </div>
+
+    <div class="compare">
+      <div>
+        <div class="col-label">Before — 캘린더 그리드</div>
+        <div class="phone">
+          <div class="phone-body">
+            <div class="status-bar"><span>9:41</span><div class="dots"><span></span><span></span><span></span></div></div>
+            <div class="home-before">
+              <div class="eyebrow">calendar</div>
+              <h1 style="font-size: 22px;">마루의 이야기 234일째</h1>
+              <div class="calendar-grid">
+                <div class="dow">일</div><div class="dow">월</div><div class="dow">화</div><div class="dow">수</div><div class="dow">목</div><div class="dow">금</div><div class="dow">토</div>
+                <div class="cell out">29</div><div class="cell out">30</div><div class="cell out">31</div>
+                <div class="cell">1</div><div class="cell dot">2</div><div class="cell">3</div><div class="cell">4</div>
+                <div class="cell dot">5</div><div class="cell">6</div><div class="cell dot">7</div><div class="cell">8</div><div class="cell">9</div><div class="cell dot">10</div><div class="cell">11</div>
+                <div class="cell">12</div><div class="cell dot">13</div><div class="cell">14</div><div class="cell dot">15</div><div class="cell">16</div><div class="cell dot">17</div><div class="cell">18</div>
+                <div class="cell dot">19</div><div class="cell">20</div><div class="cell today dot">21</div><div class="cell future">22</div><div class="cell future">23</div><div class="cell future">24</div><div class="cell future">25</div>
+                <div class="cell future">26</div><div class="cell future">27</div><div class="cell future">28</div><div class="cell future">29</div><div class="cell future">30</div><div class="cell out future">1</div><div class="cell out future">2</div>
+              </div>
+              <p style="font-size: 11px; color: var(--color-mute); margin-top: 14px; text-align: center;">빈 칸 위주, 점 하나로는 "기억의 두께" 시각화 X</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="col-label after">After — 폴라로이드 타임라인</div>
+        <div class="phone">
+          <div class="phone-body">
+            <div class="status-bar"><span>9:41</span><div class="dots"><span></span><span></span><span></span></div></div>
+            <div class="timeline">
+              <div class="month-hdr" style="padding-top: 12px;">4월</div>
+              <div class="day-row">
+                <div class="day-date"><strong>19</strong>토</div>
+                <div class="thumb"><div class="ph" style="background: linear-gradient(135deg, #e8d9c5, #a8805c);"></div></div>
+                <div class="day-meta">
+                  <h3><span class="mood-dot" style="background: var(--mood-curious);"></span>공원의 토끼바람</h3>
+                  <p>비가 올 줄 알았는데 너무 쨍해서 오히려 놀랐어.</p>
+                </div>
+              </div>
+              <div class="day-row">
+                <div class="day-date"><strong>17</strong>목</div>
+                <div class="thumb"><div class="ph" style="background: linear-gradient(135deg, #c4a57a, #6b4c2e);"></div></div>
+                <div class="day-meta">
+                  <h3><span class="mood-dot" style="background: var(--mood-calm);"></span>저녁 낮잠 습관</h3>
+                  <p>요즘 저녁 6시쯤 되면 잠깐 꾸벅꾸벅 졸아.</p>
+                </div>
+              </div>
+              <div class="day-row">
+                <div class="day-date"><strong>15</strong>화</div>
+                <div class="thumb"><div class="ph" style="background: linear-gradient(135deg, #d4b792, #8f6f4e);"></div></div>
+                <div class="day-meta">
+                  <h3><span class="mood-dot" style="background: var(--mood-bright);"></span>엄마가 한참 떠난 금요일</h3>
+                  <p>너무 기다려서 창문 앞에 한참 앉아 있었어.</p>
+                </div>
+              </div>
+
+              <div class="milestone-banner">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7a5c2c" stroke-width="2" stroke-linecap="round"><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M5 19l3-3M16 8l3-3"/></svg>
+                <span><b>100일째</b> · 첫 100일 recap 폴라로이드가 도착했어요 →</span>
+              </div>
+
+              <div class="day-row">
+                <div class="day-date"><strong>13</strong>일</div>
+                <div class="thumb milestone"><div class="ph" style="background: linear-gradient(135deg, #f0e4d2, #a88561);"></div></div>
+                <div class="day-meta">
+                  <h3><span class="mood-dot" style="background: var(--mood-bright);"></span>100일 축하받은 날</h3>
+                  <p>엄마가 작은 케이크 모양 간식을 줬어. 한 입에 다 먹었지.</p>
+                </div>
+              </div>
+
+              <div class="month-hdr" style="padding-top: 24px;">3월</div>
+              <div class="day-row">
+                <div class="day-date"><strong>28</strong>금</div>
+                <div class="thumb"><div class="ph" style="background: linear-gradient(135deg, #c9a787, #7a5c3e);"></div></div>
+                <div class="day-meta">
+                  <h3><span class="mood-dot" style="background: var(--mood-tired);"></span>긴 산책 후 곯아떨어짐</h3>
+                  <p>한강 끝까지 가봤어. 처음 가보는 곳 냄새가 다 달랐어.</p>
+                </div>
+              </div>
+            </div>
+            <div class="bottom-nav three-tab">
+              <div class="active">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h3M8 18h3" stroke-width="2.2"/></svg>
+                <span>주간</span>
+              </div>
+              <div>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                <span>월간</span>
+              </div>
+              <div>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+                <span>내 정보</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>주요 디자인 결정</strong>
+      <ul>
+        <li><b>빈 날 = 렌더 X</b>. 기록 있는 날만 보임 → "텅 빈 달력" 감각 제거</li>
+        <li>월 label은 <b>명조체 sticky</b> (D-6)</li>
+        <li>마일스톤 날 (7/30/100/365) <b>cream bg + scale 1.12</b>로 구별</li>
+        <li>mood dot (D-10)로 감정 색깔 표시</li>
+        <li>캘린더 뷰는 <span class="spec-key">/logs</span>로 이관, 유저 선택권 유지</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============================= -->
+  <!-- D-8 onboarding -->
+  <!-- ============================= -->
+  <section id="d8" class="section">
+    <div class="section-head">
+      <div class="row">
+        <div>
+          <div class="eyebrow">D-8 · Tier 2 · 1일</div>
+          <h1>Onboarding Step 6 (확정) 리빌 재설계</h1>
+        </div>
+        <button class="replay-btn" onclick="document.querySelectorAll('.reveal-step').forEach(n => { n.style.animation='none'; n.offsetWidth; n.style.animation=null; }); document.querySelectorAll('#d8 .reveal-step *').forEach(n => { n.style.animation='none'; n.offsetWidth; n.style.animation=''; });">↻ 다시 재생</button>
+      </div>
+      <p class="lead">
+        4문항 다 답하고 step 6 가면 카드 한 장에 코드 + 프롬프트 fragment만 보임. <b>짠! 순간</b>이 없습니다.
+        스태거 애니메이션으로 "와, 이게 우리 강아지구나" 모멘트를 만듭니다.
+      </p>
+    </div>
+
+    <div class="compare">
+      <div>
+        <div class="col-label">Before — 현재 ConfirmStep</div>
+        <div class="phone">
+          <div class="phone-body" style="padding: 20px 16px;">
+            <div style="background: var(--color-paper); padding: 28px 24px; transform: rotate(-0.4deg); outline: 1px solid var(--color-line);">
+              <div style="font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-mute);">소개 미리보기</div>
+              <h1 style="font-size: 20px; font-weight: 700; margin: 12px 0 4px;">이렇게 기록해둘게요</h1>
+              <p style="font-size: 14px; color: var(--color-ink-soft); margin: 0;">내용이 맞으면 저장해주세요.</p>
+              <div style="background: rgba(255,255,255,0.7); padding: 14px 16px; margin-top: 20px; border-radius: 8px;">
+                <div style="font-size: 13px; color: var(--color-mute);">마루은</div>
+                <div style="font-size: 22px; font-weight: 700; margin-top: 4px;">ENFP · 냄새 탐정</div>
+              </div>
+              <blockquote style="margin: 16px 0 0; border-left: 2px solid var(--color-accent-brand); background: rgba(255,255,255,0.6); padding: 14px 16px; font-family: var(--font-serif); font-size: 15px; line-height: 1.7;">
+                사람 많은 데 좋아함 / 현재 순간 중심 / 감정 교감…
+              </blockquote>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="col-label after">After — 리빌 애니메이션</div>
+        <div class="phone">
+          <div class="phone-body">
+            <div class="reveal-step">
+              <div class="avatar-xl">마</div>
+              <div class="prefix">마루는</div>
+              <div class="code">ENFP</div>
+              <div class="label">· 냄새 탐정 ·</div>
+              <div class="traits-card">
+                <h4>이런 친구야</h4>
+                <ul>
+                  <li>사람 많은 데 좋아함</li>
+                  <li>현재 순간 중심</li>
+                  <li>감정 교감 (~야/~어 말투)</li>
+                  <li>즉흥적 탐험가</li>
+                </ul>
+              </div>
+              <button class="btn-primary">저장할게요</button>
+              <button class="btn-ghost">다시 답할래요</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>스태거 스케줄 · 총 1.2s</strong>
+      <ul>
+        <li>0ms — 아바타 scale(0.8→1) fade-in 500ms</li>
+        <li>200ms — "마루는" fade-up 400ms</li>
+        <li>400ms — MBTI 코드 zoom-in 500ms (주인공 문구, 64px 명조체)</li>
+        <li>600ms — 성격 라벨 fade-up</li>
+        <li>800ms — traits card slide-up</li>
+        <li>1000ms — CTA 버튼들 등장</li>
+        <li>reduced-motion → 즉시 노출 (애니메이션 skip)</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============================= -->
+  <!-- D-9 빈 상태 -->
+  <!-- ============================= -->
+  <section id="d9" class="section">
+    <div class="section-head">
+      <div class="eyebrow">D-9 · Tier 2 · 1일</div>
+      <h1>빈 상태 & 에러 페이지 일러스트 통합</h1>
+      <p class="lead">
+        실패와 비어있음이 지금은 텍스트만 — "차가운 시스템 에러" 감각.
+        D-4 일러스트 + D-2 1인칭 카피를 모든 빈/에러 상태에 통합합니다.
+      </p>
+    </div>
+
+    <div class="compare">
+      <div>
+        <div class="col-label">error.tsx</div>
+        <div style="background: #fff; border: 1px solid var(--color-line); border-radius: 12px; padding: 48px 20px; text-align: center; min-height: 280px;">
+          <svg width="80" height="80" viewBox="0 0 96 96" fill="none" stroke="var(--color-ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 16px;">
+            <ellipse cx="48" cy="84" rx="20" ry="3" fill="currentColor" opacity="0.1" stroke="none" />
+            <g transform="rotate(-8 48 50)">
+              <path d="M30 50 Q30 28 48 26 Q66 28 66 50 L66 72 Q56 80 48 80 Q40 80 30 72 Z" />
+              <path d="M28 32 Q20 20 26 12 Q36 16 38 30" />
+              <path d="M68 32 Q76 20 70 12 Q60 16 58 30" />
+              <circle cx="40" cy="48" r="1.8" fill="currentColor" />
+              <circle cx="56" cy="48" r="1.8" fill="currentColor" />
+              <ellipse cx="48" cy="58" rx="3" ry="2" fill="currentColor" />
+              <path d="M48 60 L48 64" />
+              <path d="M44 66 Q48 68 52 66" />
+            </g>
+          </svg>
+          <h3 style="font-family: var(--font-serif); font-size: 18px; margin: 0 0 6px;">뭐가 잘 안 됐어</h3>
+          <p style="font-size: 13px; color: var(--color-ink-soft); margin: 0 0 18px;">잠깐 다시 해볼래?</p>
+          <button style="padding: 8px 16px; background: transparent; border: 1px solid var(--color-line); border-radius: 10px; font-size: 13px; cursor: pointer;">다시 시도</button>
+        </div>
+      </div>
+
+      <div>
+        <div class="col-label">not-found.tsx</div>
+        <div style="background: #fff; border: 1px solid var(--color-line); border-radius: 12px; padding: 48px 20px; text-align: center; min-height: 280px;">
+          <svg width="80" height="80" viewBox="0 0 96 96" fill="none" stroke="var(--color-ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 16px;">
+            <ellipse cx="48" cy="80" rx="32" ry="4" fill="currentColor" opacity="0.1" stroke="none" />
+            <path d="M18 64 Q20 50 32 48 L60 48 Q78 48 80 58 Q82 68 72 72 L32 72 Q20 72 18 64 Z" />
+            <path d="M26 48 Q20 36 26 30 Q32 32 34 42" />
+            <path d="M72 48 Q72 38 80 32 Q84 38 80 48" />
+            <circle cx="40" cy="56" r="1.5" fill="currentColor" />
+            <path d="M48 60 Q50 62 52 60" />
+          </svg>
+          <h3 style="font-family: var(--font-serif); font-size: 18px; margin: 0 0 6px;">이 페이지는 없는 것 같아</h3>
+          <p style="font-size: 13px; color: var(--color-ink-soft); margin: 0 0 18px;">잘못 찾아온 거 아닐까?</p>
+          <a style="padding: 8px 16px; background: transparent; border: 1px solid var(--color-line); border-radius: 10px; font-size: 13px; text-decoration: none; color: var(--color-ink);">홈으로</a>
+        </div>
+      </div>
+
+      <div>
+        <div class="col-label">EmptyState (공개 프로필)</div>
+        <div style="background: #fff; border: 1px solid var(--color-line); border-radius: 12px; padding: 48px 20px; text-align: center; min-height: 280px;">
+          <svg width="80" height="80" viewBox="0 0 96 96" fill="none" stroke="var(--color-ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 16px;">
+            <ellipse cx="48" cy="80" rx="32" ry="4" fill="currentColor" opacity="0.1" stroke="none" />
+            <path d="M18 64 Q20 50 32 48 L60 48 Q78 48 80 58 Q82 68 72 72 L32 72 Q20 72 18 64 Z" />
+            <path d="M26 48 Q20 36 26 30 Q32 32 34 42" />
+            <path d="M72 48 Q72 38 80 32 Q84 38 80 48" />
+            <circle cx="40" cy="56" r="1.5" fill="currentColor" />
+          </svg>
+          <h3 style="font-family: var(--font-serif); font-size: 18px; margin: 0 0 6px;">마루, 아직 준비 중</h3>
+          <p style="font-size: 13px; color: var(--color-ink-soft); margin: 0 0 18px; font-family: var(--font-serif);">조금 있다 다시 올래?</p>
+        </div>
+      </div>
+
+      <div>
+        <div class="col-label">diary fallback 배너</div>
+        <div style="background: var(--color-accent-brand-soft); border: 1px solid var(--color-accent-brand); border-radius: 12px; padding: 16px; display: flex; gap: 12px; align-items: flex-start; min-height: 280px;">
+          <svg width="32" height="32" viewBox="0 0 96 96" fill="none" stroke="var(--color-accent-brand)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
+            <g transform="rotate(-8 48 50)">
+              <path d="M30 50 Q30 28 48 26 Q66 28 66 50 L66 72 Q56 80 48 80 Q40 80 30 72 Z" />
+              <circle cx="40" cy="48" r="2" fill="currentColor" />
+              <circle cx="56" cy="48" r="2" fill="currentColor" />
+              <path d="M48 60 L48 64" />
+            </g>
+          </svg>
+          <div style="min-width: 0;">
+            <p style="font-family: var(--font-serif); font-size: 14px; color: var(--color-ink); margin: 0; line-height: 1.6;">
+              내가 오늘 말이 잘 안 떠올랐어. 잠깐 임시로 적어둘게.
+              아래 '다시 해볼래' 눌러주면 새로 써볼게.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================= -->
+  <!-- D-10 mood -->
+  <!-- ============================= -->
+  <section id="d10" class="section">
+    <div class="section-head">
+      <div class="eyebrow">D-10 · Tier 2 · 2-3일 · <span class="nav-tag" style="background: rgba(224,122,95,0.12);">design-system</span></div>
+      <h1>감정 스티커 (캘린더 점 대체)</h1>
+      <p class="lead">
+        현재 캘린더의 기록 표시 = 6px 테라코타 점. 의미 없음.
+        LLM 생성 시 <b>mood 키워드 1개</b>를 structured output으로 뽑아 6색 팔레트로 매핑 →
+        1년 쌓이면 <b>감정 지도</b> 자동 완성 (shareable annual asset).
+      </p>
+    </div>
+
+    <h3 style="font-family: var(--font-serif); margin-top: 16px;">6 mood palette</h3>
+    <div class="mood-grid">
+      <div class="mood-swatch"><div class="chip" style="background: var(--mood-bright);"></div><div class="name">bright</div><div class="hex">#e07a5f</div></div>
+      <div class="mood-swatch"><div class="chip" style="background: var(--mood-calm);"></div><div class="name">calm</div><div class="hex">#a8b5a0</div></div>
+      <div class="mood-swatch"><div class="chip" style="background: var(--mood-tired);"></div><div class="name">tired</div><div class="hex">#9ca3af</div></div>
+      <div class="mood-swatch"><div class="chip" style="background: var(--mood-curious);"></div><div class="name">curious</div><div class="hex">#d4a256</div></div>
+      <div class="mood-swatch"><div class="chip" style="background: var(--mood-grumpy);"></div><div class="name">grumpy</div><div class="hex">#8a6fa3</div></div>
+      <div class="mood-swatch"><div class="chip" style="background: var(--mood-lonely);"></div><div class="name">lonely</div><div class="hex">#5a7a8a</div></div>
+    </div>
+
+    <div class="mood-map-preview">
+      <div style="font-size: 12px; color: var(--color-mute); letter-spacing: 0.1em; text-transform: uppercase;">감정 지도 프리뷰 · 최근 3개월</div>
+      <div class="mood-map" id="moodMap"></div>
+      <script>
+        // Generate mood map squares
+        (function() {
+          const map = document.getElementById('moodMap');
+          if (!map) return;
+          const moods = ['--mood-bright', '--mood-calm', '--mood-tired', '--mood-curious', '--mood-grumpy', '--mood-lonely', 'transparent', 'transparent', 'transparent'];
+          for (let i = 0; i < 90; i++) {
+            const m = document.createElement('div');
+            m.className = 'm';
+            const c = moods[Math.floor(Math.random() * moods.length)];
+            m.style.background = c === 'transparent' ? 'var(--color-line)' : `var(${c})`;
+            if (c === 'transparent') m.style.opacity = '0.3';
+            map.appendChild(m);
+          }
+        })();
+      </script>
+    </div>
+
+    <div class="note">
+      <strong>DB migration 제안</strong>
+      <pre style="font-size: 11px; background: var(--color-paper); padding: 10px 12px; border-radius: 6px; overflow-x: auto; margin-top: 8px;">-- supabase/migrations/20260421_add_diary_mood.sql
+ALTER TABLE diaries ADD COLUMN mood TEXT
+  CHECK (mood IN ('bright','calm','tired','curious','grumpy','lonely'));
+-- forward-only, 기존 diary는 mood=NULL 허용 (fallback = calm)</pre>
+    </div>
+  </section>
+
+  <!-- ============================= -->
+  <!-- D-11 callback -->
+  <!-- ============================= -->
+  <section id="d11" class="section">
+    <div class="section-head">
+      <div class="eyebrow">D-11 · Tier 3 · 3일</div>
+      <h1>"오늘의 callback" 홈 모듈</h1>
+      <p class="lead">
+        <span class="spec-key">pet_memory_summary.recent_callbacks</span>는 DB에 쌓이지만 UI에 전혀 안 드러남.
+        제품의 <b>moat가 투명</b>합니다. 강아지가 나랑 시간을 쌓고 있다는 증거를 매일 보게 하면 재방문율이 올라갑니다.
+      </p>
+    </div>
+
+    <div class="phone" style="max-width: 420px;">
+      <div class="phone-body">
+        <div class="status-bar"><span>9:41</span><div class="dots"><span></span><span></span><span></span></div></div>
+        <div class="app-header">
+          <span class="logo" style="font-family: var(--font-serif);">buddy-note</span>
+          <span style="font-size: 11px; color: var(--color-mute); letter-spacing: 0.1em; text-transform: uppercase;">4월 21일 화</span>
+        </div>
+
+        <div class="buddy-card">
+          <div class="avatar-row">
+            <div class="avatar has-photo">마</div>
+            <div class="avatar-info">
+              <div class="name">마루</div>
+              <div class="mbti-row">
+                <span>ENFP</span><span class="dot"></span><span>냄새 탐정</span>
+              </div>
+            </div>
+          </div>
+          <div class="greeting">
+            <span class="quote">"</span>오늘도 일찍 깼네. 밥 줄 거지?<span class="quote">"</span>
+          </div>
+          <div class="stats"><b>234</b>일째 · 기록 <b>47</b>장</div>
+        </div>
+
+        <div class="callback-strip">
+          <div class="eyebrow">지난 이야기</div>
+          <div class="quote">1주일 전엔 비 와서 산책 못 갔는데, 오늘은 쨍해서 신나!</div>
+        </div>
+
+        <div style="padding: 16px 16px 0;">
+          <div style="font-size: 11px; color: var(--color-mute); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 10px;">이번 주 기록</div>
+          <div style="padding-bottom: 80px;">
+            <div class="day-row" style="padding: 12px 0;">
+              <div class="day-date"><strong>19</strong>토</div>
+              <div class="thumb"><div class="ph"></div></div>
+              <div class="day-meta"><h3><span class="mood-dot" style="background: var(--mood-curious);"></span>공원의 토끼바람</h3><p>비가 올 줄 알았는데…</p></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bottom-nav three-tab">
+          <div class="active">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h3M8 18h3" stroke-width="2.2"/></svg>
+            <span>주간</span>
+          </div>
+          <div>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            <span>월간</span>
+          </div>
+          <div>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+            <span>내 정보</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note" style="max-width: 720px; margin-left: auto; margin-right: auto;">
+      <strong>데이터 흐름</strong>
+      <ul>
+        <li><span class="spec-key">recent_callbacks: [{ref_date, ref_diary_id, fragment, created_at}[]]</span></li>
+        <li>가장 최근 1개를 홈에 노출. 클릭 → 원본 diary 로 이동</li>
+        <li>기록 3개 미만일 때는 forward-tease: <i>"아직 기록이 적어. 3일만 더 쌓이면 나 너랑 이야기 꺼낼 수 있어."</i></li>
+        <li>callback 업데이트는 기존 <span class="spec-key">memory_update_queue</span> pg_cron worker에 한 step 추가</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============================= -->
+  <!-- D-12 milestone -->
+  <!-- ============================= -->
+  <section id="d12" class="section">
+    <div class="section-head">
+      <div class="eyebrow">D-12 · Tier 3 · 3-4일</div>
+      <h1>마일스톤 자동 Recap 폴라로이드</h1>
+      <p class="lead">
+        7일, 30일, 100일, 365일 moment에 자동으로 생성되는 <b>recap 카드</b>. 9:16 / 4:5 / 1:1 세 포맷으로 렌더되어 카카오톡/인스타에 공유 가능 — retention × viral 동시 견인.
+      </p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 20px;">
+      <div>
+        <div class="col-label">9:16 포맷 · 인스타 스토리</div>
+        <div class="milestone-card">
+          <div class="day">100<small>일</small></div>
+          <div class="subtitle">마루의 이야기</div>
+
+          <div class="stack-mini">
+            <div class="sp s1"><div class="ph"></div></div>
+            <div class="sp s3"><div class="ph"></div></div>
+            <div class="sp s2"><div class="ph"></div></div>
+          </div>
+
+          <div class="pet-mbti">ENFP · 냄새 탐정</div>
+          <div class="count">폴라로이드 47장 · 100일</div>
+          <div class="quote">사람 많은 데 좋아하고 냄새를 잘 맡는 우리 아기.</div>
+
+          <div class="brand">buddy-note</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="col-label">마일스톤 트리거</div>
+        <div class="note" style="margin-top: 0;">
+          <strong>자동 생성 조건</strong>
+          <ul>
+            <li><b>D+7</b> — "첫 일주일"</li>
+            <li><b>D+30</b> — "첫 달"</li>
+            <li><b>D+100</b> — "백 날 축하"</li>
+            <li><b>D+365</b> — "OOO와 나의 1년" (v2 다큐 feature 연결)</li>
+          </ul>
+        </div>
+        <div class="note">
+          <strong>기술 스펙</strong>
+          <ul>
+            <li>pg_cron 매일 00:00 KST — 각 pet의 <span class="spec-key">days_since_created</span>를 체크</li>
+            <li>마일스톤 도달 시 <span class="spec-key">milestone_cards</span> 테이블 INSERT (RLS: owner only)</li>
+            <li>Edge Function: satori 템플릿으로 <span class="spec-key">milestone-{n}.png</span> 3 포맷 렌더 → <span class="spec-key">diary-images</span> bucket</li>
+            <li>홈 상단 dismissible 배너 (localStorage로 30일 재노출 금지)</li>
+            <li>공유 URL <span class="spec-key">/m/[id]</span> — slug_reserved에 'm' 추가</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================= -->
+  <!-- D-13 대화형 upload -->
+  <!-- ============================= -->
+  <section id="d13" class="section">
+    <div class="section-head">
+      <div class="eyebrow">D-13 · Tier 3 · 2일</div>
+      <h1>Upload = 대화형 UX</h1>
+      <p class="lead">
+        현재 upload form은 <b>필드 병렬 배치</b>. 태그, 사진, 메모가 한 화면에 다 있어 "보호자 작업" 느낌.
+        3단계 대화 플로우로 바꾸면 <b>강아지한테 직접 묻는 감각</b> — retention psychology 상 습관화됨.
+      </p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+      <div>
+        <div class="col-label">Step 1 · 태그</div>
+        <div class="phone">
+          <div class="phone-body">
+            <div class="status-bar"><span>9:41</span><div class="dots"><span></span><span></span><span></span></div></div>
+            <div class="conv-upload">
+              <div class="conv-bubble">
+                <div class="mini-avatar"></div>
+                <div class="text">오늘 뭐 했어?</div>
+              </div>
+              <div class="conv-choices">
+                <div class="conv-choice active">산책</div>
+                <div class="conv-choice active">밥</div>
+                <div class="conv-choice">놀이</div>
+                <div class="conv-choice">배변</div>
+                <div class="conv-choice">낮잠</div>
+                <div class="conv-choice">외출</div>
+                <div class="conv-choice">목욕</div>
+                <div class="conv-choice">간식</div>
+              </div>
+              <div style="margin-top: auto; padding-top: 20px; display: flex; justify-content: flex-end;">
+                <button style="background: var(--color-accent-brand); color: #fff; border: 0; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 600;">다음</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="col-label">Step 2 · 사진</div>
+        <div class="phone">
+          <div class="phone-body">
+            <div class="status-bar"><span>9:41</span><div class="dots"><span></span><span></span><span></span></div></div>
+            <div class="conv-upload">
+              <div class="conv-bubble">
+                <div class="mini-avatar"></div>
+                <div class="text">사진 찍어둔 거 있어?</div>
+              </div>
+              <div class="conv-photo-drop">
+                <div class="ph"></div>
+                <div class="hint">마음에 들면 다음</div>
+              </div>
+              <div style="margin-top: 20px; display: flex; justify-content: space-between;">
+                <button style="background: transparent; border: 0; color: var(--color-mute); font-size: 13px;">이전</button>
+                <button style="background: var(--color-accent-brand); color: #fff; border: 0; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 600;">다음</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="col-label">Step 3 · 메모</div>
+        <div class="phone">
+          <div class="phone-body">
+            <div class="status-bar"><span>9:41</span><div class="dots"><span></span><span></span><span></span></div></div>
+            <div class="conv-upload">
+              <div class="conv-bubble">
+                <div class="mini-avatar"></div>
+                <div class="text">엄마가 한 마디 해줄래? <span style="color: var(--color-mute); font-size: 11px;">(선택)</span></div>
+              </div>
+              <textarea style="margin-left: 38px; width: calc(100% - 38px); min-height: 100px; border: 1px solid var(--color-line); border-radius: 12px; padding: 12px 14px; font-size: 13px; font-family: var(--font-sans); resize: none;" placeholder="오늘 있었던 일을 짧게…">공원 한 바퀴 돌고 와서 낮잠까지. 완벽한 하루.</textarea>
+              <div style="text-align: right; font-size: 10px; color: var(--color-mute); margin-top: 4px; margin-right: 4px;">27 / 200</div>
+
+              <div style="margin-top: 20px; display: flex; justify-content: space-between;">
+                <button style="background: transparent; border: 0; color: var(--color-mute); font-size: 13px;">이전</button>
+                <button style="background: var(--color-accent-brand); color: #fff; border: 0; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 600;">오늘 이야기 만들어줘</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>호환성 유지</strong>
+      <ul>
+        <li>Server action <span class="spec-key">createLog</span> 계약 변경 X (FormData 유지)</li>
+        <li>3 step state machine, draft localStorage persist</li>
+        <li>기존 EXIF strip + 업로드 로직 그대로</li>
+        <li>step 전환 시 focus management + <span class="spec-key">aria-live</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============================= -->
+  <!-- D-14 warm-dark -->
+  <!-- ============================= -->
+  <section id="d14" class="section">
+    <div class="section-head">
+      <div class="eyebrow">D-14 · Tier 3 · 1일 · <span class="nav-tag" style="background: rgba(224,122,95,0.12);">design-system</span></div>
+      <h1>야간 warm-dark 모드</h1>
+      <p class="lead">
+        현재 <span class="spec-key">.dark</span> 테마는 검정 계열 (#111). 저녁 산책 시간 (실제 사용 시간대) 에 차갑습니다.
+        검정 아닌 <b>어두운 베이지</b>로 — 종이 느낌 유지, 테라코타 accent는 자연스럽게 살아남.
+      </p>
+    </div>
+
+    <div class="compare">
+      <div>
+        <div class="col-label">Light</div>
+        <div class="phone">
+          <div class="phone-body">
+            <div class="status-bar"><span>9:41</span><div class="dots"><span></span><span></span><span></span></div></div>
+            <div class="app-header">
+              <span class="logo" style="font-family: var(--font-serif);">buddy-note</span>
+              <span style="font-size: 11px; color: var(--color-mute);">4월 21일</span>
+            </div>
+            <div class="buddy-card">
+              <div class="avatar-row">
+                <div class="avatar has-photo">마</div>
+                <div class="avatar-info">
+                  <div class="name">마루</div>
+                  <div class="mbti-row"><span>ENFP</span><span class="dot"></span><span>냄새 탐정</span></div>
+                </div>
+              </div>
+              <div class="greeting"><span class="quote">"</span>산책 갈래?<span class="quote">"</span></div>
+              <div class="stats"><b>234</b>일째 · 기록 <b>47</b>장</div>
+            </div>
+            <div class="callback-strip">
+              <div class="eyebrow">지난 이야기</div>
+              <div class="quote">1주일 전엔 비 와서 산책 못 갔는데…</div>
+            </div>
+            <div class="timeline" style="padding: 16px 16px 80px;">
+              <div class="day-row">
+                <div class="day-date"><strong>19</strong>토</div>
+                <div class="thumb"><div class="ph"></div></div>
+                <div class="day-meta"><h3>공원의 토끼바람</h3><p>비가 올 줄 알았는데…</p></div>
+              </div>
+            </div>
+            <div class="bottom-nav three-tab">
+              <div class="active"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>주간</span></div>
+              <div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>월간</span></div>
+              <div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><span>내 정보</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="col-label after">Warm-dark (저녁 19:00+)</div>
+        <div class="phone" style="border-color: rgba(244, 238, 229, 0.08);">
+          <div class="phone-body warm-dark">
+            <div class="status-bar"><span>20:41</span><div class="dots"><span></span><span></span><span></span></div></div>
+            <div class="app-header">
+              <span class="logo" style="font-family: var(--font-serif); color: var(--wd-ink);">buddy-note</span>
+              <span style="font-size: 11px; color: var(--wd-mute);">4월 21일</span>
+            </div>
+            <div class="buddy-card">
+              <div class="avatar-row">
+                <div class="avatar has-photo">마</div>
+                <div class="avatar-info">
+                  <div class="name" style="color: var(--wd-ink);">마루</div>
+                  <div class="mbti-row"><span>ENFP</span><span class="dot"></span><span>냄새 탐정</span></div>
+                </div>
+              </div>
+              <div class="greeting"><span class="quote">"</span>산책 갈래?<span class="quote">"</span></div>
+              <div class="stats"><b>234</b>일째 · 기록 <b>47</b>장</div>
+            </div>
+            <div class="callback-strip">
+              <div class="eyebrow">지난 이야기</div>
+              <div class="quote">1주일 전엔 비 와서 산책 못 갔는데…</div>
+            </div>
+            <div class="timeline" style="padding: 16px 16px 80px;">
+              <div class="day-row">
+                <div class="day-date"><strong>19</strong>토</div>
+                <div class="thumb"><div class="ph"></div></div>
+                <div class="day-meta"><h3>공원의 토끼바람</h3><p>비가 올 줄 알았는데…</p></div>
+              </div>
+            </div>
+            <div class="bottom-nav three-tab">
+              <div class="active"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>주간</span></div>
+              <div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>월간</span></div>
+              <div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><span>내 정보</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>DESIGN.md §3 추가 (<span class="spec-key">[design-system]</span>)</strong>
+      <pre style="font-size: 11px; background: var(--color-paper); padding: 10px 12px; border-radius: 6px; overflow-x: auto; margin-top: 8px;">### Warm-dark
+--bg-dark:        #2a241f  (warm brown-black, 종이)
+--paper-dark:     #342c25
+--ink-dark:       #f4eee5  (크림 화이트)
+--ink-soft-dark:  #c9bfb0
+--mute-dark:      #8a8073
+--line-dark:      rgba(244, 238, 229, 0.08)
+--accent:         #e07a5f  (unchanged, warm 톤이라 자연스러움)
+--accent-soft-dark: #4a3029</pre>
+      <ul>
+        <li>자동 전환: <span class="spec-key">prefers-color-scheme: dark</span></li>
+        <li>optional 19:00–06:00 KST 자동 활성 (v1.5)</li>
+        <li>모든 페이지 WCAG AA 대비 4.5:1 유지</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============================= -->
+  <!-- D-15 cursor -->
+  <!-- ============================= -->
+  <section id="d15" class="section">
+    <div class="section-head">
+      <div class="eyebrow">D-15 · Tier 3 · 0.5일</div>
+      <h1>커스텀 커서 & 폴라로이드 pin hover</h1>
+      <p class="lead">
+        데스크톱 공개 프로필 방문 시 특별한 게 없음. 모바일과 동일.
+        <b>커서 = 압정</b> + 폴라로이드 hover 시 <b>pin-drop 애니메이션</b>으로 데스크톱 한정 micro-delight.
+      </p>
+    </div>
+
+    <div class="cursor-demo">
+      <h3 style="font-family: var(--font-serif); margin-top: 0;">아래 영역에 마우스를 올려보세요</h3>
+      <p style="font-size: 12.5px; color: var(--color-mute); margin-bottom: 16px;">
+        데스크톱 환경 (pointer: fine) 에서만 작동. 모바일 영향 0.
+      </p>
+
+      <div class="cursor-zone">
+        <div>폴라로이드 위에 hover하면 "핀 박히는" 모션이 실행돼요</div>
+        <div class="hover-polaroid">
+          <div class="ph"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>작은 디테일 큰 임팩트</strong>
+      <ul>
+        <li>커서 SVG 20×20 압정 (테라코타 + 그림자)</li>
+        <li>hover 시 320ms pin-drop: rotate(-1.2°) 그대로 한 번 살짝 내려갔다가 rotate(0) translateY(-4px)로 "박히는" 느낌</li>
+        <li>미디어쿼리 <span class="spec-key">(pointer: fine) and (min-width: 1024px)</span>로만 활성</li>
+        <li>focus ring이 cursor보다 우선 (접근성)</li>
+        <li>공개 프로필 <span class="spec-key">/b/[slug]</span>에만 적용 (앱 내부는 건조함 유지)</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============================= -->
+  <!-- D-16 하단 네비 3-탭 -->
+  <!-- ============================= -->
+  <section id="d16" class="section">
+    <div class="section-head">
+      <div class="eyebrow">D-16 · Tier 1 · 1일 · 추가 요청</div>
+      <h1>하단 네비게이션 3-탭 재편</h1>
+      <p class="lead">
+        현재 <b>홈 / 마이페이지</b> 2탭 구조는 "홈이 캘린더인지 주간 피드인지" 불명확.
+        <b>주간 · 월간 · 내 정보</b> 3탭으로 분리해 두 가지 보기 방식을 탭 수준에서 노출합니다.
+      </p>
+      <div class="tag-row">
+        <span class="pill">정보 아키텍처</span>
+        <span class="pill">Discoverability</span>
+        <span class="pill">Tier 1</span>
+      </div>
+    </div>
+
+    <div class="compare">
+      <div>
+        <div class="col-label">Before — 2탭</div>
+        <div class="nav-preview">
+          <div class="nav-preview-hdr">홈 / 마이페이지</div>
+          <div class="bottom-nav">
+            <div class="active">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-9 9 9"/><path d="M5 10v11h14V10"/></svg>
+              <span>홈</span>
+            </div>
+            <div>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+              <span>마이페이지</span>
+            </div>
+          </div>
+        </div>
+        <p style="font-size: 12px; color: var(--color-mute); margin-top: 10px; text-align: center;">
+          "홈" 라벨이 무엇인지 모호. 월간/주간 전환 entry 없음.
+        </p>
+      </div>
+
+      <div>
+        <div class="col-label after">After — 3탭</div>
+        <div class="nav-preview">
+          <div class="nav-preview-hdr" style="color: var(--color-accent-brand);">주간 / 월간 / 내 정보</div>
+          <div class="bottom-nav three-tab">
+            <div class="active">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h3M8 18h3" stroke-width="2.2"/></svg>
+              <span>주간</span>
+            </div>
+            <div>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+              <span>월간</span>
+            </div>
+            <div>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+              <span>내 정보</span>
+            </div>
+          </div>
+        </div>
+        <p style="font-size: 12px; color: var(--color-accent-brand); margin-top: 10px; text-align: center;">
+          주간 = buddy card + 이번 주 타임라인 · 월간 = 캘린더 그리드
+        </p>
+      </div>
+    </div>
+
+    <h3 style="font-family: var(--font-serif); margin-top: 32px;">각 탭이 보여주는 것</h3>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 14px;">
+      <div>
+        <div class="col-label after">1. 주간 (기본)</div>
+        <div class="phone">
+          <div class="phone-body">
+            <div class="status-bar"><span>9:41</span><div class="dots"><span></span><span></span><span></span></div></div>
+            <div class="app-header">
+              <span class="logo" style="font-family: var(--font-serif);">buddy-note</span>
+              <span style="font-size: 11px; color: var(--color-mute); letter-spacing: 0.1em; text-transform: uppercase;">4월 22일</span>
+            </div>
+            <div class="buddy-card">
+              <div class="avatar-row">
+                <div class="avatar has-photo">마</div>
+                <div class="avatar-info">
+                  <div class="name">마루</div>
+                  <div class="mbti-row"><span>ENFP</span><span class="dot"></span><span>냄새 탐정</span></div>
+                </div>
+              </div>
+              <div class="greeting"><span class="quote">"</span>오늘 산책 갈래?<span class="quote">"</span></div>
+              <div class="stats"><b>234</b>일째 · 기록 <b>47</b>장</div>
+            </div>
+            <div class="callback-strip">
+              <div class="eyebrow">지난 이야기</div>
+              <div class="quote">1주일 전엔 비 와서 산책 못 갔는데…</div>
+            </div>
+            <div class="timeline" style="padding: 8px 16px 80px;">
+              <div class="day-row"><div class="day-date"><strong>19</strong>토</div><div class="thumb"><div class="ph"></div></div><div class="day-meta"><h3>공원의 토끼바람</h3><p>비가 올 줄 알았는데…</p></div></div>
+              <div class="day-row"><div class="day-date"><strong>17</strong>목</div><div class="thumb"><div class="ph" style="background: linear-gradient(135deg, #c4a57a, #6b4c2e);"></div></div><div class="day-meta"><h3>저녁 낮잠 습관</h3><p>요즘 저녁 6시쯤…</p></div></div>
+            </div>
+            <div class="bottom-nav three-tab">
+              <div class="active"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>주간</span></div>
+              <div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>월간</span></div>
+              <div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><span>내 정보</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="col-label after">2. 월간 (발자국 🐾 D-17)</div>
+        <div class="phone">
+          <div class="phone-body">
+            <div class="status-bar"><span>9:41</span><div class="dots"><span></span><span></span><span></span></div></div>
+            <div class="home-before" style="padding-bottom: 80px;">
+              <div class="eyebrow">month</div>
+              <h1 style="font-family: var(--font-serif); font-size: 22px; font-weight: 700;">2026년 4월</h1>
+              <div style="display: flex; justify-content: space-between; margin-top: 16px; align-items: center;">
+                <button style="background: transparent; border: 0; font-size: 13px; color: var(--color-ink-soft);">이전</button>
+                <span style="font-family: var(--font-serif); font-size: 15px; font-weight: 700;">4월</span>
+                <button style="background: transparent; border: 0; font-size: 13px; color: var(--color-ink-soft);">다음</button>
+              </div>
+              <div class="calendar-grid" style="margin-top: 14px;">
+                <div class="dow">일</div><div class="dow">월</div><div class="dow">화</div><div class="dow">수</div><div class="dow">목</div><div class="dow">금</div><div class="dow">토</div>
+                <div class="cell out">29</div><div class="cell out">30</div><div class="cell out">31</div>
+                <div class="cell">1</div>
+                <div class="cell paw-cell">2<span class="paw-marker" style="margin-top: 1px;"><svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><ellipse cx="6.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(-25 6.5 9.5)"/><ellipse cx="10" cy="6" rx="1.7" ry="2.4" transform="rotate(-8 10 6)"/><ellipse cx="14" cy="6" rx="1.7" ry="2.4" transform="rotate(8 14 6)"/><ellipse cx="17.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(25 17.5 9.5)"/><path d="M12 11.5c-3.6 0-5.5 2.6-5 5.5.4 2.7 2.3 4 5 4s4.6-1.3 5-4c.5-2.9-1.4-5.5-5-5.5z"/></svg></span></div>
+                <div class="cell">3</div><div class="cell">4</div>
+                <div class="cell paw-cell">5<span class="paw-marker mood-tired"><svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><ellipse cx="6.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(-25 6.5 9.5)"/><ellipse cx="10" cy="6" rx="1.7" ry="2.4" transform="rotate(-8 10 6)"/><ellipse cx="14" cy="6" rx="1.7" ry="2.4" transform="rotate(8 14 6)"/><ellipse cx="17.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(25 17.5 9.5)"/><path d="M12 11.5c-3.6 0-5.5 2.6-5 5.5.4 2.7 2.3 4 5 4s4.6-1.3 5-4c.5-2.9-1.4-5.5-5-5.5z"/></svg></span></div>
+                <div class="cell">6</div>
+                <div class="cell paw-cell">7<span class="paw-marker mood-bright"><svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><ellipse cx="6.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(-25 6.5 9.5)"/><ellipse cx="10" cy="6" rx="1.7" ry="2.4" transform="rotate(-8 10 6)"/><ellipse cx="14" cy="6" rx="1.7" ry="2.4" transform="rotate(8 14 6)"/><ellipse cx="17.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(25 17.5 9.5)"/><path d="M12 11.5c-3.6 0-5.5 2.6-5 5.5.4 2.7 2.3 4 5 4s4.6-1.3 5-4c.5-2.9-1.4-5.5-5-5.5z"/></svg></span></div>
+                <div class="cell">8</div><div class="cell">9</div>
+                <div class="cell paw-cell">10<span class="paw-marker mood-calm"><svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><ellipse cx="6.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(-25 6.5 9.5)"/><ellipse cx="10" cy="6" rx="1.7" ry="2.4" transform="rotate(-8 10 6)"/><ellipse cx="14" cy="6" rx="1.7" ry="2.4" transform="rotate(8 14 6)"/><ellipse cx="17.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(25 17.5 9.5)"/><path d="M12 11.5c-3.6 0-5.5 2.6-5 5.5.4 2.7 2.3 4 5 4s4.6-1.3 5-4c.5-2.9-1.4-5.5-5-5.5z"/></svg></span></div>
+                <div class="cell">11</div>
+                <div class="cell">12</div>
+                <div class="cell paw-cell">13<span class="paw-marker mood-curious"><svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><ellipse cx="6.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(-25 6.5 9.5)"/><ellipse cx="10" cy="6" rx="1.7" ry="2.4" transform="rotate(-8 10 6)"/><ellipse cx="14" cy="6" rx="1.7" ry="2.4" transform="rotate(8 14 6)"/><ellipse cx="17.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(25 17.5 9.5)"/><path d="M12 11.5c-3.6 0-5.5 2.6-5 5.5.4 2.7 2.3 4 5 4s4.6-1.3 5-4c.5-2.9-1.4-5.5-5-5.5z"/></svg></span></div>
+                <div class="cell">14</div>
+                <div class="cell paw-cell">15<span class="paw-marker mood-bright"><svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><ellipse cx="6.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(-25 6.5 9.5)"/><ellipse cx="10" cy="6" rx="1.7" ry="2.4" transform="rotate(-8 10 6)"/><ellipse cx="14" cy="6" rx="1.7" ry="2.4" transform="rotate(8 14 6)"/><ellipse cx="17.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(25 17.5 9.5)"/><path d="M12 11.5c-3.6 0-5.5 2.6-5 5.5.4 2.7 2.3 4 5 4s4.6-1.3 5-4c.5-2.9-1.4-5.5-5-5.5z"/></svg></span></div>
+                <div class="cell">16</div>
+                <div class="cell paw-cell">17<span class="paw-marker mood-calm"><svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><ellipse cx="6.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(-25 6.5 9.5)"/><ellipse cx="10" cy="6" rx="1.7" ry="2.4" transform="rotate(-8 10 6)"/><ellipse cx="14" cy="6" rx="1.7" ry="2.4" transform="rotate(8 14 6)"/><ellipse cx="17.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(25 17.5 9.5)"/><path d="M12 11.5c-3.6 0-5.5 2.6-5 5.5.4 2.7 2.3 4 5 4s4.6-1.3 5-4c.5-2.9-1.4-5.5-5-5.5z"/></svg></span></div>
+                <div class="cell">18</div>
+                <div class="cell paw-cell">19<span class="paw-marker mood-curious"><svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><ellipse cx="6.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(-25 6.5 9.5)"/><ellipse cx="10" cy="6" rx="1.7" ry="2.4" transform="rotate(-8 10 6)"/><ellipse cx="14" cy="6" rx="1.7" ry="2.4" transform="rotate(8 14 6)"/><ellipse cx="17.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(25 17.5 9.5)"/><path d="M12 11.5c-3.6 0-5.5 2.6-5 5.5.4 2.7 2.3 4 5 4s4.6-1.3 5-4c.5-2.9-1.4-5.5-5-5.5z"/></svg></span></div>
+                <div class="cell">20</div><div class="cell">21</div>
+                <div class="cell today paw-cell">22<span class="paw-marker today"><svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><ellipse cx="6.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(-25 6.5 9.5)"/><ellipse cx="10" cy="6" rx="1.7" ry="2.4" transform="rotate(-8 10 6)"/><ellipse cx="14" cy="6" rx="1.7" ry="2.4" transform="rotate(8 14 6)"/><ellipse cx="17.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(25 17.5 9.5)"/><path d="M12 11.5c-3.6 0-5.5 2.6-5 5.5.4 2.7 2.3 4 5 4s4.6-1.3 5-4c.5-2.9-1.4-5.5-5-5.5z"/></svg></span></div>
+                <div class="cell future">23</div><div class="cell future">24</div><div class="cell future">25</div>
+                <div class="cell future">26</div><div class="cell future">27</div><div class="cell future">28</div><div class="cell future">29</div><div class="cell future">30</div><div class="cell out future">1</div><div class="cell out future">2</div>
+              </div>
+            </div>
+            <div class="bottom-nav three-tab">
+              <div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>주간</span></div>
+              <div class="active"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>월간</span></div>
+              <div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><span>내 정보</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="col-label after">3. 내 정보</div>
+        <div class="phone">
+          <div class="phone-body">
+            <div class="status-bar"><span>9:41</span><div class="dots"><span></span><span></span><span></span></div></div>
+            <div style="padding: 20px 16px; text-align: center;">
+              <div class="avatar has-photo" style="width: 90px; height: 90px; font-size: 32px; margin: 0 auto 14px;">마</div>
+              <h2 style="font-family: var(--font-serif); font-size: 24px; margin: 0 0 4px; font-weight: 700;">마루</h2>
+              <p style="font-size: 12px; color: var(--color-mute); font-family: ui-monospace, monospace; margin: 0 0 6px;">@maru-2025</p>
+              <p style="font-size: 12px; color: var(--color-accent-brand); margin: 0 0 18px;">푸들 · ENFP · 냄새 탐정</p>
+            </div>
+            <nav style="border-top: 1px solid var(--color-line);">
+              <div style="padding: 16px 20px; border-bottom: 1px solid var(--color-line); display: flex; justify-content: space-between; font-size: 14px;">버디 정보 수정<span style="color: var(--color-accent-brand);">›</span></div>
+              <div style="padding: 16px 20px; border-bottom: 1px solid var(--color-line); display: flex; justify-content: space-between; font-size: 14px;">성격 다시 답하기<span style="color: var(--color-accent-brand);">›</span></div>
+              <div style="padding: 16px 20px; border-bottom: 1px solid var(--color-line); display: flex; justify-content: space-between; font-size: 14px;">공개 프로필 설정<span style="color: var(--color-mute); font-size: 12px;">공개중</span></div>
+              <div style="padding: 16px 20px; border-bottom: 1px solid var(--color-line); display: flex; justify-content: space-between; font-size: 14px;">반려인 호칭 수정<span style="color: var(--color-accent-brand);">›</span></div>
+              <div style="padding: 16px 20px; border-bottom: 1px solid var(--color-line); display: flex; justify-content: space-between; font-size: 14px; color: var(--color-error);">계정 탈퇴<span style="color: var(--color-error);">›</span></div>
+            </nav>
+            <div class="bottom-nav three-tab">
+              <div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>주간</span></div>
+              <div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>월간</span></div>
+              <div class="active"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><span>내 정보</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>라우팅 구조 변경</strong>
+      <ul>
+        <li><span class="spec-key">/</span> = 주간 뷰 (buddy card + 이번 주 타임라인). D-1/D-7/D-11 통합 컨테이너</li>
+        <li><b>신규</b> <span class="spec-key">app/month/page.tsx</span> = 월간 캘린더 (발자국 마커 D-17 연결)</li>
+        <li><span class="spec-key">/pet</span> = 내 정보 (기존 마이페이지 그대로)</li>
+        <li><span class="spec-key">components/layout/bottom-nav.tsx</span> grid-cols-2 → grid-cols-3, HIDDEN_PREFIXES는 <span class="spec-key">['/auth', '/onboarding', '/b/']</span> 유지</li>
+        <li>Active 탭: stroke-width 2.2px, 색 <span class="spec-key">accent-brand</span> · Inactive: 1.8px, <span class="spec-key">mute</span></li>
+        <li><b>FAB (+) 제외</b> — v1은 캘린더 셀 탭 / 주간 CTA 로 기록 진입 (double entry 혼선 방지)</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============================= -->
+  <!-- D-17 발자국 마커 -->
+  <!-- ============================= -->
+  <section id="d17" class="section">
+    <div class="section-head">
+      <div class="eyebrow">D-17 · Tier 1 · 0.5일 · 추가 요청</div>
+      <h1>캘린더 기록 마커 → 강아지 발자국</h1>
+      <p class="lead">
+        월간 캘린더의 기록 표시 점(6px) → <b>강아지 발자국 SVG</b>. 브랜드 정체성(강아지 = 주인공)을 캘린더에까지 확장.
+        D-10 mood palette와 연동되면 월별 감정이 <b>발자국 색깔의 흐름</b>으로 한눈에 보임.
+      </p>
+    </div>
+
+    <div class="compare">
+      <div>
+        <div class="col-label">Before — 6px 점</div>
+        <div style="background: #fff; border: 1px solid var(--color-line); border-radius: 12px; padding: 40px; text-align: center;">
+          <div style="display: inline-flex; gap: 20px; margin-bottom: 24px;">
+            <div style="width: 44px; height: 44px; border: 1px solid var(--color-line); border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 13px; gap: 3px;">
+              15
+              <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--color-accent-brand);"></span>
+            </div>
+            <div style="width: 44px; height: 44px; border: 1px solid var(--color-line); border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 13px; gap: 3px; box-shadow: inset 0 0 0 1px var(--color-accent-brand);">
+              22
+              <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--color-accent-brand);"></span>
+            </div>
+          </div>
+          <p style="font-size: 12px; color: var(--color-mute); margin: 0;">의미 없는 점. 강아지 서비스의 생명감 부재.</p>
+        </div>
+      </div>
+
+      <div>
+        <div class="col-label after">After — 강아지 발자국</div>
+        <div style="background: #fff; border: 1px solid var(--color-line); border-radius: 12px; padding: 40px; text-align: center;">
+          <div style="display: inline-flex; gap: 20px; margin-bottom: 24px;">
+            <div style="width: 44px; height: 44px; border: 1px solid var(--color-line); border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 13px; gap: 3px;">
+              15
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--color-accent-brand)"><ellipse cx="6.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(-25 6.5 9.5)"/><ellipse cx="10" cy="6" rx="1.7" ry="2.4" transform="rotate(-8 10 6)"/><ellipse cx="14" cy="6" rx="1.7" ry="2.4" transform="rotate(8 14 6)"/><ellipse cx="17.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(25 17.5 9.5)"/><path d="M12 11.5c-3.6 0-5.5 2.6-5 5.5.4 2.7 2.3 4 5 4s4.6-1.3 5-4c.5-2.9-1.4-5.5-5-5.5z"/></svg>
+            </div>
+            <div style="width: 44px; height: 44px; border: 1px solid var(--color-line); border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 13px; gap: 3px; box-shadow: inset 0 0 0 1px var(--color-accent-brand);">
+              22
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--color-accent-brand)" style="transform: scale(1.1);"><ellipse cx="6.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(-25 6.5 9.5)"/><ellipse cx="10" cy="6" rx="1.7" ry="2.4" transform="rotate(-8 10 6)"/><ellipse cx="14" cy="6" rx="1.7" ry="2.4" transform="rotate(8 14 6)"/><ellipse cx="17.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(25 17.5 9.5)"/><path d="M12 11.5c-3.6 0-5.5 2.6-5 5.5.4 2.7 2.3 4 5 4s4.6-1.3 5-4c.5-2.9-1.4-5.5-5-5.5z"/></svg>
+            </div>
+          </div>
+          <p style="font-size: 12px; color: var(--color-accent-brand); margin: 0;">강아지가 그 날 다녀간 자국.</p>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="font-family: var(--font-serif); margin-top: 32px;">SVG 스펙 · 6 mood 색상</h3>
+    <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; margin-top: 14px;">
+      <div style="background: #fff; border: 1px solid var(--color-line); border-radius: 10px; padding: 20px; text-align: center;">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="var(--mood-bright)"><ellipse cx="6.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(-25 6.5 9.5)"/><ellipse cx="10" cy="6" rx="1.7" ry="2.4" transform="rotate(-8 10 6)"/><ellipse cx="14" cy="6" rx="1.7" ry="2.4" transform="rotate(8 14 6)"/><ellipse cx="17.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(25 17.5 9.5)"/><path d="M12 11.5c-3.6 0-5.5 2.6-5 5.5.4 2.7 2.3 4 5 4s4.6-1.3 5-4c.5-2.9-1.4-5.5-5-5.5z"/></svg>
+        <div style="font-size: 11px; font-weight: 600; margin-top: 6px;">bright</div>
+      </div>
+      <div style="background: #fff; border: 1px solid var(--color-line); border-radius: 10px; padding: 20px; text-align: center;">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="var(--mood-calm)"><ellipse cx="6.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(-25 6.5 9.5)"/><ellipse cx="10" cy="6" rx="1.7" ry="2.4" transform="rotate(-8 10 6)"/><ellipse cx="14" cy="6" rx="1.7" ry="2.4" transform="rotate(8 14 6)"/><ellipse cx="17.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(25 17.5 9.5)"/><path d="M12 11.5c-3.6 0-5.5 2.6-5 5.5.4 2.7 2.3 4 5 4s4.6-1.3 5-4c.5-2.9-1.4-5.5-5-5.5z"/></svg>
+        <div style="font-size: 11px; font-weight: 600; margin-top: 6px;">calm</div>
+      </div>
+      <div style="background: #fff; border: 1px solid var(--color-line); border-radius: 10px; padding: 20px; text-align: center;">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="var(--mood-tired)"><ellipse cx="6.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(-25 6.5 9.5)"/><ellipse cx="10" cy="6" rx="1.7" ry="2.4" transform="rotate(-8 10 6)"/><ellipse cx="14" cy="6" rx="1.7" ry="2.4" transform="rotate(8 14 6)"/><ellipse cx="17.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(25 17.5 9.5)"/><path d="M12 11.5c-3.6 0-5.5 2.6-5 5.5.4 2.7 2.3 4 5 4s4.6-1.3 5-4c.5-2.9-1.4-5.5-5-5.5z"/></svg>
+        <div style="font-size: 11px; font-weight: 600; margin-top: 6px;">tired</div>
+      </div>
+      <div style="background: #fff; border: 1px solid var(--color-line); border-radius: 10px; padding: 20px; text-align: center;">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="var(--mood-curious)"><ellipse cx="6.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(-25 6.5 9.5)"/><ellipse cx="10" cy="6" rx="1.7" ry="2.4" transform="rotate(-8 10 6)"/><ellipse cx="14" cy="6" rx="1.7" ry="2.4" transform="rotate(8 14 6)"/><ellipse cx="17.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(25 17.5 9.5)"/><path d="M12 11.5c-3.6 0-5.5 2.6-5 5.5.4 2.7 2.3 4 5 4s4.6-1.3 5-4c.5-2.9-1.4-5.5-5-5.5z"/></svg>
+        <div style="font-size: 11px; font-weight: 600; margin-top: 6px;">curious</div>
+      </div>
+      <div style="background: #fff; border: 1px solid var(--color-line); border-radius: 10px; padding: 20px; text-align: center;">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="var(--mood-grumpy)"><ellipse cx="6.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(-25 6.5 9.5)"/><ellipse cx="10" cy="6" rx="1.7" ry="2.4" transform="rotate(-8 10 6)"/><ellipse cx="14" cy="6" rx="1.7" ry="2.4" transform="rotate(8 14 6)"/><ellipse cx="17.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(25 17.5 9.5)"/><path d="M12 11.5c-3.6 0-5.5 2.6-5 5.5.4 2.7 2.3 4 5 4s4.6-1.3 5-4c.5-2.9-1.4-5.5-5-5.5z"/></svg>
+        <div style="font-size: 11px; font-weight: 600; margin-top: 6px;">grumpy</div>
+      </div>
+      <div style="background: #fff; border: 1px solid var(--color-line); border-radius: 10px; padding: 20px; text-align: center;">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="var(--mood-lonely)"><ellipse cx="6.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(-25 6.5 9.5)"/><ellipse cx="10" cy="6" rx="1.7" ry="2.4" transform="rotate(-8 10 6)"/><ellipse cx="14" cy="6" rx="1.7" ry="2.4" transform="rotate(8 14 6)"/><ellipse cx="17.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(25 17.5 9.5)"/><path d="M12 11.5c-3.6 0-5.5 2.6-5 5.5.4 2.7 2.3 4 5 4s4.6-1.3 5-4c.5-2.9-1.4-5.5-5-5.5z"/></svg>
+        <div style="font-size: 11px; font-weight: 600; margin-top: 6px;">lonely</div>
+      </div>
+    </div>
+
+    <h3 style="font-family: var(--font-serif); margin-top: 32px;">크기 별 사용</h3>
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-top: 14px;">
+      <div style="background: #fff; border: 1px solid var(--color-line); border-radius: 10px; padding: 24px; text-align: center;">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="var(--color-accent-brand)"><ellipse cx="6.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(-25 6.5 9.5)"/><ellipse cx="10" cy="6" rx="1.7" ry="2.4" transform="rotate(-8 10 6)"/><ellipse cx="14" cy="6" rx="1.7" ry="2.4" transform="rotate(8 14 6)"/><ellipse cx="17.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(25 17.5 9.5)"/><path d="M12 11.5c-3.6 0-5.5 2.6-5 5.5.4 2.7 2.3 4 5 4s4.6-1.3 5-4c.5-2.9-1.4-5.5-5-5.5z"/></svg>
+        <div style="font-size: 11px; font-weight: 600; margin-top: 6px;">12px</div>
+        <div style="font-size: 10.5px; color: var(--color-mute); margin-top: 2px;">타임라인 thumb</div>
+      </div>
+      <div style="background: #fff; border: 1px solid var(--color-line); border-radius: 10px; padding: 24px; text-align: center;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--color-accent-brand)"><ellipse cx="6.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(-25 6.5 9.5)"/><ellipse cx="10" cy="6" rx="1.7" ry="2.4" transform="rotate(-8 10 6)"/><ellipse cx="14" cy="6" rx="1.7" ry="2.4" transform="rotate(8 14 6)"/><ellipse cx="17.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(25 17.5 9.5)"/><path d="M12 11.5c-3.6 0-5.5 2.6-5 5.5.4 2.7 2.3 4 5 4s4.6-1.3 5-4c.5-2.9-1.4-5.5-5-5.5z"/></svg>
+        <div style="font-size: 11px; font-weight: 600; margin-top: 6px;">14px (기본)</div>
+        <div style="font-size: 10.5px; color: var(--color-mute); margin-top: 2px;">캘린더 셀</div>
+      </div>
+      <div style="background: #fff; border: 1px solid var(--color-line); border-radius: 10px; padding: 24px; text-align: center;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="var(--color-accent-brand)" style="opacity: 0.3;"><ellipse cx="6.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(-25 6.5 9.5)"/><ellipse cx="10" cy="6" rx="1.7" ry="2.4" transform="rotate(-8 10 6)"/><ellipse cx="14" cy="6" rx="1.7" ry="2.4" transform="rotate(8 14 6)"/><ellipse cx="17.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(25 17.5 9.5)"/><path d="M12 11.5c-3.6 0-5.5 2.6-5 5.5.4 2.7 2.3 4 5 4s4.6-1.3 5-4c.5-2.9-1.4-5.5-5-5.5z"/></svg>
+        <div style="font-size: 11px; font-weight: 600; margin-top: 6px;">20px / 30% opacity</div>
+        <div style="font-size: 10.5px; color: var(--color-mute); margin-top: 2px;">공개 프로필 footer</div>
+      </div>
+      <div style="background: #fff; border: 1px solid var(--color-line); border-radius: 10px; padding: 24px; text-align: center; position: relative;">
+        <div style="position: relative; width: 40px; height: 40px; margin: 0 auto;">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="var(--color-accent-brand)" style="position: absolute; top: 0; left: 0;"><ellipse cx="6.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(-25 6.5 9.5)"/><ellipse cx="10" cy="6" rx="1.7" ry="2.4" transform="rotate(-8 10 6)"/><ellipse cx="14" cy="6" rx="1.7" ry="2.4" transform="rotate(8 14 6)"/><ellipse cx="17.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(25 17.5 9.5)"/><path d="M12 11.5c-3.6 0-5.5 2.6-5 5.5.4 2.7 2.3 4 5 4s4.6-1.3 5-4c.5-2.9-1.4-5.5-5-5.5z"/></svg>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="var(--mood-curious)" style="position: absolute; bottom: -4px; right: -4px; opacity: 0.8;"><ellipse cx="6.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(-25 6.5 9.5)"/><ellipse cx="10" cy="6" rx="1.7" ry="2.4" transform="rotate(-8 10 6)"/><ellipse cx="14" cy="6" rx="1.7" ry="2.4" transform="rotate(8 14 6)"/><ellipse cx="17.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(25 17.5 9.5)"/><path d="M12 11.5c-3.6 0-5.5 2.6-5 5.5.4 2.7 2.3 4 5 4s4.6-1.3 5-4c.5-2.9-1.4-5.5-5-5.5z"/></svg>
+        </div>
+        <div style="font-size: 11px; font-weight: 600; margin-top: 6px;">Multi-entry (v1.5)</div>
+        <div style="font-size: 10.5px; color: var(--color-mute); margin-top: 2px;">하루 2+ 기록 시</div>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>구현 스펙</strong>
+      <pre style="font-size: 11px; background: var(--color-paper); padding: 12px 14px; border-radius: 6px; overflow-x: auto; margin-top: 8px;">// components/icons/paw-print.tsx
+export function PawPrint({ size = 14, className, ...props }) {
+  return (
+    &lt;svg width={size} height={size} viewBox="0 0 24 24"
+         fill="currentColor" aria-hidden="true"
+         className={className} {...props}&gt;
+      &lt;ellipse cx="6.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(-25 6.5 9.5)" /&gt;
+      &lt;ellipse cx="10" cy="6"   rx="1.7" ry="2.4" transform="rotate(-8 10 6)" /&gt;
+      &lt;ellipse cx="14" cy="6"   rx="1.7" ry="2.4" transform="rotate(8 14 6)" /&gt;
+      &lt;ellipse cx="17.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(25 17.5 9.5)" /&gt;
+      &lt;path d="M12 11.5c-3.6 0-5.5 2.6-5 5.5.4 2.7 2.3 4 5 4s4.6-1.3 5-4c.5-2.9-1.4-5.5-5-5.5z" /&gt;
+    &lt;/svg&gt;
+  )
+}</pre>
+      <ul>
+        <li><b>currentColor</b> — 부모에서 <span class="spec-key">text-[var(--mood-*)]</span> 지정 시 자동 테마</li>
+        <li>aria-hidden — 셀의 <span class="spec-key">aria-label</span> 에 "기록 있음" 유지 (scr reader 친화적)</li>
+        <li>오늘 셀 paw: scale(1.1) + accent color</li>
+        <li>다크 모드 (D-14) 자동 반전 — currentColor 상속</li>
+        <li>Storybook: 4 size × 6 mood = 24 variants</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============================= -->
+  <!-- D-18 온보딩 자유 기술 -->
+  <!-- ============================= -->
+  <section id="d18" class="section">
+    <div class="section-head">
+      <div class="eyebrow">D-18 · Tier 1 · 1일 · 추가 요청</div>
+      <h1>Onboarding 자유 기술 단계 (최대 200자)</h1>
+      <p class="lead">
+        MBTI 4문항 + 이름/견종/호칭만으로는 <b>개별성</b>이 부족. 같은 ENFP라도 <i>"산책 가면 집 앞 전봇대에 꼭 인사함"</i> 같은 디테일은 못 담음 — LLM 페르소나가 flat.
+        <b>확정 직전 1 step</b> 자유 기술 추가 → <span class="spec-key">persona_prompt_fragment</span>에 append되어 LLM 호출 품질이 즉시 올라갑니다.
+      </p>
+      <div class="tag-row">
+        <span class="pill">개별성 강화</span>
+        <span class="pill">LLM moat</span>
+        <span class="pill">TOTAL_STEPS 7 → 8</span>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; margin-top: 20px;">
+      <div>
+        <div class="col-label after">새 Step 6 — 자유 기술</div>
+        <div class="phone">
+          <div class="phone-body" style="padding: 16px;">
+            <!-- Progress bar -->
+            <div style="margin-bottom: 24px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="font-size: 11px; color: var(--color-mute); letter-spacing: 0.12em; text-transform: uppercase;">7 / 8</span>
+                <span style="font-size: 11px; color: var(--color-accent-brand); font-weight: 500;">거의 다 됐어요</span>
+              </div>
+              <div style="height: 3px; background: var(--color-line); border-radius: 2px; overflow: hidden;">
+                <div style="height: 100%; width: 87.5%; background: var(--color-accent-brand); border-radius: 2px;"></div>
+              </div>
+            </div>
+
+            <div class="free-desc-card">
+              <div class="eyebrow">마지막으로</div>
+              <h2>마루에 대해 더 알려줄래?</h2>
+              <p class="hint">
+                버디만의 습관이나 좋아하는 것, <br/>
+                어떻게 봐도 '얘다' 싶은 순간.<br/>
+                한두 줄이면 충분해.
+              </p>
+              <textarea placeholder="예) 산책 가면 집 앞 전봇대에 꼭 인사함.&#10;엄마랑 눈 맞추면 반드시 한 번 짖음." rows="5">집 앞 전봇대에 꼭 인사하고, 엄마가 퇴근 발소리 내면 3층 밑에서 알아채요. 간식 받을 때만 앉고, 평소엔 절대 앉지 않아요.</textarea>
+              <div class="char-counter">82 / 200</div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+              <button style="background: transparent; border: 0; color: var(--color-mute); font-size: 13px;">이전</button>
+              <div style="display: flex; gap: 10px; align-items: center;">
+                <button style="background: transparent; border: 0; color: var(--color-mute); font-size: 12px; text-decoration: underline; text-underline-offset: 4px;">건너뛰기</button>
+                <button style="background: var(--color-accent-brand); color: #fff; border: 0; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 600;">다음</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="col-label after">Step 7 — Confirm에 반영</div>
+        <div class="phone">
+          <div class="phone-body" style="padding: 16px;">
+            <div style="margin-bottom: 24px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="font-size: 11px; color: var(--color-mute); letter-spacing: 0.12em; text-transform: uppercase;">8 / 8</span>
+                <span style="font-size: 11px; color: var(--color-accent-brand); font-weight: 500;">마지막!</span>
+              </div>
+              <div style="height: 3px; background: var(--color-line); border-radius: 2px; overflow: hidden;">
+                <div style="height: 100%; width: 100%; background: var(--color-accent-brand); border-radius: 2px;"></div>
+              </div>
+            </div>
+
+            <div class="reveal-step" style="padding: 0; text-align: left;">
+              <div class="avatar-xl" style="width: 88px; height: 88px; font-size: 32px; margin: 0 auto 14px; animation: none;">마</div>
+              <div class="prefix" style="text-align: center; animation: none;">마루는</div>
+              <div class="code" style="font-size: 48px; text-align: center; animation: none;">ENFP</div>
+              <div class="label" style="text-align: center; margin-bottom: 16px; animation: none;">· 냄새 탐정 ·</div>
+
+              <div class="traits-card" style="animation: none;">
+                <h4>이런 친구야</h4>
+                <ul>
+                  <li>사람 많은 데 좋아함</li>
+                  <li>현재 순간 중심</li>
+                  <li>감정 교감 (~야/~어 말투)</li>
+                </ul>
+              </div>
+
+              <blockquote style="border-left: 2px solid var(--color-accent-brand); background: rgba(255, 250, 245, 0.8); padding: 12px 16px; font-family: var(--font-serif); font-size: 14px; line-height: 1.65; color: var(--color-ink); margin: 16px 0 0; border-radius: 0 6px 6px 0;">
+                <div style="font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-mute); margin-bottom: 6px; font-family: var(--font-sans);">보호자가 들려준 이야기</div>
+                집 앞 전봇대에 꼭 인사하고, 엄마가 퇴근 발소리 내면 3층 밑에서 알아채요.
+              </blockquote>
+
+              <button class="btn-primary" style="animation: none; margin-top: 20px;">저장할게요</button>
+              <button class="btn-ghost" style="animation: none;">다시 답할래요</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="font-family: var(--font-serif); margin-top: 32px;">글자 수 카운터 상태</h3>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 14px;">
+      <div style="background: #fff; border: 1px solid var(--color-line); border-radius: 10px; padding: 20px;">
+        <div style="height: 60px; background: var(--color-paper); border-radius: 8px; margin-bottom: 8px; padding: 12px; font-family: var(--font-serif); font-size: 13px; color: var(--color-ink);">집 앞 전봇대 인사…</div>
+        <div class="char-counter">82 / 200</div>
+        <p style="font-size: 11px; color: var(--color-mute); margin: 10px 0 0;">정상 — mute 색</p>
+      </div>
+      <div style="background: #fff; border: 1px solid var(--color-line); border-radius: 10px; padding: 20px;">
+        <div style="height: 60px; background: var(--color-paper); border-radius: 8px; margin-bottom: 8px; padding: 12px; font-family: var(--font-serif); font-size: 13px; color: var(--color-ink); overflow: hidden;">집 앞 전봇대 인사, 엄마 발소리 알아채기, 간식 받을 때만 앉음, 비 오면 현관 앞 쳐다보고 한숨…</div>
+        <div class="char-counter warn">172 / 200</div>
+        <p style="font-size: 11px; color: var(--color-warn); margin: 10px 0 0;">160자 초과 — warn 컬러</p>
+      </div>
+      <div style="background: #fff; border: 1px solid var(--color-line); border-radius: 10px; padding: 20px;">
+        <div style="height: 60px; background: var(--color-paper); border-radius: 8px; margin-bottom: 8px; padding: 12px; font-family: var(--font-serif); font-size: 13px; color: var(--color-ink); overflow: hidden;">긴 텍스트가 여기 들어가고 200자를 채우고 나면 더 이상 입력 불가…</div>
+        <div class="char-counter error">200 / 200</div>
+        <p style="font-size: 11px; color: var(--color-error); margin: 10px 0 0;">입력 block + "200자까지만 담을 수 있어." 토스트</p>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>Migration (forward-only)</strong>
+      <pre style="font-size: 11px; background: var(--color-paper); padding: 10px 12px; border-radius: 6px; overflow-x: auto; margin-top: 8px;">-- supabase/migrations/20260422_add_pet_additional_info.sql
+ALTER TABLE pets ADD COLUMN additional_info TEXT;
+ALTER TABLE pets ADD CONSTRAINT additional_info_length
+  CHECK (additional_info IS NULL OR char_length(additional_info) &lt;= 200);</pre>
+
+      <strong>LLM 프롬프트 주입</strong>
+      <pre style="font-size: 11px; background: var(--color-paper); padding: 10px 12px; border-radius: 6px; overflow-x: auto; margin-top: 8px;">// lib/pet-mbti.ts — buildPersonaPromptFragment
+let fragment = `나는 ${name}, ${breed} 강아지야. ...` // 기존
+if (additionalInfo?.trim()) {
+  fragment += ` / 보호자가 들려준 이야기: "${additionalInfo.trim()}"`
+}</pre>
+
+      <ul>
+        <li><b>TOTAL_STEPS</b> 7 → 8. Progress bar total 업데이트</li>
+        <li>Step 6 skip 가능 — 빈 값이면 <span class="spec-key">NULL</span> 저장</li>
+        <li>200자 validation: client (maxLength + onChange slice) + server (FormData parse + DB constraint)</li>
+        <li>Confirm step에 입력값 <b>blockquote preview</b> — "이렇게 들었어요"</li>
+        <li><span class="spec-key">/pet/edit</span>에서 수정 가능 (차후 티켓)</li>
+        <li>Placeholder 3-4개 랜덤 로테이션 (persona-aware)</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="footnote" style="max-width: 800px; margin-left: auto; margin-right: auto;">
+    buddy-note v0.2 UI/UX 개선 프리뷰 · 생성 2026-04-21 · 최종 수정 2026-04-22 (D-16/17/18 추가)<br/>
+    원본 로드맵은 <code>DESIGN_TODOS.md</code> 참조 · design system 변경 포함 티켓은 PR 제목에 <code>[design-system]</code> 필수
+  </div>
+
+  </main>
+
+  <script>
+    // Tab navigation
+    (function() {
+      const navLinks = document.querySelectorAll('.nav a');
+      const sections = document.querySelectorAll('.section');
+      function activate(targetId) {
+        navLinks.forEach(a => a.classList.toggle('active', a.dataset.target === targetId));
+        sections.forEach(s => s.classList.toggle('active', s.id === targetId));
+        window.scrollTo({ top: 0, behavior: 'auto' });
+        document.querySelector('.canvas').scrollTop = 0;
+        if (history.replaceState) history.replaceState(null, '', '#' + targetId);
+      }
+      navLinks.forEach(a => {
+        a.addEventListener('click', (e) => {
+          e.preventDefault();
+          const t = a.dataset.target;
+          if (t) activate(t);
+        });
+      });
+      // Deep-link support
+      const hash = (location.hash || '#overview').replace('#','');
+      if (document.getElementById(hash)) activate(hash);
+    })();
+
+    // Shutter replay
+    function replayShutter() {
+      const demo = document.getElementById('shutterDemo');
+      if (!demo) return;
+      const parent = demo.parentNode;
+      const next = demo.cloneNode(true);
+      parent.replaceChild(next, demo);
+    }
+  </script>
+</body>
+</html>
