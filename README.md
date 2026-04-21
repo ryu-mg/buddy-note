@@ -29,6 +29,7 @@ SNS에 반려동물 콘텐츠 올리는 한국 반려인.
 - **LLM**: Anthropic Claude Sonnet (multimodal), 프롬프트 인젝션 방어 + fallback 템플릿
 - **Image**: satori + @resvg/resvg-js (폴라로이드 SVG→PNG), sharp (서버 EXIF strip)
 - **Rate limit**: Upstash Redis sliding window
+- **Observability**: Sentry, Vercel Analytics, Speed Insights
 
 ## 셋업
 
@@ -66,6 +67,9 @@ bun run dev    # http://localhost:4000
 | `bun run gen:types` | Supabase 스키마 타입 재생성 |
 | `bunx tsc --noEmit` | 타입 체크 |
 
+현재 기준 품질 게이트는 `bun run lint`, `bunx tsc --noEmit`, `bun run test`
+155 pass, `bun run build` 통과 상태다.
+
 ### 타입 재생성
 
 Supabase 스키마가 바뀌면 `types/database.generated.ts`를 재생성:
@@ -89,6 +93,7 @@ SUPABASE_PROJECT_REF=xxxx bun run gen:types
 - `/auth/login` — 이메일 매직링크 + 카카오
 - `/onboarding` — 5문항 MBTI 온보딩
 - `/log` — 사진 업로드 + AI 일기 생성
+- `/logs` — 월별 기록 히스토리 (예정)
 - `/diary/[id]` — 결과 뷰 + 공유 모달
 - `/b/[slug]` — 공개 프로필 (ISR 24h, OG 메타)
 - `/pet` — 프로필 편집 + 탈퇴
@@ -116,12 +121,16 @@ types/           # database.ts
 - [rules/code-conventions.md](./rules/code-conventions.md) — 코드 스타일, AI 작업 규칙
 - [DESIGN.md](./DESIGN.md) — 폴라로이드 비주얼 시스템
 - [TODOS.md](./TODOS.md) — deferred items + 유저 action items
+- [AGENTS_TODOS.md](./AGENTS_TODOS.md) — AI 잔여 코드 작업 실행 플랜
+- [CHANGELOG.md](./CHANGELOG.md) — v0.1 pre-release 변경 이력
 
 ## 현재 상태 (v1 진행률)
 
 - ✅ 인증, 온보딩, /log, /diary, /, /b/[slug], pet 편집/탈퇴
 - ✅ 메모리 파이프라인 (pg_cron + 워커 API)
 - ✅ Rate limit, 프롬프트 인젝션 방어, 에러 경계, PWA manifest
+- ✅ GitHub Actions CI, Dependabot, Sentry, Vercel Analytics, Speed Insights
+- ✅ Supabase 타입 생성 래퍼 (`bun run gen:types`) + 테스트 155 pass
 - ⏳ Kakao 비즈앱 승인 대기 (C1)
 - ⏳ Supabase 프로젝트 생성 + migration apply (C2)
 - ⏳ LLM A/B 벤치마크 (C5)
