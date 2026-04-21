@@ -5,6 +5,15 @@ Format: Priority (P1/P2/P3) + Effort (S/M/L/XL, 인간 teams / CC+gstack compres
 
 ---
 
+## 지금 TODO
+
+- [ ] 글씨 폰트 설정
+- [ ] Claude API 키 설정
+- [ ] 디자인 개선
+- [ ] 버디/반려인 뒤에 오는 조사 맞게 처리
+
+---
+
 ## 🟠 당신(bao)이 할 일 — Week 0 Critical Path
 
 > 내(Claude)가 코드는 병렬로 만들어놨고, 이 항목들은 **당신만 할 수 있는 일**. 하나씩 처리하고 알려주면 다음 단계 이어감.
