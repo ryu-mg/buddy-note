@@ -24,7 +24,7 @@ export function RelationshipForm({
           {trimmedName}과는 어떤 사이인가요?
         </h1>
         <p className="mt-1.5 text-[14px] text-[var(--ink-soft,#3f3f3f)]">
-          일기에서 반려인을 부르는 말로 쓸게요.
+          버디노트에서 반려인을 부르는 말로 쓸게요.
         </p>
 
         <div className="mt-6 flex flex-col gap-4">
@@ -46,7 +46,7 @@ export function RelationshipForm({
               value={value}
               onChange={(e) => onChange(e.target.value)}
               placeholder="예) 누나"
-              className="w-full rounded-[8px] border border-[var(--line,#e5e7eb)] bg-white px-3 py-2.5 text-[15px] text-[var(--ink,#1a1a1a)] placeholder:text-zinc-400 focus:border-[var(--accent,#e07a5f)] focus:outline-none focus:ring-2 focus:ring-[var(--accent,#e07a5f)]/30"
+              className="w-full rounded-[8px] border border-[var(--line,#e5e7eb)] bg-white px-3 py-2.5 text-[15px] text-[var(--color-ink-soft)] placeholder:text-[var(--color-mute)]/60 focus:border-[var(--accent,#e07a5f)] focus:outline-none focus:ring-2 focus:ring-[var(--accent,#e07a5f)]/30"
             />
           </div>
 

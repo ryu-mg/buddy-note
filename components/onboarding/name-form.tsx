@@ -82,17 +82,14 @@ export function NameForm({
                   className="size-full object-cover"
                 />
               ) : (
-                <span aria-hidden className="relative block size-16">
-                  <span className="absolute left-1/2 top-1 block size-7 -translate-x-1/2 rounded-full bg-[var(--color-line)]" />
-                  <span className="absolute bottom-1 left-1/2 block h-8 w-14 -translate-x-1/2 rounded-t-full bg-[var(--color-line)]" />
-                </span>
+                <RetrieverPlaceholder />
               )}
             </div>
             <label
               htmlFor="pet-profile-photo"
               className="inline-flex min-h-10 cursor-pointer items-center justify-center rounded-[var(--radius-button)] border border-[var(--color-line)] bg-white px-4 text-[13px] font-medium text-[var(--color-ink)] transition-colors hover:bg-[var(--color-bg)]"
             >
-              대표 사진 선택
+              버디 사진 선택하기
             </label>
             <input
               id="pet-profile-photo"
@@ -131,7 +128,7 @@ export function NameForm({
               value={value.name}
               onChange={(e) => set('name', e.target.value)}
               placeholder="예) 마루"
-              className="w-full rounded-[8px] border border-[var(--line,#e5e7eb)] bg-white px-3 py-2.5 text-[15px] text-[var(--ink,#1a1a1a)] placeholder:text-zinc-400 focus:border-[var(--accent,#e07a5f)] focus:outline-none focus:ring-2 focus:ring-[var(--accent,#e07a5f)]/30"
+              className="w-full rounded-[8px] border border-[var(--line,#e5e7eb)] bg-white px-3 py-2.5 text-[15px] text-[var(--color-ink-soft)] placeholder:text-[var(--color-mute)]/60 focus:border-[var(--accent,#e07a5f)] focus:outline-none focus:ring-2 focus:ring-[var(--accent,#e07a5f)]/30"
             />
           </div>
 
@@ -152,7 +149,7 @@ export function NameForm({
               value={value.breed}
               onChange={(e) => set('breed', e.target.value)}
               placeholder="예) 푸들"
-              className="w-full rounded-[8px] border border-[var(--line,#e5e7eb)] bg-white px-3 py-2.5 text-[15px] text-[var(--ink,#1a1a1a)] placeholder:text-zinc-400 focus:border-[var(--accent,#e07a5f)] focus:outline-none focus:ring-2 focus:ring-[var(--accent,#e07a5f)]/30"
+              className="w-full rounded-[8px] border border-[var(--line,#e5e7eb)] bg-white px-3 py-2.5 text-[15px] text-[var(--color-ink-soft)] placeholder:text-[var(--color-mute)]/60 focus:border-[var(--accent,#e07a5f)] focus:outline-none focus:ring-2 focus:ring-[var(--accent,#e07a5f)]/30"
             />
           </div>
 
@@ -168,6 +165,42 @@ export function NameForm({
         </div>
       </article>
     </section>
+  )
+}
+
+function RetrieverPlaceholder() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 96 96"
+      className="size-20 text-[var(--color-line)]"
+      fill="none"
+    >
+      <path
+        d="M21 44c0-16 11-28 27-28s27 12 27 28v10c0 18-11 30-27 30S21 72 21 54V44Z"
+        fill="currentColor"
+      />
+      <path
+        d="M23 45c-8-7-11-19-5-25 9 2 16 9 19 18M73 45c8-7 11-19 5-25-9 2-16 9-19 18"
+        fill="currentColor"
+      />
+      <path
+        d="M34 54c4 0 7-3 7-7M62 54c-4 0-7-3-7-7"
+        stroke="var(--color-bg)"
+        strokeWidth="4"
+        strokeLinecap="round"
+      />
+      <path
+        d="M48 58c-5 0-9 3-9 8 0 4 4 7 9 7s9-3 9-7c0-5-4-8-9-8Z"
+        fill="var(--color-bg)"
+      />
+      <path
+        d="M44 64h8M48 64v5"
+        stroke="currentColor"
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+    </svg>
   )
 }
 

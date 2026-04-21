@@ -18,16 +18,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="space-y-5">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-bold text-[var(--color-ink)]">
-          카카오로 시작할게요
-        </h1>
-        <p className="text-sm leading-[1.6] text-[var(--color-mute)]">
-          buddy-note는 MVP에서 카카오 로그인만 지원해요.
-        </p>
-      </div>
-
+    <div>
       <KakaoButton />
     </div>
   )
