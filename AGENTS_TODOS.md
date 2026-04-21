@@ -49,6 +49,8 @@
 
 ## B-1. Vercel Analytics + Speed Insights wire
 
+**Status**: 완료 — `@vercel/analytics`, `@vercel/speed-insights` 설치 + `app/layout.tsx` 마운트
+
 ### Why
 Vercel 배포 후 페이지뷰 + Core Web Vitals(LCP, INP, CLS)를 자동 수집. dev/preview 에서는 no-op 으로 동작하므로 프로덕션 외 환경에 영향 없음.
 
@@ -105,6 +107,8 @@ chore: Vercel Analytics + Speed Insights 마운트
 ---
 
 ## B-2. `scripts/gen-types.sh` — Supabase 타입 자동생성 래퍼
+
+**Status**: 완료 — `scripts/gen-types.sh`, `types/database.generated.ts`, `bun run gen:types`, README 사용법 추가
 
 ### Why
 현재 `types/database.ts` 는 손으로 유지 중이라 스키마 evolve 시 drift 위험. 새 migration 추가 후 한 방에 싱크. **단, 도메인 shape (RecentCallback, LogTag 등) 과 충돌 방지를 위해 생성물을 별도 파일로 분리**.
@@ -219,6 +223,8 @@ chore: scripts/gen-types.sh — Supabase 타입 자동생성 래퍼
 ---
 
 ## B-3. 단위 테스트 확장 (sanitize / schemas / rate-limit)
+
+**Status**: 완료 — `sanitize`, `schemas`, `rate-limit-core` 테스트 추가, 155 pass
 
 ### Why
 현재 120 pass → 목표 150+ pass. 보안(`sanitize`) · LLM 경계(`schemas`) · 유저 쿼터(`rate-limit`) 는 회귀 시 조용히 뚫리는 영역.

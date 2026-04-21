@@ -57,8 +57,8 @@ function buildPhases(petName: string): readonly [PhaseContent, PhaseContent, Pha
 }
 
 export function PhaseCopy({ petName, onCancel, startedAt }: Props) {
-  const anchorAt = useMemo(() => startedAt ?? Date.now(), [startedAt])
-  const [elapsed, setElapsed] = useState(() => Math.max(0, Date.now() - anchorAt))
+  const [anchorAt] = useState(() => startedAt ?? Date.now())
+  const [elapsed, setElapsed] = useState(0)
 
   // 500ms tick — phase 전환 + reassurance 트리거. unmount 시 cleanup.
   useEffect(() => {

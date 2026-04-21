@@ -61,9 +61,27 @@ bun run dev    # http://localhost:4000
 | `bun run dev` | 개발 서버 (4000 포트, Turbopack) |
 | `bun run build` | 프로덕션 빌드 |
 | `bun run lint` | ESLint |
-| `bun test` | 유닛 테스트 (bun 내장) |
+| `bun run test` | 유닛 테스트 (`lib/` 한정, Bun 내장) |
 | `bun run test:e2e` | Playwright E2E (dev 서버 + Supabase env 필요) |
+| `bun run gen:types` | Supabase 스키마 타입 재생성 |
 | `bunx tsc --noEmit` | 타입 체크 |
+
+### 타입 재생성
+
+Supabase 스키마가 바뀌면 `types/database.generated.ts`를 재생성:
+
+```bash
+# 로컬 Supabase 사용 중일 때
+supabase start
+bun run gen:types
+
+# 원격 프로젝트에서 생성할 때
+SUPABASE_PROJECT_REF=xxxx bun run gen:types
+```
+
+`types/database.ts`는 hand-written 도메인 타입(`RecentCallback`, `LogTag` 등)을
+유지한다. Supabase CLI 생성물은 `types/database.generated.ts`로 분리되어 있으니
+두 파일을 합치지 말 것.
 
 ## 주요 라우트
 

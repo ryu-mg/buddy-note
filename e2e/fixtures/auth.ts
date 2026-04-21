@@ -33,7 +33,7 @@ type Fixtures = {
 }
 
 export const test = base.extend<Fixtures>({
-  authenticatedUser: async ({ page: _page }, use, testInfo) => {
+  authenticatedUser: async ({}, fixtureUse, testInfo) => {
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 
@@ -43,7 +43,7 @@ export const test = base.extend<Fixtures>({
         'authenticatedUser fixture 가 구현되지 않았거나 SUPABASE_SERVICE_ROLE_KEY / NEXT_PUBLIC_SUPABASE_URL 이 설정되지 않았어요. e2e/fixtures/auth.ts 의 TODO 참고.',
       )
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await use(undefined as any)
+      await fixtureUse(undefined as any)
       return
     }
 
@@ -51,10 +51,10 @@ export const test = base.extend<Fixtures>({
     // 실행되지 않는다. C2 이후 아래 블록을 채운다.
     testInfo.skip(true, 'authenticatedUser 실 구현 대기 중 (C2 이후).')
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await use(undefined as any)
+    await fixtureUse(undefined as any)
   },
 
-  freshUser: async ({ page: _page }, use, testInfo) => {
+  freshUser: async ({}, fixtureUse, testInfo) => {
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
     if (!serviceKey) {
       testInfo.skip(
@@ -62,13 +62,13 @@ export const test = base.extend<Fixtures>({
         'freshUser fixture 는 SUPABASE_SERVICE_ROLE_KEY 가 필요해요. C2 이후 활성화.',
       )
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await use(undefined as any)
+      await fixtureUse(undefined as any)
       return
     }
 
     testInfo.skip(true, 'freshUser 실 구현 대기 중 (C2 이후).')
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await use(undefined as any)
+    await fixtureUse(undefined as any)
   },
 })
 
