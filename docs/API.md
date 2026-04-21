@@ -273,7 +273,8 @@ Important side effects:
 - Calls LLM diary generator with fallback behavior.
 - Renders and uploads public share images to `diary-images`.
 - Inserts into `diaries`.
-- `logs` insert triggers `memory_update_queue` enqueue.
+- `diaries` insert triggers `memory_update_queue` enqueue after the diary row exists.
+- Revalidates `/`, `/logs`, and the public `/b/{slug}` page when the pet is public.
 
 ### Pet and visibility actions
 

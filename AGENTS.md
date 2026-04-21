@@ -93,7 +93,7 @@
   │   - satori render    │          │  - Storage (photos/diary)    │
   └──────────┬───────────┘          │  - Edge Functions (async)    │
              │                       └─────────────┬────────────────┘
-             ▼                                     │ trigger (logs)
+             ▼                                     │ trigger (diaries)
   ┌──────────────────────┐          ┌──────────────▼──────────────┐
   │  Claude Sonnet 4.6   │          │  memory_update_queue          │
   │  (multimodal)        │◀─────────│  + pg_cron worker             │
@@ -141,7 +141,7 @@ RLS 전수. `pets.is_public=true`일 때만 anon이 `diaries` 읽기 가능 (`lo
 1. 사진 업로드 → Supabase Storage `photos` bucket (EXIF strip — client Canvas + server sharp 이중)
 2. Claude Sonnet 4.6에 **한 번의 통합 호출** (사진 분석 + 태그 추천 + diary 생성 + title)
 3. 결과 → `diaries` insert (service role) + satori 3포맷 렌더 → `diary-images` bucket
-4. `logs` AFTER INSERT trigger → `memory_update_queue` enqueue (비동기)
+4. `diaries` AFTER INSERT trigger → `memory_update_queue` enqueue (비동기)
 5. pg_cron worker가 per-pet advisory lock 잡고 memory_summary 업데이트 (optimistic lock version)
 6. 실패 시 fallback template diary (`diaries.is_fallback=true`) + 재시도 쿨다운 UI
 

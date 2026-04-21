@@ -18,6 +18,14 @@ export const openApiDocument = {
   ],
   tags: [
     {
+      name: 'Docs',
+      description: 'Interactive API documentation.',
+    },
+    {
+      name: 'Auth',
+      description: 'Supabase auth redirect helpers.',
+    },
+    {
       name: 'Public',
       description: 'Public read surfaces.',
     },
@@ -27,6 +35,89 @@ export const openApiDocument = {
     },
   ],
   paths: {
+    '/api-docs': {
+      get: {
+        tags: ['Docs'],
+        summary: 'Swagger UI',
+        description: 'Returns the interactive Swagger UI HTML page.',
+        responses: {
+          '200': {
+            description: 'Swagger UI HTML.',
+            content: {
+              'text/html': {
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    '/api/openapi.json': {
+      get: {
+        tags: ['Docs'],
+        summary: 'OpenAPI document',
+        description: 'Returns the OpenAPI 3.1 JSON document used by `/api-docs`.',
+        responses: {
+          '200': {
+            description: 'OpenAPI JSON document.',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    '/auth/callback': {
+      get: {
+        tags: ['Auth'],
+        summary: 'Supabase auth callback',
+        description:
+          'Exchanges a Supabase auth code for a session, then redirects new users to onboarding and returning users to home. On auth errors, redirects to login with an error query.',
+        parameters: [
+          {
+            name: 'code',
+            in: 'query',
+            required: false,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'error_description',
+            in: 'query',
+            required: false,
+            schema: {
+              type: 'string',
+            },
+          },
+        ],
+        responses: {
+          '307': {
+            description:
+              'Redirects to `/`, `/onboarding`, or `/auth/login?error=...`.',
+          },
+        },
+      },
+    },
+    '/auth/signout': {
+      post: {
+        tags: ['Auth'],
+        summary: 'Sign out current session',
+        description:
+          'Signs out the current Supabase session when available, then redirects to `/`.',
+        responses: {
+          '303': {
+            description: 'Redirects to `/` after signout.',
+          },
+        },
+      },
+    },
     '/b/{slug}': {
       get: {
         tags: ['Public'],
@@ -194,6 +285,19 @@ export const openApiDocument = {
         description:
           'Same behavior as GET. POST is supported for cron callers that prefer non-GET jobs.',
         security: [{ cronBearer: [] }],
+        parameters: [
+          {
+            name: 'dryRun',
+            in: 'query',
+            required: false,
+            schema: {
+              type: 'string',
+              enum: ['0', '1'],
+              default: '0',
+            },
+            description: '`1` returns counts without deleting objects.',
+          },
+        ],
         responses: {
           '200': {
             description: 'Cleanup completed.',
@@ -208,6 +312,26 @@ export const openApiDocument = {
           '401': {
             description:
               'Missing or invalid `DIARY_IMAGE_CLEANUP_SECRET` / `CRON_SECRET` bearer token.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Storage list/delete or database read failure.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+          '503': {
+            description: 'Supabase service role env is missing.',
             content: {
               'application/json': {
                 schema: {
@@ -294,6 +418,26 @@ export const openApiDocument = {
               'application/json': {
                 schema: {
                   $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Anthropic request failed or returned an empty response.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/LlmHealthFailure',
+                },
+              },
+            },
+          },
+          '503': {
+            description: '`ANTHROPIC_API_KEY` is missing.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/LlmHealthFailure',
                 },
               },
             },

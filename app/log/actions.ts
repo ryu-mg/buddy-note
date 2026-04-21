@@ -154,7 +154,7 @@ export async function createLog(formData: FormData): Promise<CreateLogResult> {
   // 3) Verify pet ownership (SSR client — RLS enforced)
   const { data: pet, error: petError } = await supabase
     .from('pets')
-    .select('id, name, persona_prompt_fragment')
+    .select('id, name, persona_prompt_fragment, slug, is_public')
     .eq('id', petId)
     .eq('user_id', user.id)
     .single()
@@ -369,8 +369,12 @@ export async function createLog(formData: FormData): Promise<CreateLogResult> {
     }
   }
 
-  // 13) 홈 타임라인 갱신
+  // 13) 소유자 피드와 공개 프로필 캐시 갱신.
   revalidatePath('/')
+  revalidatePath('/logs')
+  if (pet.is_public && pet.slug) {
+    revalidatePath(`/b/${pet.slug}`)
+  }
 
   return { ok: true, diaryId: diaryRow.id }
 }

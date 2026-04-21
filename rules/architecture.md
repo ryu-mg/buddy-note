@@ -39,7 +39,7 @@
              │ diary + tags     │  (pending → processing → done)   │
              │ + title          │  pg_cron worker with advisory    │
              ▼                  │  lock per pet                    │
-       [diary insert]           └──────────────────────────────────┘
+      [diary insert] ──trigger─▶└──────────────────────────────────┘
              │                           │
              ▼                           ▼
       [satori 3포맷]            [pet_memory_summary 압축 업데이트]
@@ -160,12 +160,12 @@ RLS 변경 시 **unit test 필수** (`/tests/rls/*.sql` 또는 Supabase dashboar
      f. diaries insert (service role, is_fallback=false)
      g. satori 3포맷 렌더 → diary-images bucket upload (UUID 파일명)
      h. diaries UPDATE image_url_{916,45,11}
-     i. revalidate('/') + revalidate('/b/[slug]') (on-demand)
+     i. revalidate('/') + revalidate('/logs') + revalidate('/b/[slug]') (on-demand)
      j. return diary to client
   3. Client: /diary/[id] 페이지로 slide-up 애니메이션
 
 [trigger side-effect]
-  logs AFTER INSERT → memory_update_queue enqueue
+  diaries AFTER INSERT → memory_update_queue enqueue
   pg_cron worker (매 30초) → 대기 row 처리 (per-pet advisory lock):
     - 최근 N개 log + 기존 memory_summary를 LLM에 주고 압축 업데이트
     - pet_memory_summary UPSERT with version 체크 (optimistic lock)
