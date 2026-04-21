@@ -1,5 +1,3 @@
-import { timingSafeEqual } from 'node:crypto'
-
 import { NextResponse, type NextRequest } from 'next/server'
 
 import {
@@ -7,6 +5,7 @@ import {
   DIARY_IMAGES_BUCKET,
   findOrphanDiaryImageNames,
 } from '@/lib/ops/diary-image-cleanup'
+import { hasValidBearerToken } from '@/lib/ops/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 export const runtime = 'nodejs'
@@ -15,26 +14,8 @@ export const dynamic = 'force-dynamic'
 const LIST_LIMIT = 1000
 const REMOVE_CHUNK_SIZE = 100
 
-function readBearer(request: NextRequest): string {
-  const authorization = request.headers.get('authorization')
-  if (!authorization?.startsWith('Bearer ')) return ''
-  return authorization.slice('Bearer '.length).trim()
-}
-
 function getCleanupSecret(): string {
   return process.env.DIARY_IMAGE_CLEANUP_SECRET || process.env.CRON_SECRET || ''
-}
-
-function isAuthorized(request: NextRequest): boolean {
-  const expected = getCleanupSecret()
-  const actual = readBearer(request)
-  if (!expected || !actual) return false
-
-  const expectedBuffer = Buffer.from(expected)
-  const actualBuffer = Buffer.from(actual)
-  if (expectedBuffer.length !== actualBuffer.length) return false
-
-  return timingSafeEqual(expectedBuffer, actualBuffer)
 }
 
 function chunk<T>(values: readonly T[], size: number): T[][] {
@@ -82,7 +63,7 @@ async function listDiaryImageNames(): Promise<
 }
 
 async function handleCleanup(request: NextRequest) {
-  if (!isAuthorized(request)) {
+  if (!hasValidBearerToken(request.headers, getCleanupSecret())) {
     return NextResponse.json(
       { ok: false, error: 'cleanup secret이 필요해요.' },
       { status: 401 },
