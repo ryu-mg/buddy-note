@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>buddy-note — 디자인 프리뷰</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Design tokens ── */
+    :root {
+      --color-paper: #fafaf5;
+      --color-ink: #1a1a1a;
+      --color-ink-soft: #3f3f3f;
+      --color-mute: #6b7280;
+      --color-line: #e5e7eb;
+      --color-bg: #ffffff;
+      --color-accent-brand: #e07a5f;
+      --color-accent-brand-soft: #fde6e0;
+      --color-success: #4a7c59;
+      --color-error: #b04a4a;
+      --color-warn: #d4a256;
+      --radius-card: 12px;
+      --radius-button: 10px;
+      --radius-input: 8px;
+      --font-sans: "Pretendard Variable", "Pretendard", -apple-system, BlinkMacSystemFont, "Noto Sans KR", sans-serif;
+      --font-serif: "Nanum Myeongjo", "Apple SD Gothic Neo", serif;
+      --ease-soft-out: cubic-bezier(0.2, 0.9, 0.3, 1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-sans);
+      background: #f0ede8;
+      color: var(--color-ink);
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ── Navigator ── */
+    .nav {
+      width: 200px;
+      min-width: 200px;
+      background: #1a1a1a;
+      padding: 20px 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+    .nav-logo {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--color-accent-brand);
+      padding: 0 16px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      letter-spacing: 0.04em;
+    }
+    .nav-section {
+      padding: 12px 16px 4px;
+      font-size: 10px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.3);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    .nav a {
+      display: block;
+      padding: 8px 16px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.6);
+      text-decoration: none;
+      transition: all 0.15s;
+    }
+    .nav a:hover, .nav a.active {
+      color: #fff;
+      background: rgba(255,255,255,0.06);
+    }
+    .nav a.active {
+      color: var(--color-accent-brand);
+    }
+
+    /* ── Main canvas ── */
+    .canvas {
+      flex: 1;
+      overflow-y: auto;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+
+    /* ── Screen wrapper ── */
+    .screen {
+      display: none;
+      width: 100%;
+      max-width: 480px;
+      flex-direction: column;
+      gap: 0;
+    }
+    .screen.active { display: flex; }
+
+    .screen-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--color-mute);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 12px;
+    }
+
+    /* ── Shared components ── */
+
+    /* App Header */
+    .app-header {
+      background: var(--color-bg);
+      border-bottom: 1px solid var(--color-line);
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      width: 100%;
+    }
+    .app-header .logo {
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--color-ink);
+      text-decoration: none;
+    }
+    .app-header nav {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .app-header nav a {
+      font-size: 13px;
+      color: var(--color-mute);
+      text-decoration: none;
+    }
+    .app-header nav a.signout {
+      font-size: 13px;
+      color: var(--color-mute);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: var(--font-sans);
+    }
+    .app-header nav a.petname {
+      color: var(--color-ink-soft);
+    }
+
+    /* Phone frame */
+    .phone-frame {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.07), 0 32px 64px -20px rgba(0,0,0,0.15);
+      border: 1px solid var(--color-line);
+    }
+    .phone-content {
+      overflow-y: auto;
+      max-height: 720px;
+      background: var(--color-bg);
+    }
+
+    /* Polaroid card */
+    .polaroid {
+      background: var(--color-paper);
+      padding: 24px 24px 44px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 14px 32px -18px rgba(0,0,0,0.18);
+      outline: 1px solid var(--color-line);
+    }
+    .polaroid-sm {
+      background: var(--color-paper);
+      padding: 16px 18px 32px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 8px 24px -12px rgba(0,0,0,0.08);
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-card);
+    }
+    .card-tilted-left { transform: rotate(-1.2deg); }
+    .card-tilted-left-sm { transform: rotate(-0.6deg); }
+    .card-tilted-right { transform: rotate(0.8deg); }
+
+    .photo-placeholder {
+      width: 100%;
+      aspect-ratio: 4/5;
+      background: var(--color-line);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      color: var(--color-mute);
+    }
+    .photo-placeholder-sq {
+      width: 100%;
+      aspect-ratio: 1/1;
+      background: var(--color-line);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      color: var(--color-mute);
+    }
+
+    /* Buttons */
+    .btn-primary {
+      background: var(--color-accent-brand);
+      color: white;
+      border: none;
+      border-radius: var(--radius-button);
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: var(--font-sans);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-primary.full { width: 100%; justify-content: center; }
+    .btn-secondary {
+      background: transparent;
+      color: var(--color-ink-soft);
+      border: none;
+      border-radius: var(--radius-button);
+      padding: 10px 16px;
+      font-size: 14px;
+      font-weight: 500;
+      font-family: var(--font-sans);
+      cursor: pointer;
+    }
+    .btn-outline {
+      background: transparent;
+      color: var(--color-ink);
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-button);
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      font-family: var(--font-sans);
+      cursor: pointer;
+    }
+
+    /* Input */
+    .form-input {
+      width: 100%;
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-input);
+      background: white;
+      padding: 10px 12px;
+      font-size: 15px;
+      font-family: var(--font-sans);
+      color: var(--color-ink);
+      outline: none;
+    }
+    .form-input::placeholder { color: #9ca3af; }
+    .form-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--color-ink);
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    /* Radio chip */
+    .radio-chip {
+      flex: 1;
+      border: 2px solid var(--color-line);
+      border-radius: var(--radius-input);
+      background: white;
+      padding: 10px;
+      text-align: center;
+      font-size: 14px;
+      color: var(--color-ink-soft);
+      cursor: pointer;
+    }
+    .radio-chip.selected {
+      border-color: var(--color-accent-brand);
+      background: var(--color-accent-brand-soft);
+      color: var(--color-ink);
+    }
+
+    /* Option row */
+    .option-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      border: 2px solid transparent;
+      border-radius: 10px;
+      background: white;
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .option-row.selected {
+      border-color: var(--color-accent-brand);
+      background: var(--color-accent-brand-soft);
+    }
+    .option-key {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid var(--color-line);
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--color-mute);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .option-row.selected .option-key {
+      border-color: var(--color-accent-brand);
+      background: var(--color-accent-brand);
+      color: white;
+    }
+    .option-text {
+      font-size: 15px;
+      line-height: 1.5;
+      color: var(--color-ink-soft);
+    }
+    .option-row.selected .option-text { color: var(--color-ink); }
+
+    /* Progress */
+    .progress-bar-wrap {
+      height: 3px;
+      background: var(--color-line);
+      border-radius: 9999px;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      background: var(--color-accent-brand);
+      border-radius: 9999px;
+      transition: width 0.3s var(--ease-soft-out);
+    }
+
+    /* Meta label */
+    .meta-label {
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--color-mute);
+    }
+
+    /* Tags / chips */
+    .tag-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--color-paper);
+      border: 1px solid var(--color-line);
+      border-radius: 9999px;
+      padding: 4px 12px;
+      font-size: 13px;
+      color: var(--color-ink-soft);
+    }
+
+    /* Badge */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--color-mute);
+    }
+    .badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--color-mute);
+    }
+    .badge-dot.green { background: var(--color-success); }
+
+    /* Divider */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #9ca3af;
+      font-size: 12px;
+    }
+    .divider::before, .divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--color-line);
+    }
+
+    /* Diary card feed */
+    .diary-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      padding: 16px;
+    }
+    .diary-card {
+      background: var(--color-paper);
+      padding: 16px 16px 32px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 12px 28px -16px rgba(0,0,0,0.18);
+      outline: 1px solid var(--color-line);
+      cursor: pointer;
+    }
+    .diary-card .card-photo {
+      width: 100%;
+      aspect-ratio: 4/5;
+      background: var(--color-line);
+      object-fit: cover;
+    }
+    .diary-card h3 {
+      margin-top: 14px;
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.35;
+      color: var(--color-ink);
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .diary-card p {
+      margin-top: 6px;
+      font-size: 12px;
+      line-height: 1.65;
+      color: var(--color-ink-soft);
+      font-family: var(--font-serif);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .diary-card .date {
+      margin-top: 10px;
+      font-size: 10px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--color-mute);
+    }
+
+    /* Upload zone */
+    .upload-zone {
+      border: 2px dashed var(--color-line);
+      border-radius: var(--radius-card);
+      background: var(--color-paper);
+      aspect-ratio: 4/5;
+      max-height: 320px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .upload-zone:hover { border-color: var(--color-accent-brand); }
+    .upload-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--color-accent-brand-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-accent-brand);
+    }
+
+    /* Error / Notice */
+    .notice-error {
+      background: var(--color-accent-brand-soft);
+      border-radius: var(--radius-input);
+      padding: 10px 12px;
+      font-size: 13px;
+      color: var(--color-error);
+    }
+    .notice-warn {
+      background: #fef9e7;
+      border-radius: var(--radius-input);
+      border: 1px solid var(--color-accent-brand-soft);
+      padding: 12px 14px;
+      font-size: 13px;
+      color: var(--color-ink-soft);
+      line-height: 1.6;
+    }
+
+    /* Misc */
+    .text-mute { color: var(--color-mute); }
+    .text-ink { color: var(--color-ink); }
+    .text-ink-soft { color: var(--color-ink-soft); }
+    .serif { font-family: var(--font-serif); }
+    .gap-1 { gap: 4px; }
+    .gap-2 { gap: 8px; }
+    .gap-3 { gap: 12px; }
+    .gap-4 { gap: 16px; }
+    .gap-5 { gap: 20px; }
+    .gap-6 { gap: 24px; }
+    .flex { display: flex; }
+    .flex-col { flex-direction: column; }
+    .items-center { align-items: center; }
+    .justify-between { justify-content: space-between; }
+    .justify-center { justify-content: center; }
+    .text-center { text-align: center; }
+    .w-full { width: 100%; }
+    .underline { text-decoration: underline; }
+    .link-subtle {
+      font-size: 13px;
+      color: var(--color-mute);
+      text-decoration: none;
+    }
+    .link-subtle:hover { text-decoration: underline; }
+    .link-error {
+      font-size: 13px;
+      color: var(--color-error);
+      text-decoration: none;
+    }
+    .link-error:hover { text-decoration: underline; }
+
+    .kakao-btn {
+      width: 100%;
+      background: #FEE500;
+      border: none;
+      border-radius: var(--radius-button);
+      padding: 11px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: var(--font-sans);
+      color: rgba(0,0,0,0.85);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    /* Share modal tabs */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      z-index: 100;
+    }
+    .modal-sheet {
+      background: white;
+      border-radius: 16px 16px 0 0;
+      width: 100%;
+      max-width: 480px;
+      padding: 24px 20px 40px;
+    }
+    .tab-list {
+      display: flex;
+      gap: 4px;
+      background: var(--color-paper);
+      border-radius: 8px;
+      padding: 4px;
+    }
+    .tab-item {
+      flex: 1;
+      padding: 6px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--color-mute);
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .tab-item.active {
+      background: white;
+      color: var(--color-ink);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    /* Phase copy loading */
+    .phase-bar {
+      height: 3px;
+      background: var(--color-line);
+      border-radius: 9999px;
+      overflow: hidden;
+    }
+    .phase-bar-fill {
+      height: 100%;
+      background: var(--color-accent-brand);
+      border-radius: 9999px;
+      width: 60%;
+      animation: shimmer 1.5s infinite;
+    }
+    @keyframes shimmer {
+      0% { opacity: 0.6; }
+      50% { opacity: 1; }
+      100% { opacity: 0.6; }
+    }
+
+    .skeleton {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: skeleton-wave 1.5s infinite;
+      border-radius: 4px;
+    }
+    @keyframes skeleton-wave {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* Public profile */
+    .public-header {
+      padding: 40px 20px 24px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Navigation ── -->
+<nav class="nav">
+  <div class="nav-logo">buddy-note</div>
+  <div class="nav-section">진입</div>
+  <a href="#" onclick="show('landing')">랜딩 (비로그인)</a>
+  <a href="#" onclick="show('login')">로그인</a>
+  <a href="#" onclick="show('verify')">이메일 확인</a>
+  <div class="nav-section">온보딩</div>
+  <a href="#" onclick="show('onboard-0')">0 · 기본 정보</a>
+  <a href="#" onclick="show('onboard-q')">1–5 · 성격 문항</a>
+  <a href="#" onclick="show('onboard-confirm')">6 · 소개 확인</a>
+  <div class="nav-section">메인</div>
+  <a href="#" onclick="show('home')">홈 (일기 있음)</a>
+  <a href="#" onclick="show('home-empty')">홈 (첫 방문)</a>
+  <a href="#" onclick="show('log')">기록 업로드</a>
+  <a href="#" onclick="show('log-loading')">AI 생성 중</a>
+  <a href="#" onclick="show('diary')">일기 상세</a>
+  <div class="nav-section">공개</div>
+  <a href="#" onclick="show('public')">공개 프로필</a>
+</nav>
+
+<!-- ── Canvas ── -->
+<div class="canvas">
+
+  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+  <!-- SCREEN: Landing -->
+  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+  <div id="screen-landing" class="screen active">
+    <div class="screen-label">/ — 랜딩 (비로그인)</div>
+    <div class="phone-frame">
+      <div class="app-header">
+        <a class="logo" href="#">buddy-note</a>
+        <nav><a href="#">로그인</a></nav>
+      </div>
+      <div class="phone-content" style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:620px; padding:40px 24px; text-align:center; gap:28px;">
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <p class="meta-label">buddy-note</p>
+          <h1 style="font-size:28px; font-weight:700; line-height:1.25; color:var(--color-ink);">
+            내 강아지의 성격을<br>1년 동안 기억해줄게요.
+          </h1>
+          <p style="margin-top:4px; font-size:15px; line-height:1.65; color:var(--color-ink-soft);">
+            사진 한 장으로 일기가 되고, 일기가 쌓이면<br>우리 아이가 점점 더 자기 자신 같아져요.
+          </p>
+        </div>
+        <div style="display:flex; flex-direction:column; align-items:center; gap:12px;">
+          <button class="btn-primary" style="padding:12px 28px; font-size:15px;">시작하기</button>
+          <p style="font-size:12px; color:var(--color-mute);">이메일만 있으면 바로 시작할 수 있어요.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+  <!-- SCREEN: Login -->
+  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+  <div id="screen-login" class="screen">
+    <div class="screen-label">/auth/login</div>
+    <div class="phone-frame">
+      <div class="phone-content" style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:680px; padding:48px 16px; background:white;">
+        <div style="width:100%; max-width:360px; display:flex; flex-direction:column; gap:0;">
+          <!-- Logo area -->
+          <div style="display:flex; flex-direction:column; align-items:center; gap:8px; margin-bottom:32px;">
+            <div style="width:40px; height:40px; border-radius:10px; background:var(--color-accent-brand);"></div>
+            <p style="font-size:13px; color:#6b7280;">buddy-note</p>
+          </div>
+          <!-- Card -->
+          <div style="border:1px solid #e5e7eb; border-radius:12px; background:white; padding:24px; box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+            <div style="margin-bottom:20px;">
+              <h1 style="font-size:22px; font-weight:700; color:var(--color-ink);">buddy-note에 로그인</h1>
+              <p style="margin-top:4px; font-size:13px; color:#6b7280;">이메일만 있으면 바로 시작할 수 있어요.</p>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:16px;">
+              <div>
+                <label class="form-label">이메일</label>
+                <input class="form-input" type="email" placeholder="you@example.com" value="fbaudrl96@gmail.com" />
+              </div>
+              <button class="btn-primary full" style="padding:12px 16px;">매직 링크 보내기</button>
+              <p style="text-align:center; font-size:12px; color:#9ca3af;">링크를 클릭하면 바로 로그인돼요</p>
+            </div>
+            <div class="divider" style="margin:20px 0;">또는</div>
+            <button class="kakao-btn">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 3C7.03 3 3 6.36 3 10.5c0 2.72 1.69 5.1 4.23 6.46L6.5 21l4.34-2.87c.38.04.77.07 1.16.07 4.97 0 9-3.36 9-7.5S16.97 3 12 3z" fill="rgba(0,0,0,0.85)"/></svg>
+              카카오로 계속하기
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+  <!-- SCREEN: Verify -->
+  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+  <div id="screen-verify" class="screen">
+    <div class="screen-label">/auth/verify</div>
+    <div class="phone-frame">
+      <div class="phone-content" style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:680px; padding:48px 16px; background:white;">
+        <div style="width:100%; max-width:360px; display:flex; flex-direction:column; gap:0;">
+          <div style="display:flex; flex-direction:column; align-items:center; gap:8px; margin-bottom:32px;">
+            <div style="width:40px; height:40px; border-radius:10px; background:var(--color-accent-brand);"></div>
+            <p style="font-size:13px; color:#6b7280;">buddy-note</p>
+          </div>
+          <div style="border:1px solid #e5e7eb; border-radius:12px; background:white; padding:24px; box-shadow:0 1px 3px rgba(0,0,0,0.06); display:flex; flex-direction:column; gap:16px;">
+            <div>
+              <h1 style="font-size:22px; font-weight:700; color:var(--color-ink);">메일을 확인해주세요</h1>
+              <p style="margin-top:6px; font-size:13px; color:#6b7280; line-height:1.6;">
+                <strong style="color:var(--color-ink);">f•••6@gmail.com</strong>으로<br>매직 링크를 보냈어요.
+              </p>
+            </div>
+            <div style="background:var(--color-paper); border-radius:8px; padding:12px 14px;">
+              <p style="font-size:13px; color:var(--color-ink-soft); line-height:1.6;">스팸함도 확인해보세요. 혹시 안 왔다면 이메일 주소가 맞는지 확인해주세요.</p>
+            </div>
+            <p style="font-size:13px; color:#9ca3af; text-align:center;">
+              다른 이메일로 보내기 — <a href="#" style="color:var(--color-accent-brand); text-decoration:none;">다시 시도</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+  <!-- SCREEN: Onboarding 0 -->
+  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+  <div id="screen-onboard-0" class="screen">
+    <div class="screen-label">/onboarding/steps/0 — 기본 정보</div>
+    <div class="phone-frame">
+      <div class="phone-content" style="padding:32px 16px 40px; display:flex; flex-direction:column; gap:24px;">
+        <!-- Progress -->
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:12px; color:var(--color-mute);">1 / 7</span>
+            <span style="font-size:12px; color:var(--color-mute);">14%</span>
+          </div>
+          <div class="progress-bar-wrap"><div class="progress-bar" style="width:14%;"></div></div>
+        </div>
+        <!-- Card -->
+        <div class="polaroid-sm card-tilted-left-sm">
+          <p class="meta-label">시작하기</p>
+          <h1 style="margin-top:12px; font-size:20px; font-weight:700; line-height:1.35; color:var(--color-ink);">우리 아이를 소개해주세요</h1>
+          <p style="margin-top:6px; font-size:14px; color:var(--color-ink-soft);">이름, 종, 그리고 품종까지 알려주면 돼요.</p>
+          <div style="margin-top:24px; display:flex; flex-direction:column; gap:20px;">
+            <div>
+              <label class="form-label">이름</label>
+              <input class="form-input" type="text" placeholder="예) 마루" value="마루" />
+            </div>
+            <div>
+              <label class="form-label">종</label>
+              <div style="display:flex; gap:8px; margin-top:6px;">
+                <div class="radio-chip selected">강아지</div>
+                <div class="radio-chip">고양이</div>
+              </div>
+            </div>
+            <div>
+              <label class="form-label">품종 <span style="font-weight:400; color:var(--color-mute);">(믹스도 괜찮아요)</span></label>
+              <input class="form-input" type="text" placeholder="예) 푸들, 시츄-푸들 믹스" />
+            </div>
+          </div>
+        </div>
+        <!-- Nav -->
+        <div style="display:flex; justify-content:flex-end;">
+          <button class="btn-primary">다음</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+  <!-- SCREEN: Onboarding Q -->
+  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+  <div id="screen-onboard-q" class="screen">
+    <div class="screen-label">/onboarding/steps/2 — 성격 문항</div>
+    <div class="phone-frame">
+      <div class="phone-content" style="padding:32px 16px 40px; display:flex; flex-direction:column; gap:24px;">
+        <!-- Progress -->
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:12px; color:var(--color-mute);">3 / 7</span>
+            <span style="font-size:12px; color:var(--color-mute);">43%</span>
+          </div>
+          <div class="progress-bar-wrap"><div class="progress-bar" style="width:43%;"></div></div>
+        </div>
+        <!-- Card -->
+        <div class="polaroid-sm card-tilted-left-sm">
+          <p class="meta-label">질문 2 / 5</p>
+          <h1 style="margin-top:12px; font-size:20px; font-weight:700; line-height:1.35; color:var(--color-ink);">산책할 때 어떤 편이에요?</h1>
+          <p style="margin-top:6px; font-size:14px; color:var(--color-ink-soft);">평소에 산책하는 모습을 생각해보세요.</p>
+          <div style="margin-top:20px; display:flex; flex-direction:column; gap:8px;">
+            <div class="option-row selected">
+              <div class="option-key">A</div>
+              <span class="option-text">한 방향만 쭉 달려요. 냄새 맡는 것도 사양할게요</span>
+            </div>
+            <div class="option-row">
+              <div class="option-key">B</div>
+              <span class="option-text">냄새 맡고 표시하는 게 제일 중요해요</span>
+            </div>
+            <div class="option-row">
+              <div class="option-key">C</div>
+              <span class="option-text">사람이나 강아지 만나는 게 좋아요</span>
+            </div>
+            <div class="option-row">
+              <div class="option-key">D</div>
+              <span class="option-text">그냥 옆에 붙어서 같이 걸어요</span>
+            </div>
+          </div>
+        </div>
+        <!-- Nav -->
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <button class="btn-secondary">이전</button>
+          <button class="btn-primary">다음</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+  <!-- SCREEN: Onboarding Confirm -->
+  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+  <div id="screen-onboard-confirm" class="screen">
+    <div class="screen-label">/onboarding/steps/6 — 소개 확인</div>
+    <div class="phone-frame">
+      <div class="phone-content" style="padding:32px 16px 40px; display:flex; flex-direction:column; gap:24px;">
+        <!-- Progress -->
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:12px; color:var(--color-mute);">7 / 7</span>
+            <span style="font-size:12px; color:var(--color-mute);">100%</span>
+          </div>
+          <div class="progress-bar-wrap"><div class="progress-bar" style="width:100%;"></div></div>
+        </div>
+        <!-- Card -->
+        <div class="polaroid-sm" style="transform:rotate(-0.4deg);">
+          <p class="meta-label">소개 미리보기</p>
+          <h1 style="margin-top:12px; font-size:20px; font-weight:700; line-height:1.35; color:var(--color-ink);">이렇게 기록해둘게요</h1>
+          <p style="margin-top:6px; font-size:14px; color:var(--color-ink-soft);">내용이 맞으면 저장해주세요. 나중에 언제든 다시 바꿀 수 있어요.</p>
+          <blockquote style="margin-top:20px; border-left:2px solid var(--color-accent-brand); background:rgba(255,255,255,0.6); padding:16px; font-size:15px; line-height:1.7; color:var(--color-ink); font-family:var(--font-serif); white-space:pre-line;">마루는 활동적이고 에너지 넘치는 강아지예요.
+산책 중엔 목적지가 분명하게 앞만 보고 달리는 편이에요.
+혼자 있는 걸 즐기진 않고, 항상 사람 곁에 있으려 해요.
+먹는 건 세상에서 제일 중요한 일이에요.
+낯선 곳에서도 꼬리 흔들며 인사를 건네는 편이에요.</blockquote>
+        </div>
+        <!-- Nav -->
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <button class="btn-secondary">이전</button>
+          <button class="btn-primary">저장할게요</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+  <!-- SCREEN: Home (with diaries) -->
+  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+  <div id="screen-home" class="screen">
+    <div class="screen-label">/ — 홈 (일기 있음)</div>
+    <div class="phone-frame">
+      <div class="app-header">
+        <a class="logo" href="#">buddy-note</a>
+        <nav>
+          <a href="#">기록</a>
+          <a href="#" class="petname">마루</a>
+          <a href="#">로그아웃</a>
+        </nav>
+      </div>
+      <div class="phone-content" style="padding:24px 16px 60px; display:flex; flex-direction:column; gap:24px;">
+        <!-- Header -->
+        <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+          <div>
+            <h1 style="font-size:22px; font-weight:600; color:var(--color-ink); line-height:1.25;">마루의 이야기 38일째</h1>
+            <p style="margin-top:4px; font-size:13px; color:var(--color-mute);">2026.03.14 – 2026.04.20 · 기록 12개</p>
+          </div>
+          <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
+            <div class="badge"><div class="badge-dot green"></div><span style="font-size:12px;">공개중</span></div>
+            <button style="font-size:12px; color:var(--color-mute); background:none; border:none; cursor:pointer; padding:0;">비공개로 바꾸기</button>
+          </div>
+        </div>
+        <!-- CTA Card -->
+        <a href="#" style="text-decoration:none; display:block;">
+          <div class="polaroid card-tilted-left" style="padding:28px 28px 28px;">
+            <p class="meta-label">오늘의 기록</p>
+            <p style="margin-top:8px; font-size:20px; line-height:1.4; color:var(--color-ink); font-family:var(--font-serif);">오늘 마루 어땠어요?</p>
+            <p style="margin-top:6px; font-size:13px; color:var(--color-ink-soft);">사진 한 장이면 일기로 만들어볼게요.</p>
+            <div style="margin-top:20px;">
+              <button class="btn-primary">일기 쓰러 가기</button>
+            </div>
+          </div>
+        </a>
+        <!-- Feed grid -->
+        <div class="diary-grid">
+          <div class="diary-card card-tilted-left">
+            <div class="card-photo" style="background:#d4c4b0;"></div>
+            <h3>소파 위의 작은 왕국</h3>
+            <p style="font-family:var(--font-serif);">오늘도 소파 위 내 자리를 지키는 건 당연한 일이지. 낮잠이 제일이야.</p>
+            <p class="date">4월 20일</p>
+          </div>
+          <div class="diary-card card-tilted-right" style="margin-top:24px;">
+            <div class="card-photo" style="background:#c8d4c0;"></div>
+            <h3>공원에서 냄새 탐험</h3>
+            <p style="font-family:var(--font-serif);">공원에서 새로운 냄새를 발견했다. 엄청 중요한 냄새임이 틀림없어.</p>
+            <p class="date">4월 19일</p>
+          </div>
+          <div class="diary-card card-tilted-left">
+            <div class="card-photo" style="background:#c0c8d4;"></div>
+            <h3>간식 협상의 달인</h3>
+            <p style="font-family:var(--font-serif);">눈을 동그랗게 뜨고 보면 99% 성공률. 오늘도 통했다.</p>
+            <p class="date">4월 18일</p>
+          </div>
+          <div class="diary-card card-tilted-right" style="margin-top:24px;">
+            <div class="card-photo" style="background:#d4c0c8;"></div>
+            <h3>빗소리 듣는 날</h3>
+            <p style="font-family:var(--font-serif);">창밖에 빗소리가 들렸다. 산책을 못 가도 이런 날도 나쁘지 않아.</p>
+            <p class="date">4월 17일</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+  <!-- SCREEN: Home (empty) -->
+  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+  <div id="screen-home-empty" class="screen">
+    <div class="screen-label">/ — 홈 (첫 방문, 일기 없음)</div>
+    <div class="phone-frame">
+      <div class="app-header">
+        <a class="logo" href="#">buddy-note</a>
+        <nav>
+          <a href="#">기록</a>
+          <a href="#" class="petname">마루</a>
+          <a href="#">로그아웃</a>
+        </nav>
+      </div>
+      <div class="phone-content" style="padding:24px 16px 60px; display:flex; flex-direction:column; gap:24px;">
+        <div>
+          <h1 style="font-size:22px; font-weight:600; color:var(--color-ink); line-height:1.25;">마루의 이야기 1일째</h1>
+          <p style="margin-top:4px; font-size:13px; color:var(--color-mute);">아직 기록이 없어요. 첫 일기를 함께 시작해볼까요?</p>
+        </div>
+        <!-- CTA Card -->
+        <div class="polaroid card-tilted-left" style="padding:28px 28px 28px;">
+          <p class="meta-label">오늘의 기록</p>
+          <p style="margin-top:8px; font-size:20px; line-height:1.4; color:var(--color-ink); font-family:var(--font-serif);">오늘 마루 어땠어요?</p>
+          <p style="margin-top:6px; font-size:13px; color:var(--color-ink-soft);">사진 한 장이면 일기로 만들어볼게요.</p>
+          <div style="margin-top:20px;">
+            <button class="btn-primary">일기 쓰러 가기</button>
+          </div>
+        </div>
+        <!-- Empty state -->
+        <div style="display:flex; justify-content:center; padding:12px 0;">
+          <div style="transform:rotate(0.8deg);">
+            <div class="polaroid-sm" style="max-width:320px; text-align:center; padding:28px 28px 40px;">
+              <p class="meta-label">첫 페이지</p>
+              <p style="margin-top:12px; font-size:22px; line-height:1.4; color:var(--color-ink); font-family:var(--font-serif);">오늘 마루 어땠어요?</p>
+              <p style="margin-top:8px; font-size:14px; line-height:1.6; color:var(--color-ink-soft);">사진 한 장이면 첫 일기가 시작돼요.</p>
+              <div style="margin-top:24px;">
+                <button class="btn-primary">첫 일기 써보기</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+  <!-- SCREEN: Log upload -->
+  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+  <div id="screen-log" class="screen">
+    <div class="screen-label">/log — 사진 업로드</div>
+    <div class="phone-frame">
+      <div class="app-header">
+        <a class="logo" href="#">buddy-note</a>
+        <nav>
+          <a href="#">기록</a>
+          <a href="#" class="petname">마루</a>
+          <a href="#">로그아웃</a>
+        </nav>
+      </div>
+      <div class="phone-content" style="padding:40px 16px 60px; display:flex; flex-direction:column; gap:24px;">
+        <div>
+          <p class="meta-label">오늘의 한 장</p>
+          <h1 style="margin-top:8px; font-size:22px; font-weight:500; line-height:1.3; color:var(--color-ink);">마루의 오늘을 남겨볼까요</h1>
+          <p style="margin-top:6px; font-size:14px; line-height:1.55; color:var(--color-ink-soft);">사진 한 장만 올려주면 마루의 말투로 일기를 적어줄게요.</p>
+        </div>
+        <!-- Upload zone -->
+        <div class="upload-zone">
+          <div class="upload-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          </div>
+          <p style="font-size:14px; font-weight:500; color:var(--color-ink);">사진을 올려주세요</p>
+          <p style="font-size:12px; color:var(--color-mute);">JPG, PNG · 최대 8MB</p>
+        </div>
+        <!-- Memo -->
+        <div>
+          <label class="form-label">한 줄 메모 <span style="font-weight:400; color:var(--color-mute);">(선택)</span></label>
+          <textarea class="form-input" style="height:80px; resize:none; line-height:1.6;" placeholder="오늘 있었던 일을 짧게 적어주세요 (200자 이내)"></textarea>
+        </div>
+        <!-- Tags -->
+        <div>
+          <label class="form-label">태그 <span style="font-weight:400; color:var(--color-mute);">(선택)</span></label>
+          <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;">
+            <div class="tag-chip" style="border-color:var(--color-accent-brand); background:var(--color-accent-brand-soft); color:var(--color-ink);">산책</div>
+            <div class="tag-chip">간식</div>
+            <div class="tag-chip">놀이</div>
+            <div class="tag-chip">낮잠</div>
+            <div class="tag-chip">목욕</div>
+            <div class="tag-chip">병원</div>
+          </div>
+        </div>
+        <button class="btn-primary full" style="padding:14px; font-size:15px;" disabled style="opacity:0.4;">일기 만들어줘</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+  <!-- SCREEN: AI generating -->
+  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+  <div id="screen-log-loading" class="screen">
+    <div class="screen-label">/log — AI 일기 생성 중 (Phase 2)</div>
+    <div class="phone-frame">
+      <div class="app-header">
+        <a class="logo" href="#">buddy-note</a>
+        <nav><a href="#" class="petname">마루</a></nav>
+      </div>
+      <div class="phone-content" style="padding:40px 16px 60px; display:flex; flex-direction:column; gap:28px;">
+        <div>
+          <p class="meta-label">오늘의 한 장</p>
+          <h1 style="margin-top:8px; font-size:22px; font-weight:500; line-height:1.3; color:var(--color-ink);">마루의 일기를 쓰고 있어요</h1>
+        </div>
+        <!-- Progress bar -->
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <p style="font-size:13px; color:var(--color-ink-soft);">일기 작성 중…</p>
+            <p style="font-size:12px; color:var(--color-mute);">15s</p>
+          </div>
+          <div class="phase-bar"><div class="phase-bar-fill"></div></div>
+        </div>
+        <!-- Photo -->
+        <div style="transform:rotate(-0.8deg); box-shadow:0 1px 2px rgba(0,0,0,0.04), 0 14px 32px -18px rgba(0,0,0,0.18); outline:1px solid var(--color-line);">
+          <div style="background:var(--color-paper); padding:16px 16px 36px;">
+            <div class="photo-placeholder" style="background:#c8d4c0; aspect-ratio:4/5; max-height:200px; display:flex; align-items:center; justify-content:center;">
+              <span style="font-size:12px; color:var(--color-mute);">마루.jpg</span>
+            </div>
+            <!-- Skeleton lines -->
+            <div style="margin-top:16px; display:flex; flex-direction:column; gap:8px;">
+              <div class="skeleton" style="height:18px; width:70%;"></div>
+              <div class="skeleton" style="height:14px; width:100%;"></div>
+              <div class="skeleton" style="height:14px; width:88%;"></div>
+              <div class="skeleton" style="height:14px; width:60%;"></div>
+            </div>
+          </div>
+        </div>
+        <!-- Phase tags -->
+        <div style="display:flex; flex-wrap:wrap; gap:8px;">
+          <div class="tag-chip" style="background:var(--color-accent-brand-soft); border-color:var(--color-accent-brand); color:var(--color-ink);">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            사진 분석
+          </div>
+          <div class="tag-chip" style="background:var(--color-accent-brand-soft); border-color:var(--color-accent-brand); color:var(--color-ink);">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            공원 · 산책 · 맑음
+          </div>
+          <div class="tag-chip">일기 작성 중…</div>
+        </div>
+        <div style="text-align:center;">
+          <button style="font-size:13px; color:var(--color-mute); background:none; border:none; cursor:pointer; text-decoration:underline;">뒤로 갈래요</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+  <!-- SCREEN: Diary detail -->
+  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+  <div id="screen-diary" class="screen">
+    <div class="screen-label">/diary/[id] — 일기 상세</div>
+    <div class="phone-frame">
+      <div class="app-header">
+        <a class="logo" href="#">buddy-note</a>
+        <nav>
+          <a href="#">기록</a>
+          <a href="#" class="petname">마루</a>
+          <a href="#">로그아웃</a>
+        </nav>
+      </div>
+      <div class="phone-content" style="padding:28px 16px 60px; display:flex; flex-direction:column; gap:24px;">
+        <!-- Header -->
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+          <a class="link-subtle" href="#">← 홈으로</a>
+          <span class="meta-label">DIARY</span>
+        </div>
+        <!-- Polaroid -->
+        <div style="margin:0 auto; width:100%; max-width:380px;">
+          <div class="polaroid card-tilted-left">
+            <div style="display:flex; align-items:baseline; justify-content:space-between; gap:12px;">
+              <p class="meta-label">2026년 4월 20일</p>
+              <p style="font-size:14px; line-height:1.5; color:var(--color-ink); font-family:var(--font-serif);">마루</p>
+            </div>
+            <div style="margin-top:16px; overflow:hidden; background:var(--color-line);">
+              <div class="photo-placeholder" style="background:#c8d4c0; aspect-ratio:4/5; max-height:260px;">
+                <span style="font-size:12px;">마루 사진</span>
+              </div>
+            </div>
+            <h1 style="margin-top:24px; font-size:26px; font-weight:600; line-height:1.3; color:var(--color-ink);">공원에서 냄새 탐험</h1>
+            <p style="margin-top:16px; font-size:18px; line-height:1.7; color:var(--color-ink); font-family:var(--font-serif); white-space:pre-line;">오늘 공원에서 진짜 중요한 걸 발견했어. 저쪽 구석 풀밭 근처에 아주 특별한 냄새가 나는 거야.
+
+세 번이나 돌아가서 확인했는데, 확실히 중요한 냄새였어. 보호자가 계속 당기던데 그게 좀 아쉬웠지.
+
+집에 돌아오는 길에 간식을 받았어. 오늘은 좋은 날이야.</p>
+          </div>
+        </div>
+        <!-- Actions -->
+        <div style="margin:0 auto; width:100%; max-width:380px; display:flex; flex-direction:column; gap:12px;">
+          <button class="btn-primary full" style="padding:14px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            공유하기
+          </button>
+          <div style="display:flex; justify-content:center; margin-top:12px;">
+            <a class="link-error" href="#">이 일기 삭제</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+  <!-- SCREEN: Public profile -->
+  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+  <div id="screen-public" class="screen" style="max-width:640px;">
+    <div class="screen-label">/b/maru — 공개 프로필</div>
+    <div class="phone-frame" style="max-width:640px;">
+      <div class="phone-content" style="background:var(--color-bg);">
+        <!-- Header -->
+        <div style="padding:40px 20px 24px; text-align:center; border-bottom:1px solid var(--color-line);">
+          <p style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.14em; color:var(--color-mute);">buddy-note</p>
+          <h1 style="margin-top:16px; font-size:36px; font-weight:700; color:var(--color-ink); font-family:var(--font-serif);">마루</h1>
+          <p style="margin-top:8px; font-size:15px; color:var(--color-ink-soft);">마루의 이야기 38일째</p>
+        </div>
+        <!-- Feed -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; padding:24px 20px;">
+          <div style="background:var(--color-paper); padding:14px 14px 28px; box-shadow:0 1px 2px rgba(0,0,0,0.04), 0 8px 20px -12px rgba(0,0,0,0.14); outline:1px solid var(--color-line); transform:rotate(-0.8deg);">
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+              <span style="font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--color-mute);">4월 20일</span>
+              <span style="font-size:11px; color:var(--color-mute); font-family:var(--font-serif);">마루</span>
+            </div>
+            <div style="background:#c8d4c0; aspect-ratio:4/5; max-height:160px;"></div>
+            <h3 style="margin-top:12px; font-size:14px; font-weight:600; color:var(--color-ink);">공원에서 냄새 탐험</h3>
+            <p style="margin-top:6px; font-size:12px; line-height:1.6; color:var(--color-ink-soft); font-family:var(--font-serif); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">오늘 공원에서 진짜 중요한 걸 발견했어. 저쪽 구석 풀밭 근처에 아주 특별한 냄새가 나는 거야.</p>
+          </div>
+          <div style="background:var(--color-paper); padding:14px 14px 28px; box-shadow:0 1px 2px rgba(0,0,0,0.04), 0 8px 20px -12px rgba(0,0,0,0.14); outline:1px solid var(--color-line); transform:rotate(0.6deg); margin-top:20px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+              <span style="font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--color-mute);">4월 19일</span>
+              <span style="font-size:11px; color:var(--color-mute); font-family:var(--font-serif);">마루</span>
+            </div>
+            <div style="background:#d4c4b0; aspect-ratio:4/5; max-height:160px;"></div>
+            <h3 style="margin-top:12px; font-size:14px; font-weight:600; color:var(--color-ink);">소파 위의 작은 왕국</h3>
+            <p style="margin-top:6px; font-size:12px; line-height:1.6; color:var(--color-ink-soft); font-family:var(--font-serif); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">오늘도 소파 위 내 자리를 지키는 건 당연한 일이지. 낮잠이 제일이야.</p>
+          </div>
+          <div style="background:var(--color-paper); padding:14px 14px 28px; box-shadow:0 1px 2px rgba(0,0,0,0.04), 0 8px 20px -12px rgba(0,0,0,0.14); outline:1px solid var(--color-line); transform:rotate(-0.4deg);">
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+              <span style="font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--color-mute);">4월 18일</span>
+              <span style="font-size:11px; color:var(--color-mute); font-family:var(--font-serif);">마루</span>
+            </div>
+            <div style="background:#c0c8d4; aspect-ratio:4/5; max-height:160px;"></div>
+            <h3 style="margin-top:12px; font-size:14px; font-weight:600; color:var(--color-ink);">간식 협상의 달인</h3>
+            <p style="margin-top:6px; font-size:12px; line-height:1.6; color:var(--color-ink-soft); font-family:var(--font-serif); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">눈을 동그랗게 뜨고 보면 99% 성공률. 오늘도 통했다.</p>
+          </div>
+          <div style="background:var(--color-paper); padding:14px 14px 28px; box-shadow:0 1px 2px rgba(0,0,0,0.04), 0 8px 20px -12px rgba(0,0,0,0.14); outline:1px solid var(--color-line); transform:rotate(0.9deg); margin-top:20px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+              <span style="font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--color-mute);">4월 17일</span>
+              <span style="font-size:11px; color:var(--color-mute); font-family:var(--font-serif);">마루</span>
+            </div>
+            <div style="background:#d4c0c8; aspect-ratio:4/5; max-height:160px;"></div>
+            <h3 style="margin-top:12px; font-size:14px; font-weight:600; color:var(--color-ink);">빗소리 듣는 날</h3>
+            <p style="margin-top:6px; font-size:12px; line-height:1.6; color:var(--color-ink-soft); font-family:var(--font-serif); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">창밖에 빗소리가 들렸다. 산책을 못 가도 이런 날도 나쁘지 않아.</p>
+          </div>
+        </div>
+        <!-- CTA -->
+        <div style="padding:32px 20px 48px; text-align:center; border-top:1px solid var(--color-line); display:flex; flex-direction:column; align-items:center; gap:14px;">
+          <p style="font-size:16px; font-weight:500; color:var(--color-ink);">내 강아지의 이야기도 남겨볼래요?</p>
+          <button class="btn-outline" style="padding:12px 28px; font-size:14px;">나도 만들어보기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /canvas -->
+
+<script>
+  function show(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav a').forEach(a => a.classList.remove('active'));
+    const screen = document.getElementById('screen-' + id);
+    if (screen) screen.classList.add('active');
+    // Mark nav active
+    document.querySelectorAll('.nav a').forEach(a => {
+      if (a.getAttribute('onclick') && a.getAttribute('onclick').includes("'" + id + "'")) {
+        a.classList.add('active');
+      }
+    });
+    // Wide screens for public profile
+    document.querySelector('.canvas').style.alignItems = (id === 'public') ? 'center' : 'center';
+  }
+  // Initial active nav
+  document.querySelector('.nav a').classList.add('active');
+</script>
+</body>
+</html>
