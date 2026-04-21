@@ -29,7 +29,7 @@
       --mood-calm: #a8b5a0;
       --mood-tired: #9ca3af;
       --mood-curious: #d4a256;
-      --mood-grumpy: #8a6fa3;
+      --mood-grumpy: #8a6650;
       --mood-lonely: #5a7a8a;
 
       /* v0.2 제안 — warm-dark (D-14) */
@@ -2214,7 +2214,7 @@
       <div class="mood-swatch"><div class="chip" style="background: var(--mood-calm);"></div><div class="name">calm</div><div class="hex">#a8b5a0</div></div>
       <div class="mood-swatch"><div class="chip" style="background: var(--mood-tired);"></div><div class="name">tired</div><div class="hex">#9ca3af</div></div>
       <div class="mood-swatch"><div class="chip" style="background: var(--mood-curious);"></div><div class="name">curious</div><div class="hex">#d4a256</div></div>
-      <div class="mood-swatch"><div class="chip" style="background: var(--mood-grumpy);"></div><div class="name">grumpy</div><div class="hex">#8a6fa3</div></div>
+      <div class="mood-swatch"><div class="chip" style="background: var(--mood-grumpy);"></div><div class="name">grumpy</div><div class="hex">#8a6650</div></div>
       <div class="mood-swatch"><div class="chip" style="background: var(--mood-lonely);"></div><div class="name">lonely</div><div class="hex">#5a7a8a</div></div>
     </div>
 
@@ -2952,7 +2952,7 @@ export function PawPrint({ size = 14, className, ...props }) {
   )
 }</pre>
       <ul>
-        <li><b>currentColor</b> — 부모에서 <span class="spec-key">text-[var(--mood-*)]</span> 지정 시 자동 테마</li>
+        <li><b>currentColor</b> — 부모에서 mood color utility를 지정하면 자동 테마</li>
         <li>aria-hidden — 셀의 <span class="spec-key">aria-label</span> 에 "기록 있음" 유지 (scr reader 친화적)</li>
         <li>오늘 셀 paw: scale(1.1) + accent color</li>
         <li>다크 모드 (D-14) 자동 반전 — currentColor 상속</li>

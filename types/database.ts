@@ -46,6 +46,14 @@ export type MemoryUpdateQueueStatus =
   | 'done'
   | 'failed';
 
+export type DiaryMood =
+  | 'bright'
+  | 'calm'
+  | 'tired'
+  | 'curious'
+  | 'grumpy'
+  | 'lonely';
+
 /**
  * Entry in pet_memory_summary.recent_callbacks (jsonb).
  * referenceDate is ISO 8601 date (YYYY-MM-DD).
@@ -80,6 +88,7 @@ export interface PetRow {
   guardian_relationship: string | null;
   companion_relationship: string | null;
   profile_photo_storage_path: string | null;
+  additional_info: string | null;
   personality_code: string | null;
   personality_label: string | null;
   persona_answers: PersonaAnswers;
@@ -103,6 +112,7 @@ export type PetInsert = Omit<
   | 'guardian_relationship'
   | 'companion_relationship'
   | 'profile_photo_storage_path'
+  | 'additional_info'
 > & {
   id?: string;
   created_at?: string;
@@ -111,6 +121,7 @@ export type PetInsert = Omit<
   guardian_relationship?: string | null;
   companion_relationship?: string | null;
   profile_photo_storage_path?: string | null;
+  additional_info?: string | null;
   personality_code?: string | null;
   personality_label?: string | null;
   persona_answers?: PersonaAnswers;
@@ -148,6 +159,7 @@ export interface DiaryRow {
   image_url_916: string | null;
   image_url_45: string | null;
   image_url_11: string | null;
+  mood: DiaryMood | null;
   is_fallback: boolean;
   model_used: string | null;
   latency_ms: number | null;
@@ -222,6 +234,32 @@ export interface SlugReservedRow {
 export type SlugReservedInsert = SlugReservedRow;
 export type SlugReservedUpdate = Partial<SlugReservedRow>;
 
+export interface MilestoneCardRow {
+  id: string;
+  pet_id: string;
+  milestone_day: 7 | 30 | 100 | 365;
+  title: string;
+  caption: string;
+  image_url_916: string | null;
+  image_url_45: string | null;
+  image_url_11: string | null;
+  is_public: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export type MilestoneCardInsert = Omit<
+  MilestoneCardRow,
+  'id' | 'created_at' | 'updated_at' | 'is_public'
+> & {
+  id?: string;
+  created_at?: string;
+  updated_at?: string;
+  is_public?: boolean;
+};
+
+export type MilestoneCardUpdate = Partial<MilestoneCardInsert>;
+
 // -----------------------------------------------------------------------------
 // Aggregate Database shape — compatible with @supabase/supabase-js createClient<Database>()
 // -----------------------------------------------------------------------------
@@ -258,6 +296,11 @@ export interface Database {
         Row: SlugReservedRow;
         Insert: SlugReservedInsert;
         Update: SlugReservedUpdate;
+      };
+      milestone_cards: {
+        Row: MilestoneCardRow;
+        Insert: MilestoneCardInsert;
+        Update: MilestoneCardUpdate;
       };
     };
     Views: Record<string, never>;

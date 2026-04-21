@@ -1,5 +1,0 @@
-# .envs/ 하위는 기본적으로 git 대상 제외.
-# 템플릿(example.env)과 이 .gitignore 만 커밋한다.
-*
-!.gitignore
-!example.env

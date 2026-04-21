@@ -11,6 +11,7 @@ import {
   type RecentCallbackInput,
 } from '@/lib/llm/schemas'
 import { createLogger } from '@/lib/logger'
+import { FALLBACK_DIARY_MOOD } from '@/lib/mood'
 
 const log = createLogger('llm:diary')
 
@@ -74,6 +75,7 @@ function buildFallback(input: DiaryInput): DiaryOutput {
     title: `${name} 의 오늘`,
     body: bodyParts.join('\n\n'),
     suggestedTags: [],
+    mood: FALLBACK_DIARY_MOOD,
   }
 }
 

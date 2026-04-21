@@ -3,6 +3,7 @@ import { describe, it, expect } from 'bun:test'
 import {
   QUESTIONS,
   QUESTION_IDS,
+  CHARACTER_TRAITS,
   buildPersonaPromptFragment,
   calculatePersonality,
   getQuestion,
@@ -100,6 +101,17 @@ describe('calculatePersonality', () => {
   })
 })
 
+describe('CHARACTER_TRAITS', () => {
+  it('16개 성격 코드마다 확인 화면용 특징을 가진다', () => {
+    expect(Object.keys(CHARACTER_TRAITS)).toHaveLength(16)
+
+    for (const traits of Object.values(CHARACTER_TRAITS)) {
+      expect(traits.length).toBeGreaterThanOrEqual(3)
+      expect(traits.every((trait) => trait.length > 0)).toBeTruthy()
+    }
+  })
+})
+
 describe('buildPersonaPromptFragment', () => {
   const answers: Answers = { q1: 'A', q2: 'A', q3: 'B', q4: 'B' }
 
@@ -144,5 +156,17 @@ describe('buildPersonaPromptFragment', () => {
         ' / 반려인 표정과 목소리에 민감하게 반응하는 다정한 쪽이고' +
         ' / 바뀐 흐름에도 금방 맞추는 유연한 타입이야.',
     )
+  })
+
+  it('반려인이 들려준 추가 이야기를 append한다', () => {
+    const out = buildPersonaPromptFragment({
+      name: '마루',
+      breed: '푸들',
+      companionRelationship: '누나',
+      answers,
+      additionalInfo: '비 오는 날 창밖 보는 걸 좋아해',
+    })
+
+    expect(out).toContain('반려인이 들려준 이야기: "비 오는 날 창밖 보는 걸 좋아해"')
   })
 })

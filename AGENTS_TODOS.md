@@ -43,7 +43,7 @@
 | # | 항목 | 해제 조건 | 해제 후 할 일 |
 |---|---|---|---|
 | C1 | Kakao 비즈앱 승인 | Kakao 비즈앱 승인 + Supabase Dashboard Provider 활성화 | staging에서 Kakao OAuth 실제 플로우 검증 |
-| C2 | Supabase Seoul 프로젝트 | `.envs/local.env` 작성 + `supabase db push` | `bun run gen:types`, DB 타입 싱크 감사, 실제 E2E |
+| C2 | Supabase Seoul 프로젝트 | `.env.local` 작성 + `supabase db push` | `bun run gen:types`, DB 타입 싱크 감사, 실제 E2E |
 | C5 | LLM A/B 벤치 | 강아지 사진 5-10장 + 3 API key | `scripts/llm-benchmark` 실행 후 모델 결정 업데이트 |
 | — | pg_cron 스케줄 등록 | Supabase SQL Editor에서 migration 주석 블록 실행 | `/api/memory/process` 실가동 확인 |
 | — | Vercel 프로젝트 연결 | `vercel link` + env 등록 | Analytics/Speed Insights/Cron 실동작 확인 |

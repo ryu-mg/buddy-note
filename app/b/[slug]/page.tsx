@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 
 import { EmptyState } from '@/components/empty/empty-state'
+import { ProfileHero } from '@/components/public/profile-hero'
 import { PublicDiaryCard } from '@/components/public/public-diary-card'
 
 type PageProps = {
@@ -24,6 +25,8 @@ type PublicPet = {
   slug: string
   is_public: boolean
   created_at: string
+  personality_code: string | null
+  personality_label: string | null
 }
 
 type PublicDiary = {
@@ -41,7 +44,7 @@ async function fetchPublicPet(slug: string): Promise<PublicPet | null> {
 
   const { data } = await supabase
     .from('pets')
-    .select('id, name, slug, is_public, created_at')
+    .select('id, name, slug, is_public, created_at, personality_code, personality_label')
     .eq('slug', slug)
     .eq('is_public', true)
     .maybeSingle<PublicPet>()
@@ -149,22 +152,15 @@ export default async function PublicProfilePage({ params }: PageProps) {
   const days = daysSince(pet.created_at)
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-12 px-4 pb-16 pt-10 sm:px-6">
-      {/* Hero — pet name + N일째 */}
-      <header className="flex flex-col items-center gap-3 pt-6 text-center">
-        <p className="text-[12px] font-medium uppercase tracking-[0.18em] text-[var(--color-mute)]">
-          buddy-note
-        </p>
-        <h1
-          className="text-[36px] font-bold leading-[1.15] text-[var(--color-ink)] sm:text-[44px]"
-          style={{ fontFamily: 'var(--font-serif)' }}
-        >
-          {pet.name}
-        </h1>
-        <p className="text-[14px] text-[var(--color-mute)]">
-          {pet.name}의 이야기 {days}일째
-        </p>
-      </header>
+    <main className="public-profile-surface mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-12 px-4 pb-16 pt-10 sm:px-6">
+      <ProfileHero
+        name={pet.name}
+        days={days}
+        diaryCount={diaries.length}
+        personalityCode={pet.personality_code}
+        personalityLabel={pet.personality_label}
+        images={diaries.map((d) => d.image_url_45 ?? d.image_url_11)}
+      />
 
       {/* Feed */}
       {diaries.length === 0 ? (
@@ -173,6 +169,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
           hint="다음에 다시 놀러 와주세요."
           tone="neutral"
           cta={null}
+          illustration="resting"
         />
       ) : (
         <section

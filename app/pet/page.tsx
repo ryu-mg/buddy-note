@@ -77,7 +77,7 @@ export default async function PetOverviewPage({ searchParams }: PageProps) {
           <ChevronLeft aria-hidden className="size-6" strokeWidth={1.8} />
         </Link>
         <h1 className="text-[18px] font-semibold text-[var(--color-ink)]">
-          마이페이지
+          내 정보
         </h1>
       </header>
 

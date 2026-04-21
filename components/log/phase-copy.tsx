@@ -38,20 +38,20 @@ type PhaseContent = {
 function buildPhases(petName: string): readonly [PhaseContent, PhaseContent, PhaseContent, PhaseContent] {
   return [
     {
-      title: '사진을 살펴보는 중이에요',
-      body: `${petName}가 오늘 뭘 했는지 천천히 읽는 중이에요.`,
+      title: '사진 들여다보는 중...',
+      body: `오늘 내 표정이 어떤지 천천히 보고 있어.`,
     },
     {
-      title: '오늘의 순간을 찾는 중이에요',
-      body: '눈에 띄는 장면을 하나씩 모아볼게요.',
+      title: '내 하루를 떠올리는 중...',
+      body: '냄새, 소리, 기분을 한 장면씩 모아볼게.',
     },
     {
-      title: `${petName}의 말투로 적는 중이에요`,
-      body: '평소 성격을 떠올리며 한 줄씩 적어볼게요.',
+      title: '나 평소처럼 적어볼게',
+      body: `${petName}답게 말이 나오도록 조금만 기다려줘.`,
     },
     {
-      title: '거의 다 됐어요',
-      body: '마지막 다듬기만 남았어요.',
+      title: '거의 다 적었어',
+      body: '마지막 문장만 포근하게 접어둘게.',
     },
   ] as const
 }
@@ -157,7 +157,7 @@ export function PhaseCopy({ petName, onCancel, startedAt }: Props) {
               'motion-safe:animate-in motion-safe:fade-in motion-safe:duration-200',
             )}
           >
-            AI가 조금 더 생각하고 있어요. 30초 안에 보여드릴게요.
+            내가 오늘 말이 잘 안 떠올라서 조금 더 생각하고 있어.
           </p>
         ) : null}
 
@@ -174,7 +174,7 @@ export function PhaseCopy({ petName, onCancel, startedAt }: Props) {
                 'transition-colors motion-reduce:transition-none',
               )}
             >
-              뒤로 갈래요
+              조금 있다 다시 할래
             </button>
           </div>
         ) : null}

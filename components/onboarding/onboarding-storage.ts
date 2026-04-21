@@ -25,6 +25,7 @@ export type OnboardingDraft = {
   /** Deprecated draft key kept for older localStorage payloads. */
   guardianRelationship?: string
   profilePhotoDataUrl?: string
+  additionalInfo?: string
   answers: Partial<Answers>
   lastStep: number
   savedAt: string // ISO
@@ -46,7 +47,7 @@ function sanitizeAnswers(x: unknown): Partial<Answers> {
 
 function clampStep(n: unknown): number {
   if (typeof n !== 'number' || Number.isNaN(n)) return 0
-  return Math.min(Math.max(Math.trunc(n), 0), 6)
+  return Math.min(Math.max(Math.trunc(n), 0), 7)
 }
 
 /**
@@ -98,6 +99,10 @@ export function readDraft(): OnboardingDraft | null {
       obj.profilePhotoDataUrl.startsWith('data:image/')
         ? obj.profilePhotoDataUrl
         : ''
+    const additionalInfo =
+      typeof obj.additionalInfo === 'string'
+        ? obj.additionalInfo.slice(0, 200)
+        : ''
     const answers = sanitizeAnswers(obj.answers)
     const lastStep = clampStep(obj.lastStep)
 
@@ -106,6 +111,7 @@ export function readDraft(): OnboardingDraft | null {
       breed,
       companionRelationship,
       profilePhotoDataUrl,
+      additionalInfo,
       answers,
       lastStep,
       savedAt,

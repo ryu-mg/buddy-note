@@ -5,6 +5,7 @@ import type { Option, OptionKey, Question } from '@/lib/pet-mbti'
 
 type QuestionCardProps = {
   question: Question
+  petName: string
   /** 1-based 질문 번호 (A11y H1 표기용) */
   index: number
   total: number
@@ -16,12 +17,17 @@ type QuestionCardProps = {
 
 export function QuestionCard({
   question,
+  petName,
   index,
   total,
   value,
   onChange,
   keyboardEnabled = true,
 }: QuestionCardProps) {
+  const displayName = petName.trim() || '반려동물'
+  const headline = question.headline.replaceAll('버디', displayName)
+  const prompt = question.prompt.replaceAll('버디', displayName)
+
   // A/B 단축 키 — 입력 필드 안에서만 비활성 (여기선 radio 뿐이라 항상 허용).
   useEffect(() => {
     if (!keyboardEnabled) return
@@ -52,23 +58,23 @@ export function QuestionCard({
       className="mx-auto w-full max-w-md"
     >
       <article
-        className="relative rounded-[12px] border border-[var(--line,#e5e7eb)] bg-[var(--paper,#fafaf5)] px-6 py-7 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_-12px_rgba(0,0,0,0.08)] motion-safe:[transform:rotate(-0.6deg)] motion-reduce:rotate-0"
+        className="relative rounded-[12px] border border-[var(--color-line)] bg-[var(--color-paper)] px-6 py-7 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_-12px_rgba(0,0,0,0.08)] motion-safe:[transform:rotate(-0.6deg)] motion-reduce:rotate-0"
       >
-        <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-[var(--mute,#6b7280)]">
+        <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-[var(--color-mute)]">
           질문 {index} / {total}
         </p>
         <h1
           id={`${question.id}-title`}
-          className="mt-3 text-[20px] font-bold leading-[1.35] text-[var(--ink,#1a1a1a)]"
+          className="mt-3 text-[20px] font-bold leading-[1.35] text-[var(--color-ink)]"
         >
-          {question.headline}
+          {headline}
         </h1>
-        <p className="mt-1.5 text-[14px] text-[var(--ink-soft,#3f3f3f)]">
-          {question.prompt}
+        <p className="mt-1.5 text-[14px] text-[var(--color-ink-soft)]">
+          {prompt}
         </p>
 
         <fieldset className="mt-5 flex flex-col gap-2">
-          <legend className="sr-only">{question.prompt}</legend>
+          <legend className="sr-only">{prompt}</legend>
           {question.options.map((opt) => (
             <OptionRow
               key={opt.key}
@@ -100,8 +106,8 @@ function OptionRow({
       className={[
         'group/option flex cursor-pointer items-start gap-3 rounded-[10px] border-2 px-4 py-3 transition-all duration-200 ease-out motion-reduce:transition-none',
         checked
-          ? 'border-[var(--accent,#e07a5f)] bg-[var(--accent-soft,#fde6e0)]'
-          : 'border-transparent bg-white hover:border-[var(--line,#e5e7eb)]',
+          ? 'border-[var(--color-accent-brand)] bg-[var(--color-accent-brand-soft)] shadow-[0_10px_24px_-18px_rgba(224,122,95,0.8)]'
+          : 'border-transparent bg-white hover:border-[var(--color-line)]',
       ].join(' ')}
     >
       <input
@@ -117,8 +123,8 @@ function OptionRow({
         className={[
           'mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 text-[11px] font-semibold transition-colors',
           checked
-            ? 'border-[var(--accent,#e07a5f)] bg-[var(--accent,#e07a5f)] text-white'
-            : 'border-[var(--line,#e5e7eb)] bg-white text-[var(--mute,#6b7280)] group-hover/option:border-[var(--ink-soft,#3f3f3f)]',
+            ? 'border-[var(--color-accent-brand)] bg-[var(--color-accent-brand)] text-white'
+            : 'border-[var(--color-line)] bg-white text-[var(--color-mute)] group-hover/option:border-[var(--color-ink-soft)]',
         ].join(' ')}
       >
         {option.key}
@@ -127,8 +133,8 @@ function OptionRow({
         className={[
           'text-[15px] leading-[1.5]',
           checked
-            ? 'text-[var(--ink,#1a1a1a)]'
-            : 'text-[var(--ink-soft,#3f3f3f)]',
+            ? 'font-semibold text-[var(--color-ink)]'
+            : 'text-[var(--color-ink-soft)]',
         ].join(' ')}
       >
         {option.label}

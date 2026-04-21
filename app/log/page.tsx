@@ -31,7 +31,7 @@ export default async function LogPage() {
 
   const { data: pet } = await supabase
     .from('pets')
-    .select('id, name, persona_prompt_fragment')
+    .select('id, name, persona_prompt_fragment, companion_relationship, guardian_relationship')
     .eq('user_id', user.id)
     .limit(1)
     .maybeSingle()
@@ -63,7 +63,13 @@ export default async function LogPage() {
         </p>
       </header>
 
-      <UploadForm petId={pet.id} petName={pet.name} />
+      <UploadForm
+        petId={pet.id}
+        petName={pet.name}
+        companionRelationship={
+          pet.companion_relationship ?? pet.guardian_relationship ?? null
+        }
+      />
     </main>
   )
 }

@@ -133,8 +133,7 @@ export default async function DiaryPage({ params }: PageProps) {
           aria-live="polite"
           className="rounded-[8px] border border-[var(--color-accent-brand-soft)] bg-[var(--color-accent-brand-soft)] px-4 py-3 text-[13px] leading-[1.6] text-[var(--color-ink-soft)]"
         >
-          AI가 잠시 놓쳤어요. 이건 임시 일기예요. 아래 &apos;다시 만들기&apos; 버튼으로 새로
-          만들어볼 수 있어요.
+          내가 오늘 말이 잘 안 떠올랐어. 잠깐 임시로 적어둘게.
         </section>
       ) : null}
 
@@ -210,7 +209,7 @@ export default async function DiaryPage({ params }: PageProps) {
               aria-disabled="true"
               className="rounded-[10px] border border-[var(--color-line)] px-4 py-2.5 text-[13px] font-medium text-[var(--color-mute)] opacity-60"
             >
-              다시 만들기
+              다시 해볼래
             </button>
             <p className="text-[12px] text-[var(--color-mute)]">
               이 기능은 곧 준비될게요.

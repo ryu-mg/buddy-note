@@ -61,6 +61,30 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
             gap: '24px',
           }}
         >
+          <svg
+            viewBox="0 0 180 140"
+            aria-label="고개를 갸웃한 버디"
+            role="img"
+            style={{ width: '150px', height: '116px' }}
+          >
+            <g transform="rotate(-8 90 72)">
+              <path
+                d="M44 78c0-31 23-54 53-54s54 23 54 54-24 49-55 49-52-18-52-49Z"
+                fill="#fafaf5"
+                stroke="#1a1a1a"
+                strokeWidth="4"
+              />
+              <path
+                d="M56 38c-10-16-5-30 10-38 9 15 7 29-4 42M128 39c8-15 22-20 37-12-3 17-15 25-32 22"
+                fill="#fafaf5"
+                stroke="#1a1a1a"
+                strokeWidth="4"
+                strokeLinecap="round"
+              />
+              <path d="M80 77h.5M114 77h.5" stroke="#1a1a1a" strokeWidth="7" strokeLinecap="round" />
+              <path d="M94 84c4 2 8 2 11 0" stroke="#e07a5f" strokeWidth="4" strokeLinecap="round" />
+            </g>
+          </svg>
           <h1
             style={{
               margin: 0,
@@ -81,7 +105,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
               maxWidth: '30ch',
             }}
           >
-            새로고침하면 다시 작동할 거예요.
+            내가 잠깐 길을 놓쳤어. 새로고침하면 다시 찾아볼게.
           </p>
           {error.digest && (
             <p

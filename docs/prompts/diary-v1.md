@@ -6,7 +6,7 @@
 - **Version**: v1 (2026-04-20)
 - **Model target**: `claude-sonnet-4-5` (Week 0 A/B 로 `claude-sonnet-4-6` 확정 예정, AGENTS.md D4)
 - **호출 경로**: `lib/llm/generate-diary.ts` → `lib/llm/client.ts`
-- **출력**: `diarySchema` (title / body / suggestedTags) — `lib/llm/schemas.ts`
+- **출력**: `diarySchema` (title / body / suggestedTags / mood) — `lib/llm/schemas.ts`
 - **입력**: 사진 (multimodal) + `{ petName, personaFragment, memo, recentCallbacks }`
 
 변경 시 새 파일 (`diary-v2.md`) 로 복사 후 수정한다. 기존 버전은 **삭제 금지** (A/B / 재현 목적, `diaries.model_used` 에 버전 tag 로 기록).
@@ -43,7 +43,8 @@ recentCallbacks:
 {
   "title": "string, 1~40자, 강아지 말투 허용",
   "body": "string, 20~600자, 강아지 1인칭 반말 일기",
-  "suggestedTags": ["string", "..."]
+  "suggestedTags": ["string", "..."],
+  "mood": "bright | calm | tired | curious | grumpy | lonely"
 }
 ```
 
@@ -51,6 +52,9 @@ recentCallbacks:
 `meal`, `walk`, `bathroom`, `play`, `sleep`, `outing`, `bath`, `snack`.
 
 최대 8개, 0개 OK. 사진/메모에서 근거 없으면 넣지 말 것.
+
+`mood` 는 오늘 일기의 전체 분위기 1개만 고른다:
+`bright`, `calm`, `tired`, `curious`, `grumpy`, `lonely`.
 
 ---
 
@@ -66,6 +70,7 @@ recentCallbacks:
 - 어조: 반말. 권유형·다정한 톤. 힘이 너무 들어간 과장 금지.
 - 길이: body 는 2~4문단, 총 80~500자가 자연스럽다. 너무 짧으면 장면 묘사를, 너무 길면 문단을 줄인다.
 - title: 짧은 한 마디. 제목이 사진/메모의 핵심을 암시해야 한다. 예: "비 오는 날 현관 탐험", "엄마 따라 거실까지".
+- mood: 오늘 일기의 전체 분위기 1개. 밝게 뛰어논 날은 bright, 평온하면 calm, 지치거나 졸리면 tired, 새로움을 탐색하면 curious, 마음에 안 든 일이 있으면 grumpy, 기다림·외로움이 크면 lonely.
 
 [personaFragment 활용]
 - personaFragment 는 이 강아지의 고정 성격이다. 말투와 행동 묘사를 여기에 맞춘다.
@@ -93,9 +98,10 @@ recentCallbacks:
 
 [출력 형식 — 엄격]
 - **JSON 객체 하나만** 출력한다. 앞뒤 설명·인사·code fence 금지.
-- 스키마: { "title": string, "body": string, "suggestedTags": string[] }
+- 스키마: { "title": string, "body": string, "suggestedTags": string[], "mood": string }
 - title 1~40자, body 20~600자.
 - suggestedTags 는 다음 vocabulary 중에서만 고른다: meal, walk, bathroom, play, sleep, outing, bath, snack. 최대 8개. 근거 없으면 빈 배열.
+- mood 는 다음 vocabulary 중 하나만 고른다: bright, calm, tired, curious, grumpy, lonely.
 - JSON 외 텍스트가 한 글자라도 있으면 파싱이 실패한다.
 
 [실패 처리]
@@ -128,7 +134,8 @@ recentCallbacks:
 {
   "title": "하천길에서 오리랑 눈 마주쳤다",
   "body": "오늘은 늘 가던 길 말고 다른 쪽으로 갔어. 새 길 냄새는 진짜 다르다. 돌멩이, 풀, 물 냄새, 전부 처음이었어.\n\n물가에 앉아 있는 오리랑 잠깐 눈이 마주쳤는데, 나는 먼저 꼬리부터 흔들었어. 엄마가 목줄 당겨서 가까이는 못 갔지만 괜찮아. 다음에 또 오면 돼.\n\n집에 와서는 바로 뻗었다. 새 길은 역시 기운을 다 쓴다.",
-  "suggestedTags": ["walk", "outing"]
+  "suggestedTags": ["walk", "outing"],
+  "mood": "curious"
 }
 ```
 
@@ -152,7 +159,8 @@ recentCallbacks: []
 {
   "title": "비 오는 날의 긴 낮잠",
   "body": "창 밖에 비 소리가 계속 났어. 나는 그런 날이 사실 좋아. 산책 안 가도 되니까.\n\n엄마가 소파 옆에서 간식 하나를 줬는데, 바삭한 쪽이었다. 한 조각 천천히 씹고, 나머지는 나중을 위해 남겼어. 배부르니까 바로 눈이 감겼다.\n\n깨어 보니 비는 아직이고 엄마는 여전히 옆에 있었다. 오늘은 이 정도면 충분해.",
-  "suggestedTags": ["snack", "sleep"]
+  "suggestedTags": ["snack", "sleep"],
+  "mood": "calm"
 }
 ```
 

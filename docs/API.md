@@ -304,7 +304,7 @@ All actions require a Supabase session and return user-facing Korean errors inst
 | `UPSTASH_REDIS_REST_URL` | rate limit | optional in dev; missing = stub mode |
 | `UPSTASH_REDIS_REST_TOKEN` | rate limit | optional in dev; missing = stub mode |
 
-Full template: `.envs/example.env`.
+Full template: `.env.example`.
 
 ## Versioning Policy
 

@@ -21,6 +21,7 @@ type PetEditFormProps = {
     name: string
     breed: string
     companionRelationship: string
+    additionalInfo: string
     persona_answers: PersonaAnswers
   }
 }
@@ -48,6 +49,7 @@ export function PetEditForm({ pet }: PetEditFormProps) {
   const [companionRelationship, setCompanionRelationship] = useState(
     pet.companionRelationship,
   )
+  const [additionalInfo, setAdditionalInfo] = useState(pet.additionalInfo)
   const [answers, setAnswers] = useState<Partial<Answers>>(() =>
     toAnswers(pet.persona_answers),
   )
@@ -73,6 +75,7 @@ export function PetEditForm({ pet }: PetEditFormProps) {
     fd.set('name', name.trim())
     fd.set('breed', breed.trim())
     fd.set('companionRelationship', companionRelationship.trim())
+    fd.set('additionalInfo', additionalInfo.trim())
     for (const id of QUESTION_IDS) {
       fd.set(id, answers[id] ?? '')
     }
@@ -183,6 +186,30 @@ export function PetEditForm({ pet }: PetEditFormProps) {
               placeholder="예) 누나"
               className="w-full rounded-[var(--radius-input)] border border-[var(--color-line)] bg-white px-3 py-2.5 text-[15px] text-[var(--color-ink)] placeholder:text-zinc-400 focus:border-[var(--color-accent-brand)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-brand)]/30"
             />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label
+              htmlFor="edit-additional-info"
+              className="text-[13px] font-medium text-[var(--color-ink)]"
+            >
+              버디만의 이야기
+            </label>
+            <textarea
+              id="edit-additional-info"
+              maxLength={200}
+              rows={4}
+              value={additionalInfo}
+              onChange={(e) => {
+                setAdditionalInfo(e.target.value.slice(0, 200))
+                setError(null)
+              }}
+              placeholder="예) 비 오는 날 창밖 보는 걸 좋아해요"
+              className="min-h-28 w-full resize-none rounded-[var(--radius-input)] border border-[var(--color-line)] bg-white px-3 py-2.5 text-[15px] leading-[1.55] text-[var(--color-ink)] placeholder:text-zinc-400 focus:border-[var(--color-accent-brand)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-brand)]/30"
+            />
+            <p className="text-right text-[12px] tabular-nums text-[var(--color-mute)]">
+              {additionalInfo.length}/200
+            </p>
           </div>
         </section>
 

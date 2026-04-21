@@ -12,6 +12,7 @@ import { useRouter } from 'next/navigation'
 import {
   buildPersonaPromptFragment,
   calculatePersonality,
+  CHARACTER_TRAITS,
   isCompleteAnswers,
   QUESTIONS,
   QUESTION_IDS,
@@ -25,6 +26,7 @@ import {
   NameForm,
   type NameFormValues,
 } from '@/components/onboarding/name-form'
+import { FreeDescriptionForm } from '@/components/onboarding/free-description-form'
 import { RelationshipForm } from '@/components/onboarding/relationship-form'
 import {
   clearDraft,
@@ -33,12 +35,13 @@ import {
 } from '@/components/onboarding/onboarding-storage'
 import { savePet, type SavePetState } from '../../actions'
 
-const TOTAL_STEPS = 7 // 0 (정보) + 1 (관계) + 4 (질문) + 1 (확정)
+const TOTAL_STEPS = 8 // 0 (정보) + 1 (관계) + 4 (질문) + 1 (자유기술) + 1 (확정)
 
 type Draft = {
   info: NameFormValues
   companionRelationship: string
   profilePhotoDataUrl: string
+  additionalInfo: string
   answers: Partial<Answers>
 }
 
@@ -46,6 +49,7 @@ const emptyDraft: Draft = {
   info: { name: '', breed: '' },
   companionRelationship: '',
   profilePhotoDataUrl: '',
+  additionalInfo: '',
   answers: {},
 }
 
@@ -81,6 +85,7 @@ export default function OnboardingStepPage(props: PageProps) {
         },
         companionRelationship: stored.companionRelationship,
         profilePhotoDataUrl: stored.profilePhotoDataUrl ?? '',
+        additionalInfo: stored.additionalInfo ?? '',
         answers: stored.answers,
       })
       /* eslint-enable react-hooks/set-state-in-effect */
@@ -96,6 +101,7 @@ export default function OnboardingStepPage(props: PageProps) {
       breed: draft.info.breed,
       companionRelationship: draft.companionRelationship,
       profilePhotoDataUrl: draft.profilePhotoDataUrl,
+      additionalInfo: draft.additionalInfo,
       answers: draft.answers,
       lastStep: step,
     })
@@ -113,6 +119,11 @@ export default function OnboardingStepPage(props: PageProps) {
 
   const setCompanionRelationship = useCallback((next: string) => {
     setDraft((d) => ({ ...d, companionRelationship: next }))
+    setStepError(null)
+  }, [])
+
+  const setAdditionalInfo = useCallback((next: string) => {
+    setDraft((d) => ({ ...d, additionalInfo: next }))
     setStepError(null)
   }, [])
 
@@ -176,6 +187,10 @@ export default function OnboardingStepPage(props: PageProps) {
     goTo(step - 1)
   }, [step, goTo])
 
+  const handleRetake = useCallback(() => {
+    goTo(2)
+  }, [goTo])
+
   // Enter 키로 다음 스텝. 최종 step 6 은 form submit 으로 저장.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -205,7 +220,7 @@ export default function OnboardingStepPage(props: PageProps) {
     return (
       <div
         aria-hidden
-        className="mx-auto mt-10 h-40 w-full max-w-md rounded-[12px] bg-[var(--line,#e5e7eb)]/40"
+        className="mx-auto mt-10 h-40 w-full max-w-md rounded-[12px] bg-[var(--color-line)]/40"
       />
     )
   }
@@ -238,8 +253,16 @@ export default function OnboardingStepPage(props: PageProps) {
             index={step - 1}
             total={4}
             question={QUESTIONS[step - 2]}
+            petName={draft.info.name}
             value={draft.answers[QUESTION_IDS[step - 2]] ?? null}
             onChange={(v) => setAnswer(QUESTION_IDS[step - 2], v)}
+          />
+        ) : step === 6 ? (
+          <FreeDescriptionForm
+            petName={draft.info.name}
+            value={draft.additionalInfo}
+            onChange={setAdditionalInfo}
+            error={stepError}
           />
         ) : (
           <ConfirmStep draft={draft} />
@@ -258,7 +281,7 @@ export default function OnboardingStepPage(props: PageProps) {
         step={step}
         total={TOTAL_STEPS}
         canAdvance={canAdvance}
-        onPrev={handlePrev}
+        onPrev={step === TOTAL_STEPS - 1 ? handleRetake : handlePrev}
         onNext={handleNext}
         draft={draft}
       />
@@ -291,6 +314,7 @@ function ConfirmStep({ draft }: { draft: Draft }) {
         breed: draft.info.breed,
         companionRelationship: draft.companionRelationship,
         answers: draft.answers as Answers,
+        additionalInfo: draft.additionalInfo,
       })
     : ''
   const personality = ready
@@ -302,39 +326,73 @@ function ConfirmStep({ draft }: { draft: Draft }) {
       aria-labelledby="confirm-title"
       className="mx-auto w-full max-w-md"
     >
-      <article className="rounded-[12px] border border-[var(--line,#e5e7eb)] bg-[var(--paper,#fafaf5)] px-6 py-7 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_-12px_rgba(0,0,0,0.08)] motion-safe:[transform:rotate(-0.4deg)] motion-reduce:rotate-0">
-        <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-[var(--mute,#6b7280)]">
-          소개 미리보기
+      <article className="rounded-[12px] border border-[var(--color-line)] bg-[var(--color-paper)] px-6 py-7 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_-12px_rgba(0,0,0,0.08)] motion-safe:[transform:rotate(-0.4deg)] motion-reduce:rotate-0">
+        <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-[var(--color-mute)]">
+          소개 확인
         </p>
         <h1
           id="confirm-title"
-          className="mt-3 text-[20px] font-bold leading-[1.35] text-[var(--ink,#1a1a1a)]"
+          className="mt-3 text-[21px] font-bold leading-[1.35] text-[var(--color-ink)]"
         >
-          이렇게 기록해둘게요
+          이제 {draft.info.name || '버디'}답게 적어볼게요
         </h1>
-        <p className="mt-1.5 text-[14px] text-[var(--ink-soft,#3f3f3f)]">
-          내용이 맞으면 저장해주세요. 나중에 언제든 다시 바꿀 수 있어요.
+        <p className="mt-1.5 text-[14px] text-[var(--color-ink-soft)]">
+          내용이 맞으면 저장해주세요. 다음 버디노트부터 이 성격을 기억할게요.
         </p>
 
         {ready ? (
           <>
-            <div className="mt-5 rounded-[10px] bg-white/70 px-4 py-4">
-              <p className="text-[13px] font-medium text-[var(--mute,#6b7280)]">
-                {draft.info.name}은
+            <div className="mt-6 flex flex-col items-center text-center">
+              <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border border-[var(--color-line)] bg-white shadow-[0_12px_30px_-20px_rgba(0,0,0,0.35)]">
+                {draft.profilePhotoDataUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={draft.profilePhotoDataUrl}
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <span className="text-[38px] font-serif text-[var(--color-accent-brand)]">
+                    {draft.info.name.trim().slice(0, 1)}
+                  </span>
+                )}
+              </div>
+              <p className="mt-5 text-[15px] font-medium text-[var(--color-mute)]">
+                {draft.info.name}는
               </p>
-              <p className="mt-1 text-[22px] font-bold leading-[1.25] text-[var(--ink,#1a1a1a)]">
-                {personality?.code} · {personality?.label}
+              <p className="mt-1 font-serif text-[54px] font-semibold leading-none text-[var(--color-ink)]">
+                {personality?.code}
+              </p>
+              <p className="mt-2 text-[18px] font-semibold text-[var(--color-accent-brand)]">
+                {personality?.label}
               </p>
             </div>
-            <blockquote
-              className="mt-4 whitespace-pre-wrap border-l-2 border-[var(--accent,#e07a5f)] bg-white/60 px-4 py-4 text-[15px] leading-[1.7] text-[var(--ink,#1a1a1a)]"
-              style={{ fontFamily: '"Nanum Myeongjo", "RIDIBatang", serif' }}
-            >
-              {fragment}
-            </blockquote>
+            {personality ? (
+              <ul className="mt-5 grid gap-2">
+                {CHARACTER_TRAITS[personality.code].map((trait) => (
+                  <li
+                    key={trait}
+                    className="rounded-[var(--radius-button)] bg-white/70 px-4 py-2.5 text-[14px] leading-[1.45] text-[var(--color-ink-soft)]"
+                  >
+                    {trait}
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+            {draft.additionalInfo.trim() ? (
+              <blockquote className="mt-4 border-l-2 border-[var(--color-accent-brand)] bg-white/60 px-4 py-3 text-[14px] leading-[1.7] text-[var(--color-ink)]">
+                {draft.additionalInfo.trim()}
+              </blockquote>
+            ) : null}
+            <details className="mt-4 rounded-[var(--radius-button)] bg-white/55 px-4 py-3 text-[13px] text-[var(--color-mute)]">
+              <summary className="cursor-pointer font-medium text-[var(--color-ink-soft)]">
+                프롬프트 조각 보기
+              </summary>
+              <p className="mt-3 whitespace-pre-wrap leading-[1.65]">{fragment}</p>
+            </details>
           </>
         ) : (
-          <p className="mt-5 rounded-[8px] bg-[var(--accent-soft,#fde6e0)] px-3 py-2 text-[13px] text-[var(--error,#b04a4a)]">
+          <p className="mt-5 rounded-[8px] bg-[var(--color-accent-brand-soft)] px-3 py-2 text-[13px] text-[var(--color-error)]">
             앞 단계에서 이름, 견종, 반려인 호칭, 4문항을 마저 채워주세요.
           </p>
         )}
@@ -370,7 +428,7 @@ function StepNav({
         type="button"
         onClick={onPrev}
         disabled={step === 0}
-        className="rounded-[10px] px-4 py-2.5 text-sm font-medium text-[var(--ink-soft,#3f3f3f)] transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-30"
+        className="rounded-[10px] px-4 py-2.5 text-sm font-medium text-[var(--color-ink-soft)] transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-30"
       >
         이전
       </button>
@@ -378,7 +436,7 @@ function StepNav({
         type="button"
         onClick={onNext}
         disabled={!canAdvance}
-        className="rounded-[10px] bg-[var(--accent,#e07a5f)] px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+        className="rounded-[10px] bg-[var(--color-accent-brand)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_10px_24px_-16px_rgba(224,122,95,0.9)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:bg-[var(--color-line)] disabled:text-[var(--color-mute)] disabled:shadow-none"
       >
         다음
       </button>
@@ -416,9 +474,10 @@ function SubmitRow({
       <input type="hidden" name="breed" value={draft.info.breed} />
       <input
         type="hidden"
-        name="companionRelationship"
-        value={draft.companionRelationship}
+      name="companionRelationship"
+      value={draft.companionRelationship}
       />
+      <input type="hidden" name="additionalInfo" value={draft.additionalInfo} />
       <input
         type="hidden"
         name="profilePhotoDataUrl"
@@ -436,7 +495,7 @@ function SubmitRow({
       {state.error ? (
         <p
           role="alert"
-          className="rounded-[8px] bg-[var(--accent-soft,#fde6e0)] px-3 py-2 text-[13px] text-[var(--error,#b04a4a)]"
+          className="rounded-[8px] bg-[var(--color-accent-brand-soft)] px-3 py-2 text-[13px] text-[var(--color-error)]"
         >
           {state.error}
         </p>
@@ -447,15 +506,15 @@ function SubmitRow({
           type="button"
           onClick={onPrev}
           disabled={pending}
-          className="rounded-[10px] px-4 py-2.5 text-sm font-medium text-[var(--ink-soft,#3f3f3f)] transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-30"
+          className="rounded-[10px] px-4 py-2.5 text-sm font-medium text-[var(--color-ink-soft)] transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-30"
         >
-          이전
+          다시 답할래요
         </button>
         <button
           type="submit"
           disabled={!ready || pending}
           aria-busy={pending}
-          className="rounded-[10px] bg-[var(--accent,#e07a5f)] px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+          className="rounded-[10px] bg-[var(--color-accent-brand)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_10px_24px_-16px_rgba(224,122,95,0.9)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:bg-[var(--color-line)] disabled:text-[var(--color-mute)] disabled:shadow-none"
         >
           {pending ? '저장하는 중…' : '저장할게요'}
         </button>

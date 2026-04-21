@@ -199,10 +199,8 @@ new-project/
 ├── CLAUDE.md                         # → AGENTS.md (symlink)
 ├── package.json
 ├── .nvmrc                            # 22 (Next 16 요건 >=20.9.0)
-├── .envs/                            # 모든 env 파일은 여기서 관리
-│   ├── example.env                   # 템플릿 (커밋 대상)
-│   ├── .gitignore                    # example.env + 본 .gitignore 외 전부 제외
-│   └── local.env                     # 각자 생성 (gitignore)
+├── .env.example                      # Next.js env 템플릿 (커밋 대상)
+├── .env.local                        # 각자 생성 (gitignore)
 └── README.md                         # Next.js 기본 (나중에 프로젝트용으로 교체)
 ```
 
@@ -219,9 +217,8 @@ nvm use   # .nvmrc → 22
 bun install
 
 # 환경변수 (Supabase 프로젝트는 dashboard에서 생성 — Region: Seoul)
-cp .envs/example.env .envs/local.env
-ln -sf .envs/local.env .env.local     # Next.js 는 루트 .env.local 만 인식
-# .envs/local.env 채우기:
+cp .env.example .env.local
+# .env.local 채우기:
 #   NEXT_PUBLIC_SUPABASE_URL=...
 #   NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 #   SUPABASE_SERVICE_ROLE_KEY=...

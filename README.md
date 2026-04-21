@@ -43,10 +43,9 @@ SNS에 반려동물 콘텐츠 올리는 한국 반려인.
 nvm use
 bun install
 
-cp .envs/example.env .envs/local.env
-ln -sf .envs/local.env .env.local
+cp .env.example .env.local
 
-# .envs/local.env 채우기 (Supabase / Anthropic / Upstash / MEMORY_WORKER_SECRET)
+# .env.local 채우기 (Supabase / Anthropic / Upstash / MEMORY_WORKER_SECRET)
 
 # Supabase 프로젝트 생성 후
 supabase link --project-ref <ref>
@@ -117,7 +116,7 @@ scripts/         # llm-benchmark/ (Bun 서브프로젝트)
 rules/           # architecture.md, code-conventions.md
 docs/            # 제품 문서 (MBTI 문항 등)
 types/           # database.ts
-.envs/           # example.env + local.env (gitignore)
+.env.example     # env 템플릿 (.env.local 등 실제 값 파일은 gitignore)
 ```
 
 ## 문서

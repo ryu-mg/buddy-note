@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 import { recentCallbackSchema, type RecentCallback } from '@/lib/llm/memory-schemas'
+import { DIARY_MOODS } from '@/lib/mood'
 import type { LogTag } from '@/types/database'
 
 /**
@@ -20,6 +21,7 @@ export const LOG_TAG_VALUES = [
 ] as const satisfies readonly LogTag[]
 
 export const logTagSchema = z.enum(LOG_TAG_VALUES)
+export const diaryMoodSchema = z.enum(DIARY_MOODS)
 
 /**
  * LLM output shape for a single diary generation.
@@ -27,11 +29,13 @@ export const logTagSchema = z.enum(LOG_TAG_VALUES)
  * - `title`: 짧은 한 마디. 1~40자.
  * - `body`: 강아지 1인칭 한국어 일기. 20~600자.
  * - `suggestedTags`: `LogTag` vocabulary 서브셋, 최대 8개 (빈 배열 OK).
+ * - `mood`: 하루 분위기 1개. 캘린더/타임라인 색상에 사용.
  */
 export const diarySchema = z.object({
   title: z.string().min(1).max(40),
   body: z.string().min(20).max(600),
   suggestedTags: z.array(logTagSchema).max(8),
+  mood: diaryMoodSchema,
 })
 
 export type DiaryOutput = z.infer<typeof diarySchema>
@@ -59,9 +63,9 @@ export const diaryInputSchema = z.object({
   photoMediaType: z.enum(['image/jpeg', 'image/png', 'image/gif', 'image/webp']),
   petName: z.string().trim().min(1).max(24),
   // personaFragment 는 `buildPersonaPromptFragment` (lib/pet-mbti.ts) 가
-  // 5개 고정 option fragment 를 " / " 로 이어 만든다. 이론적 상한은 ~400자
-  // 수준이지만, DB row 가 poisoning 됐을 때를 대비해 500자 cap 으로 방어.
-  personaFragment: z.string().min(1).max(500),
+  // 4개 고정 option fragment + optional additional_info 를 이어 만든다.
+  // DB row poisoning 을 대비해 800자 cap 으로 방어.
+  personaFragment: z.string().min(1).max(800),
   memo: z.string().max(200).optional().default(''),
   recentCallbacks: z.array(recentCallbackSchema).max(10).optional().default([]),
 })

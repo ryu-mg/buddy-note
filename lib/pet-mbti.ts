@@ -56,6 +56,8 @@ export type PersonalityResult = {
   label: string
 }
 
+export type PersonalityTraitMap = Record<PersonalityCode, readonly string[]>
+
 export const QUESTIONS: Question[] = [
   {
     id: 'q1',
@@ -160,6 +162,25 @@ export const PERSONALITY_LABELS: Record<PersonalityCode, string> = {
   ENTJ: '당당한 골목 대장',
 }
 
+export const CHARACTER_TRAITS: PersonalityTraitMap = {
+  ISTJ: ['익숙한 루틴을 좋아해', '차분히 살피고 기억해', '약속한 시간을 잘 알아차려'],
+  ISFJ: ['곁을 조용히 지켜줘', '익숙한 사람에게 깊이 다정해', '집의 작은 변화를 잘 알아'],
+  INFJ: ['반려인 마음을 오래 바라봐', '조용한 교감을 좋아해', '낯선 일에도 의미를 찾아'],
+  INTJ: ['혼자 생각하는 시간이 필요해', '새 규칙을 빠르게 파악해', '원하는 길이 분명해'],
+  ISTP: ['냄새와 소리를 오래 관찰해', '느긋하게 자기 속도를 지켜', '필요할 때만 딱 움직여'],
+  ISFP: ['포근한 분위기에 마음을 열어', '감정 표현이 부드러워', '좋아하는 감각을 오래 기억해'],
+  INFP: ['상상하듯 냄새를 따라가', '편한 사람에게 마음을 깊게 줘', '담요 같은 안정감을 좋아해'],
+  INTP: ['궁금한 건 끝까지 확인해', '새 냄새를 연구하듯 맡아', '예상 밖 장면에 눈이 반짝여'],
+  ESTP: ['문이 열리면 바로 움직여', '새 친구에게 겁 없이 다가가', '순간의 재미를 놓치지 않아'],
+  ESFP: ['분위기를 금방 환하게 만들어', '칭찬에 꼬리가 먼저 반응해', '산책길의 주인공이 돼'],
+  ENFP: ['새로운 장면을 먼저 탐험해', '사람과 친구를 좋아해', '기분 좋은 변화를 반겨'],
+  ENTP: ['놀이 방법을 자꾸 바꿔봐', '장난감의 다른 쓰임을 찾아', '예상 못한 행동으로 웃겨줘'],
+  ESTJ: ['산책 순서를 잘 기억해', '해야 할 일을 씩씩하게 해', '무리를 든든하게 이끌어'],
+  ESFJ: ['사람들 사이에서 빛나', '반려인 반응을 빠르게 읽어', '다정한 애교를 아낌없이 줘'],
+  ENFJ: ['분위기를 먼저 살펴줘', '함께 움직일 때 더 신나', '마음을 읽고 다가와'],
+  ENTJ: ['원하는 방향이 또렷해', '새 공간에서도 당당해', '놀이의 흐름을 주도해'],
+}
+
 export function getQuestion(id: QuestionId): Question {
   const q = QUESTIONS.find((x) => x.id === id)
   if (!q) throw new Error(`Unknown question id: ${id}`)
@@ -207,6 +228,7 @@ export function buildPersonaPromptFragment(input: {
   breed: string
   companionRelationship: string
   answers: Answers
+  additionalInfo?: string | null
 }): string {
   const name = input.name.trim()
   const breed = input.breed.trim()
@@ -226,7 +248,12 @@ export function buildPersonaPromptFragment(input: {
   const joined = fragments.join(' / ')
   const subject = breed ? `${name}, ${breed}` : name
   const companion = companionRelationship || '반려인'
-  return `나는 ${subject}${josaYa(subject)}. ${companion}${josaNeun(companion)} 내 반려인이야.\n내 성격 유형은 ${personality.code} · ${personality.label}.\n나를 한 줄로 말하면:\n${joined}.`
+  const base = `나는 ${subject}${josaYa(subject)}. ${companion}${josaNeun(companion)} 내 반려인이야.\n내 성격 유형은 ${personality.code} · ${personality.label}.\n나를 한 줄로 말하면:\n${joined}.`
+  const additionalInfo = input.additionalInfo?.trim()
+
+  if (!additionalInfo) return base
+
+  return `${base}\n반려인이 들려준 이야기: "${additionalInfo}"`
 }
 
 // 마지막 음절에 받침이 있으면 '이야', 없으면 '야'. 한글이 아니면 '야'로 폴백.

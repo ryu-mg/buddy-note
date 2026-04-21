@@ -23,6 +23,14 @@
   --color-accent-brand: #e07a5f;       /* 테라코타 */
   --color-accent-brand-soft: #fde6e0;
 
+  /* DESIGN v0.2 — Mood palette (no purple; grumpy uses muted umber). */
+  --color-mood-bright: #e0a83f;
+  --color-mood-calm: #6f9f86;
+  --color-mood-tired: #9b9489;
+  --color-mood-curious: #5f8aa8;
+  --color-mood-grumpy: #8a6650;
+  --color-mood-lonely: #7f8f9f;
+
   /* DESIGN §3 — Semantic */
   --color-success: #4a7c59;
   --color-error: #b04a4a;
@@ -98,44 +106,73 @@
   --sidebar-ring: var(--color-accent-brand);
 }
 
-/* Dark mode — minimal invert. Not v1 focus per DESIGN.md but defined so
-   `.dark` doesn't fall back to raw shadcn greys. */
+/* DESIGN v0.2 — warm-dark, applied by class and system preference. */
 .dark {
-  --background: #111111;
-  --foreground: #f5f5f0;
+  --color-paper: #211b17;
+  --color-ink: #f5efe6;
+  --color-ink-soft: #d8cabe;
+  --color-mute: #aa9a8d;
+  --color-line: #3a302a;
+  --color-bg: #17120f;
+  --color-accent-brand-soft: #3a2620;
 
-  --card: #1a1a1a;
-  --card-foreground: #f5f5f0;
-
-  --popover: #1a1a1a;
-  --popover-foreground: #f5f5f0;
-
+  --background: var(--color-bg);
+  --foreground: var(--color-ink);
+  --card: var(--color-bg);
+  --card-foreground: var(--color-ink);
+  --popover: var(--color-bg);
+  --popover-foreground: var(--color-ink);
   --primary: var(--color-accent-brand);
   --primary-foreground: #ffffff;
-
-  --secondary: #1f1f1f;
-  --secondary-foreground: #f5f5f0;
-
-  --muted: #1f1f1f;
-  --muted-foreground: #a1a1aa;
-
-  --accent: #3a2620;
-  --accent-foreground: #f5f5f0;
-
+  --secondary: var(--color-paper);
+  --secondary-foreground: var(--color-ink);
+  --muted: var(--color-paper);
+  --muted-foreground: var(--color-mute);
+  --accent: var(--color-accent-brand-soft);
+  --accent-foreground: var(--color-ink);
   --destructive: var(--color-error);
-
-  --border: rgba(255, 255, 255, 0.08);
-  --input: rgba(255, 255, 255, 0.12);
+  --border: var(--color-line);
+  --input: var(--color-line);
   --ring: var(--color-accent-brand);
-
-  --sidebar: #151515;
-  --sidebar-foreground: #f5f5f0;
+  --sidebar: var(--color-paper);
+  --sidebar-foreground: var(--color-ink);
   --sidebar-primary: var(--color-accent-brand);
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #3a2620;
-  --sidebar-accent-foreground: #f5f5f0;
-  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-accent: var(--color-accent-brand-soft);
+  --sidebar-accent-foreground: var(--color-ink);
+  --sidebar-border: var(--color-line);
   --sidebar-ring: var(--color-accent-brand);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-paper: #211b17;
+    --color-ink: #f5efe6;
+    --color-ink-soft: #d8cabe;
+    --color-mute: #aa9a8d;
+    --color-line: #3a302a;
+    --color-bg: #17120f;
+    --color-accent-brand-soft: #3a2620;
+    --background: var(--color-bg);
+    --foreground: var(--color-ink);
+    --card: var(--color-bg);
+    --card-foreground: var(--color-ink);
+    --popover: var(--color-bg);
+    --popover-foreground: var(--color-ink);
+    --secondary: var(--color-paper);
+    --secondary-foreground: var(--color-ink);
+    --muted: var(--color-paper);
+    --muted-foreground: var(--color-mute);
+    --accent: var(--color-accent-brand-soft);
+    --accent-foreground: var(--color-ink);
+    --border: var(--color-line);
+    --input: var(--color-line);
+    --sidebar: var(--color-paper);
+    --sidebar-foreground: var(--color-ink);
+    --sidebar-accent: var(--color-accent-brand-soft);
+    --sidebar-accent-foreground: var(--color-ink);
+    --sidebar-border: var(--color-line);
+  }
 }
 
 /* ---------------------------------------------------------------------------
@@ -186,6 +223,12 @@
   --color-bg: var(--color-bg);
   --color-accent-brand: var(--color-accent-brand);
   --color-accent-brand-soft: var(--color-accent-brand-soft);
+  --color-mood-bright: var(--color-mood-bright);
+  --color-mood-calm: var(--color-mood-calm);
+  --color-mood-tired: var(--color-mood-tired);
+  --color-mood-curious: var(--color-mood-curious);
+  --color-mood-grumpy: var(--color-mood-grumpy);
+  --color-mood-lonely: var(--color-mood-lonely);
   --color-success: var(--color-success);
   --color-error: var(--color-error);
   --color-warn: var(--color-warn);
@@ -230,6 +273,54 @@
   :focus-visible {
     outline: 2px solid var(--color-accent-brand);
     outline-offset: 2px;
+  }
+  @keyframes shutter-flash {
+    0% {
+      opacity: 0;
+      background: transparent;
+    }
+    12% {
+      opacity: 1;
+      background: white;
+    }
+    100% {
+      opacity: 0;
+      background: transparent;
+    }
+  }
+  @keyframes polaroid-drop {
+    0% {
+      opacity: 0;
+      transform: translateY(-26px) rotate(-8deg) scale(0.94);
+    }
+    45% {
+      opacity: 1;
+      transform: translateY(6px) rotate(-2deg) scale(1);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) rotate(-2deg) scale(1);
+    }
+  }
+  @keyframes soft-fade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @media (pointer: fine) and (min-width: 1024px) {
+    .public-profile-surface {
+      cursor: url("/cursor-pin.svg") 8 8, auto;
+    }
+    .public-profile-surface .public-polaroid {
+      transition: transform var(--duration-default) var(--ease-soft-out);
+    }
+    .public-profile-surface .public-polaroid:hover {
+      transform: rotate(0deg) translateY(-4px);
+    }
   }
   /* DESIGN §6 — Respect prefers-reduced-motion */
   @media (prefers-reduced-motion: reduce) {

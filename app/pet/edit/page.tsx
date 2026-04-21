@@ -13,6 +13,7 @@ type PetForEdit = {
   breed: string | null
   guardian_relationship: string | null
   companion_relationship: string | null
+  additional_info: string | null
   slug: string
   is_public: boolean
   persona_answers: PersonaAnswers | null
@@ -36,7 +37,7 @@ export default async function PetEditPage() {
   const { data: pet } = await supabase
     .from('pets')
     .select(
-      'id, name, breed, guardian_relationship, companion_relationship, slug, is_public, persona_answers',
+      'id, name, breed, guardian_relationship, companion_relationship, additional_info, slug, is_public, persona_answers',
     )
     .eq('user_id', user.id)
     .limit(1)
@@ -65,6 +66,7 @@ export default async function PetEditPage() {
           breed: pet.breed ?? '',
           companionRelationship:
             pet.companion_relationship ?? pet.guardian_relationship ?? '',
+          additionalInfo: pet.additional_info ?? '',
           persona_answers: pet.persona_answers ?? {},
         }}
       />

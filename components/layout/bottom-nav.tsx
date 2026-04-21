@@ -2,9 +2,9 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, UserRound } from 'lucide-react'
+import { CalendarDays, Home, UserRound } from 'lucide-react'
 
-const HIDDEN_PREFIXES = ['/auth', '/onboarding', '/b/']
+const HIDDEN_PREFIXES = ['/auth', '/onboarding', '/b/', '/m/']
 
 export function BottomNav() {
   const pathname = usePathname()
@@ -13,8 +13,9 @@ export function BottomNav() {
   }
 
   const items = [
+    { href: '/week', label: '주간', icon: CalendarDays },
     { href: '/', label: '홈', icon: Home },
-    { href: '/pet', label: '마이페이지', icon: UserRound },
+    { href: '/pet', label: '내 정보', icon: UserRound },
   ]
 
   return (
@@ -22,11 +23,11 @@ export function BottomNav() {
       aria-label="주요 메뉴"
       className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--color-line)] bg-[var(--color-bg)]"
     >
-      <div className="mx-auto grid h-16 max-w-md grid-cols-2 px-4 pb-[env(safe-area-inset-bottom)]">
+      <div className="mx-auto grid h-16 max-w-md grid-cols-3 px-4 pb-[env(safe-area-inset-bottom)]">
         {items.map((item) => {
           const active =
             item.href === '/'
-              ? pathname === '/'
+              ? pathname === '/' || pathname === '/month'
               : pathname === item.href || pathname.startsWith(`${item.href}/`)
           const Icon = item.icon
           return (

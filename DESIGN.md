@@ -145,10 +145,51 @@ shadcn/ui base + 오버라이드:
 - 로고 (우하단 12×12, opacity 0.3, 자연스럽게 섞임)
 - 3 포맷 (9:16 / 4:5 / 1:1): crop ratio만 다름, lockup 동일
 
+## 13. v0.2 Emotional System
+
+v0.2는 폴라로이드 원칙을 유지하되, 버디가 화면의 주인공처럼 보이는 순간을 늘린다.
+
+### Emotional serif usage
+
+`var(--font-serif)`는 아래 경우에 허용한다.
+
+- 강아지 이름
+- MBTI 코드
+- milestone 숫자
+- 완료 문구 (`저장됐어`, `기억할게`)
+- 일기 본문
+
+작은 라벨, 메뉴, 입력 UI는 Pretendard를 유지한다.
+
+### Mood palette
+
+일기 분위기는 `bright | calm | tired | curious | grumpy | lonely` 6개만 사용한다.
+`grumpy`는 purple을 쓰지 않고 muted umber/brown 계열로 표현한다.
+
+- bright: `--color-mood-bright`
+- calm: `--color-mood-calm`
+- tired: `--color-mood-tired`
+- curious: `--color-mood-curious`
+- grumpy: `--color-mood-grumpy`
+- lonely: `--color-mood-lonely`
+
+무드는 월간 캘린더 발자국, 주간 timeline accent, 향후 mood map에만 작게 쓴다.
+
+### Warm-dark
+
+시스템 dark mode는 차가운 검정/슬레이트가 아니라 warm brown-black으로 자동 전환한다.
+수동 테마 토글은 v0.2 범위에서 제외한다.
+
+### Illustration
+
+공통 일러스트는 `BuddyResting`, `BuddyTilted`, `BuddyHappy` 3개를 기준으로 한다.
+상태는 직접 설명하는 긴 텍스트보다 그림과 짧은 버디 1인칭 카피로 전달한다.
+
 ---
 
 **Change log**
 
+- v0.2 — 2026-04-22 — Emotional serif, mood palette, warm-dark, Buddy illustration system.
 - v0.1 — 2026-04-19 — Initial from design review auto-decisions. `/plan-design-review` auto-decided 15 items, all locked for v1.
 
 이 문서는 Week 0 안에 확정해야 이후 모든 구현이 align 됨. 변경 시 PR 제목에 `[design-system]` 접두어 필수.

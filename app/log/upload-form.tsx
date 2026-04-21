@@ -5,6 +5,7 @@ import { useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 
+import { ShutterReveal } from '@/components/diary/shutter-reveal'
 import { PhaseCopy } from '@/components/log/phase-copy'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -19,6 +20,7 @@ type Props = {
   petId: string
   petName: string
   logDate?: string
+  companionRelationship?: string | null
 }
 
 const MAX_MEMO = 200
@@ -48,7 +50,12 @@ function todayInSeoul(): string {
   return `${year}-${month}-${day}`
 }
 
-export function UploadForm({ petId, petName, logDate }: Props) {
+export function UploadForm({
+  petId,
+  petName,
+  logDate,
+  companionRelationship,
+}: Props) {
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [file, setFile] = useState<File | null>(null)
@@ -56,7 +63,13 @@ export function UploadForm({ petId, petName, logDate }: Props) {
   const [selectedTags, setSelectedTags] = useState<LogTag[]>([])
   const [memo, setMemo] = useState('')
   const [startedAt, setStartedAt] = useState<number | null>(null)
+  const [completedDiary, setCompletedDiary] = useState<{
+    id: string
+    title: string
+    imageUrl?: string | null
+  } | null>(null)
   const [isPending, startTransition] = useTransition()
+  const companion = companionRelationship?.trim() || '엄마/아빠'
 
   function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const picked = e.target.files?.[0] ?? null
@@ -98,7 +111,14 @@ export function UploadForm({ petId, petName, logDate }: Props) {
     startTransition(async () => {
       const result = await createLog(fd)
       if (result.ok) {
-        router.push(`/diary/${result.diaryId}`)
+        setCompletedDiary({
+          id: result.diaryId,
+          title: result.title,
+          imageUrl: result.imageUrl,
+        })
+        window.setTimeout(() => {
+          router.push(`/diary/${result.diaryId}?arrive=1`)
+        }, 1400)
         return
       }
       setStartedAt(null)
@@ -109,11 +129,57 @@ export function UploadForm({ petId, petName, logDate }: Props) {
   return (
     <>
       <form onSubmit={onSubmit} className="flex flex-col gap-6">
+        <section className="flex flex-col gap-3">
+          <div>
+            <p className="text-[12px] font-medium uppercase tracking-[0.14em] text-[var(--color-mute)]">
+              1
+            </p>
+            <h3 className="text-[18px] font-semibold text-[var(--color-ink)]">
+              오늘 뭐 했어?
+            </h3>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {LOG_TAG_VALUES.map((tag) => {
+              const active = selectedTags.includes(tag)
+              return (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => toggleTag(tag)}
+                  aria-pressed={active}
+                  className={cn(
+                    'min-h-11 px-3 text-[13px] transition-colors',
+                    'ring-1 ring-[var(--color-line)]',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent-brand)] focus-visible:ring-offset-2',
+                    active
+                      ? 'bg-[var(--color-accent-brand-soft)] text-[var(--color-ink)] ring-[var(--color-accent-brand)]'
+                      : 'bg-[var(--color-bg)] text-[var(--color-ink-soft)] hover:bg-[var(--color-paper)]',
+                  )}
+                  style={{
+                    borderRadius: 'var(--radius-pill)',
+                    fontFamily: 'var(--font-sans)',
+                  }}
+                >
+                  {TAG_LABELS[tag]}
+                </button>
+              )
+            })}
+          </div>
+        </section>
+
         {/* 사진 업로드 — 폴라로이드 드롭존 */}
-        <div className="flex flex-col gap-2">
+        <section className="flex flex-col gap-2">
+          <div>
+            <p className="text-[12px] font-medium uppercase tracking-[0.14em] text-[var(--color-mute)]">
+              2
+            </p>
+            <h3 className="text-[18px] font-semibold text-[var(--color-ink)]">
+              사진 찍어둔 거 있어?
+            </h3>
+          </div>
           <Label
             htmlFor="photo-input"
-            className="text-[13px] text-[var(--color-ink-soft)]"
+            className="sr-only"
           >
             오늘의 사진
           </Label>
@@ -172,54 +238,28 @@ export function UploadForm({ petId, petName, logDate }: Props) {
               </div>
             )}
             <p
-              id="photo-input-hint"
-              className="mt-3 text-center text-[12px] text-[var(--color-mute)]"
+            id="photo-input-hint"
+            className="mt-3 text-center text-[12px] text-[var(--color-mute)]"
               style={{ fontFamily: 'var(--font-serif)' }}
             >
-              {file ? '마음에 들면 아래 버튼을 눌러주세요' : '눌러서 고르기'}
-            </p>
+            {file ? '마음에 들면 아래 버튼을 눌러주세요' : '눌러서 고르기'}
+          </p>
           </label>
-        </div>
-
-        {/* 태그 chips */}
-        <div className="flex flex-col gap-2">
-          <Label className="text-[13px] text-[var(--color-ink-soft)]">
-            오늘의 태그 (선택)
-          </Label>
-          <div className="flex flex-wrap gap-2">
-            {LOG_TAG_VALUES.map((tag) => {
-              const active = selectedTags.includes(tag)
-              return (
-                <button
-                  key={tag}
-                  type="button"
-                  onClick={() => toggleTag(tag)}
-                  aria-pressed={active}
-                  className={cn(
-                    'min-h-11 px-3 text-[13px] transition-colors',
-                    'ring-1 ring-[var(--color-line)]',
-                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent-brand)] focus-visible:ring-offset-2',
-                    active
-                      ? 'bg-[var(--color-accent-brand-soft)] text-[var(--color-ink)] ring-[var(--color-accent-brand)]'
-                      : 'bg-[var(--color-bg)] text-[var(--color-ink-soft)] hover:bg-[var(--color-paper)]',
-                  )}
-                  style={{
-                    borderRadius: 'var(--radius-pill)',
-                    fontFamily: 'var(--font-sans)',
-                  }}
-                >
-                  {TAG_LABELS[tag]}
-                </button>
-              )
-            })}
-          </div>
-        </div>
+        </section>
 
         {/* Memo — native textarea, 토큰 스타일 */}
-        <div className="flex flex-col gap-2">
+        <section className="flex flex-col gap-2">
+          <div>
+            <p className="text-[12px] font-medium uppercase tracking-[0.14em] text-[var(--color-mute)]">
+              3
+            </p>
+            <h3 className="text-[18px] font-semibold text-[var(--color-ink)]">
+              {companion}가 뭐 말해줄 거 있어?
+            </h3>
+          </div>
           <Label
             htmlFor="memo-input"
-            className="text-[13px] text-[var(--color-ink-soft)]"
+            className="sr-only"
           >
             남겨두고 싶은 메모 (선택)
           </Label>
@@ -231,7 +271,7 @@ export function UploadForm({ petId, petName, logDate }: Props) {
             maxLength={MAX_MEMO}
             rows={3}
             aria-describedby="memo-count"
-            placeholder="오늘 있었던 일을 짧게 적어주세요"
+            placeholder="예) 오늘 처음 보는 길에서도 씩씩하게 걸었어"
             className={cn(
               'w-full resize-none px-3 py-2 text-[14px] leading-[1.55]',
               'bg-[var(--color-bg)] text-[var(--color-ink)]',
@@ -252,7 +292,7 @@ export function UploadForm({ petId, petName, logDate }: Props) {
           >
             {memo.length} / {MAX_MEMO}
           </p>
-        </div>
+        </section>
 
         <Button
           type="submit"
@@ -282,6 +322,13 @@ export function UploadForm({ petId, petName, logDate }: Props) {
             onCancel={() => router.back()}
           />
         </div>
+      ) : null}
+
+      {completedDiary ? (
+        <ShutterReveal
+          title={completedDiary.title}
+          imageUrl={completedDiary.imageUrl}
+        />
       ) : null}
     </>
   )

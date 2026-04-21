@@ -11,13 +11,5 @@ export async function BottomNavGate() {
   } = await supabase.auth.getUser()
   if (!user) return null
 
-  const { data: pet } = await supabase
-    .from('pets')
-    .select('id')
-    .eq('user_id', user.id)
-    .limit(1)
-    .maybeSingle<{ id: string }>()
-
-  if (!pet) return null
   return <BottomNav />
 }

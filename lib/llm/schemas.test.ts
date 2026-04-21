@@ -2,6 +2,7 @@ import { describe, expect, it } from 'bun:test'
 
 import {
   diaryInputSchema,
+  diaryMoodSchema,
   diarySchema,
   LOG_TAG_VALUES,
   logTagSchema,
@@ -40,6 +41,7 @@ describe('diarySchema', () => {
     title: '오늘의 마루',
     body: '오늘 나는 공원에서 냄새를 잔뜩 맡았다. 집에 와서는 조금 졸렸다.',
     suggestedTags: ['walk', 'sleep'],
+    mood: 'bright',
   }
 
   it('유효한 LLM 출력 payload를 허용한다', () => {
@@ -86,6 +88,15 @@ describe('diarySchema', () => {
       diarySchema.safeParse({ ...valid, suggestedTags: ['walk', 'vet'] })
         .success,
     ).toBeFalsy()
+  })
+
+  it('mood는 허용된 분위기만 통과한다', () => {
+    for (const mood of ['bright', 'calm', 'tired', 'curious', 'grumpy', 'lonely']) {
+      expect(diaryMoodSchema.safeParse(mood).success).toBeTruthy()
+    }
+
+    expect(diaryMoodSchema.safeParse('purple').success).toBeFalsy()
+    expect(diarySchema.safeParse({ ...valid, mood: 'purple' }).success).toBeFalsy()
   })
 })
 
@@ -165,11 +176,11 @@ describe('diaryInputSchema', () => {
     ).toBeFalsy()
   })
 
-  it('personaFragment는 500자를 넘으면 실패한다', () => {
+  it('personaFragment는 800자를 넘으면 실패한다', () => {
     expect(
       diaryInputSchema.safeParse({
         ...validDiaryInput,
-        personaFragment: 'a'.repeat(501),
+        personaFragment: 'a'.repeat(801),
       }).success,
     ).toBeFalsy()
   })

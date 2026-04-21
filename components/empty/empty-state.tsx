@@ -1,5 +1,8 @@
 import Link from 'next/link'
 
+import { BuddyHappy } from '@/components/illustrations/buddy-happy'
+import { BuddyResting } from '@/components/illustrations/buddy-resting'
+import { BuddyTilted } from '@/components/illustrations/buddy-tilted'
 import { cn } from '@/lib/utils'
 
 /**
@@ -22,6 +25,7 @@ type EmptyStateProps = {
   hint?: string
   cta?: { label: string; href: string } | null
   tone?: 'neutral' | 'warm'
+  illustration?: 'resting' | 'tilted' | 'happy' | 'none'
 }
 
 export function EmptyState({
@@ -29,7 +33,17 @@ export function EmptyState({
   hint,
   cta,
   tone = 'neutral',
+  illustration = 'none',
 }: EmptyStateProps) {
+  const Illustration =
+    illustration === 'resting'
+      ? BuddyResting
+      : illustration === 'tilted'
+        ? BuddyTilted
+        : illustration === 'happy'
+          ? BuddyHappy
+          : null
+
   return (
     <section
       aria-label={title}
@@ -43,6 +57,10 @@ export function EmptyState({
           'motion-safe:-rotate-[0.6deg] motion-reduce:rotate-0',
         )}
       >
+        {Illustration ? (
+          <Illustration className="mx-auto mb-4 h-24 w-32 text-[var(--color-ink)]" />
+        ) : null}
+
         <div className="flex items-center justify-center gap-2">
           {tone === 'warm' ? (
             <span

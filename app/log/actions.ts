@@ -43,7 +43,12 @@ const log = createLogger('log:action')
  * 만료 후 리프레시는 읽기 경로에서 `getSignedPhotoUrl(path)`로 재발급.
  */
 
-export type CreateLogSuccess = { ok: true; diaryId: string }
+export type CreateLogSuccess = {
+  ok: true
+  diaryId: string
+  title: string
+  imageUrl?: string | null
+}
 export type CreateLogFailure = {
   ok: false
   error: string
@@ -87,6 +92,9 @@ type ExistingDailyLog = {
 
 type ExistingDailyDiary = {
   id: string
+  title: string
+  image_url_45: string | null
+  image_url_11: string | null
 }
 
 function todayInSeoul(): string {
@@ -221,12 +229,17 @@ export async function createLog(formData: FormData): Promise<CreateLogResult> {
   if (existingLog) {
     const { data: existingDiary } = await supabase
       .from('diaries')
-      .select('id')
+      .select('id, title, image_url_45, image_url_11')
       .eq('log_id', existingLog.id)
       .maybeSingle<ExistingDailyDiary>()
 
     if (existingDiary) {
-      return { ok: true, diaryId: existingDiary.id }
+      return {
+        ok: true,
+        diaryId: existingDiary.id,
+        title: existingDiary.title,
+        imageUrl: existingDiary.image_url_45 ?? existingDiary.image_url_11,
+      }
     }
 
     return {
@@ -417,6 +430,7 @@ export async function createLog(formData: FormData): Promise<CreateLogResult> {
       image_url_916: imageUrl916,
       image_url_45: imageUrl45,
       image_url_11: imageUrl11,
+      mood: diaryResult.data.mood,
       is_fallback: diaryResult.meta.isFallback,
       model_used: diaryResult.meta.modelUsed,
       latency_ms: diaryResult.meta.latencyMs,
@@ -438,10 +452,16 @@ export async function createLog(formData: FormData): Promise<CreateLogResult> {
 
   // 13) 소유자 피드와 공개 프로필 캐시 갱신.
   revalidatePath('/')
+  revalidatePath('/month')
   revalidatePath('/logs')
   if (pet.is_public && pet.slug) {
     revalidatePath(`/b/${pet.slug}`)
   }
 
-  return { ok: true, diaryId: diaryRow.id }
+  return {
+    ok: true,
+    diaryId: diaryRow.id,
+    title: diaryResult.data.title,
+    imageUrl: imageUrl45 ?? imageUrl11 ?? imageUrl916,
+  }
 }

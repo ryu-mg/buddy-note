@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>buddy-note — MVP 디자인 프리뷰</title>
+  <title>buddy-note — v0.2 디자인 프리뷰</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet" />
@@ -17,6 +17,12 @@
       --color-bg: #ffffff;
       --color-accent-brand: #e07a5f;
       --color-accent-brand-soft: #fde6e0;
+      --color-mood-bright: #e0a83f;
+      --color-mood-calm: #6f9f86;
+      --color-mood-tired: #9b9489;
+      --color-mood-curious: #5f8aa8;
+      --color-mood-grumpy: #8a6650;
+      --color-mood-lonely: #7f8f9f;
       --color-success: #4a7c59;
       --color-error: #b04a4a;
       --radius-card: 12px;
@@ -116,6 +122,23 @@
       overflow-y: auto;
       background: var(--color-bg);
     }
+    .stat {
+      border-radius: var(--radius-button);
+      background: rgba(255,255,255,0.72);
+      padding: 12px 14px;
+    }
+    .stat span {
+      display: block;
+      color: var(--color-mute);
+      font-size: 12px;
+    }
+    .stat strong {
+      display: block;
+      margin-top: 4px;
+      font-family: var(--font-serif);
+      font-size: 24px;
+      line-height: 1;
+    }
 
     .app-header {
       height: 56px;
@@ -144,7 +167,7 @@
       border-top: 1px solid var(--color-line);
       background: var(--color-bg);
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr 1fr 1fr;
       z-index: 20;
     }
     .bottom-nav a {
@@ -481,7 +504,7 @@
 <body>
   <nav class="nav">
     <div class="nav-logo">buddy-note</div>
-    <div class="nav-section">MVP 변경</div>
+    <div class="nav-section">v0.2 변경</div>
     <a href="#" onclick="show('overview')" class="active">변경 요약</a>
     <a href="#" onclick="show('login')">카카오 로그인</a>
     <div class="nav-section">온보딩</div>
@@ -489,15 +512,17 @@
     <a href="#" onclick="show('onboard-relation')">1 · 반려인 호칭</a>
     <a href="#" onclick="show('onboard-mbti')">2–5 · 4문항 MBTI</a>
     <a href="#" onclick="show('onboard-confirm')">6 · 유형 확인</a>
-    <div class="nav-section">홈</div>
-    <a href="#" onclick="show('calendar-empty')">빈 날짜 선택</a>
-    <a href="#" onclick="show('calendar-detail')">기록 날짜 선택</a>
-    <a href="#" onclick="show('mypage')">마이페이지</a>
+    <a href="#" onclick="show('onboard-free')">6 · 자유 기술</a>
+    <div class="nav-section">IA</div>
+    <a href="#" onclick="show('weekly-home')">주간 홈</a>
+    <a href="#" onclick="show('calendar-empty')">월간 · 빈 날짜 선택</a>
+    <a href="#" onclick="show('calendar-detail')">월간 · 기록 날짜 선택</a>
+    <a href="#" onclick="show('mypage')">내 정보</a>
   </nav>
 
   <main class="canvas">
     <section id="screen-overview" class="screen active">
-      <div class="screen-label">MVP redesign — what changed</div>
+      <div class="screen-label">v0.2 redesign — what changed</div>
       <div class="phone">
         <div class="app-header">
           <a class="logo" href="#">buddy-note</a>
@@ -507,7 +532,7 @@
           <p class="meta">new product frame</p>
           <h1 class="h1" style="margin-top:8px;">캘린더에 하루 한 장씩<br />마루의 기억을 쌓아요.</h1>
           <p class="copy" style="margin-top:10px;">
-            이번 MVP는 피드 중심에서 월간 캘린더 중심으로 이동했어요.
+            v0.2는 월간 캘린더 단독 홈에서 주간 홈 + 월간 + 내 정보 3탭 구조로 이동했어요.
             날짜를 누르면 기록 업로드 또는 일기 상세가 바로 이어집니다.
           </p>
           <div style="display:grid; gap:12px; margin-top:24px;">
@@ -523,14 +548,15 @@
             </div>
             <div class="panel">
               <p class="meta">home</p>
-              <h2 style="margin:8px 0 0; font-size:18px;">홈 / 마이페이지 하단 네비</h2>
+              <h2 style="margin:8px 0 0; font-size:18px;">주간 / 월간 / 내 정보 하단 네비</h2>
               <p class="muted" style="margin:6px 0 0;">주요 앱 화면은 하단 2탭으로 단순화했습니다.</p>
             </div>
           </div>
         </div>
         <div class="bottom-nav">
-          <a class="active" href="#"><span class="line-icon"></span>홈</a>
-          <a href="#"><span class="line-icon user"></span>마이페이지</a>
+          <a class="active" href="#"><span class="line-icon"></span>주간</a>
+          <a href="#"><span class="line-icon"></span>월간</a>
+          <a href="#"><span class="line-icon user"></span>내 정보</a>
         </div>
       </div>
     </section>
@@ -638,37 +664,105 @@
       </div>
     </section>
 
-    <section id="screen-onboard-confirm" class="screen">
-      <div class="screen-label">/onboarding/steps/6 — 소개 확인</div>
+    <section id="screen-onboard-free" class="screen">
+      <div class="screen-label">/onboarding/steps/6 — 자유 기술</div>
       <div class="phone">
         <div class="phone-content" style="padding:32px 16px;">
           <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-            <span class="muted">7 / 7</span><span class="muted">100%</span>
+            <span class="muted">7 / 8</span><span class="muted">88%</span>
           </div>
-          <div class="progress-track"><div class="progress-fill" style="width:100%;"></div></div>
+          <div class="progress-track"><div class="progress-fill" style="width:88%;"></div></div>
           <article class="panel tilt" style="margin-top:24px;">
-            <p class="meta">소개 미리보기</p>
-            <h1 class="h1" style="font-size:20px; margin-top:10px;">이렇게 기록해둘게요</h1>
-            <p class="copy" style="margin-top:6px;">내용이 맞으면 저장해주세요. 나중에 언제든 다시 바꿀 수 있어요.</p>
-            <div style="margin-top:20px; border-radius:10px; background:white; padding:16px;">
-              <p class="muted" style="margin:0;">마루은</p>
-              <p style="margin:4px 0 0; font-size:22px; font-weight:800;">ENFP · 문앞 탐험가</p>
-            </div>
-            <blockquote style="margin:16px 0 0; border-left:2px solid var(--color-accent-brand); background:rgba(255,255,255,0.66); padding:14px; font-family:var(--font-serif); font-size:15px; line-height:1.75; white-space:pre-wrap;">나는 마루, 푸들이야. 누나는 내 반려인이야.
-내 성격 유형은 ENFP · 문앞 탐험가.
-나를 한 줄로 말하면:
-처음 보는 친구에게도 먼저 다가가 인사하는 외향적인 쪽이고 / 새 장난감과 새 장소를 만나면 궁금해서 먼저 탐험하고 / 반려인 표정과 목소리에 민감하게 반응하는 다정한 쪽이고 / 바뀐 흐름에도 금방 맞추는 유연한 타입이야.</blockquote>
+            <p class="meta">더 들려줄 이야기</p>
+            <h1 class="h1" style="font-size:20px; margin-top:10px;">마루만의 습관이 있나요?</h1>
+            <p class="copy" style="margin-top:6px;">좋아하는 말, 싫어하는 소리, 이상하게 꼭 하는 행동 같은 걸 짧게 남겨도 좋아요.</p>
+            <textarea class="input" style="height:128px; margin-top:18px; resize:none;" placeholder="예) 비 오는 날 창밖 보는 걸 좋아해요">비 오는 날 창밖 보는 걸 좋아해요.</textarea>
+            <p class="muted" style="text-align:right; margin:8px 0 0;">18/200</p>
           </article>
           <div style="display:flex; justify-content:space-between; margin-top:24px;">
             <button class="btn-ghost">이전</button>
+            <button class="btn-primary">다음</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="screen-onboard-confirm" class="screen">
+      <div class="screen-label">/onboarding/steps/7 — 리빌/확정</div>
+      <div class="phone">
+        <div class="phone-content" style="padding:32px 16px;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+            <span class="muted">8 / 8</span><span class="muted">100%</span>
+          </div>
+          <div class="progress-track"><div class="progress-fill" style="width:100%;"></div></div>
+          <article class="panel tilt" style="margin-top:24px;">
+            <p class="meta">소개 확인</p>
+            <h1 class="h1" style="font-size:20px; margin-top:10px;">이제 마루답게 적어볼게요</h1>
+            <p class="copy" style="margin-top:6px;">다음 버디노트부터 이 성격을 기억할게요.</p>
+            <div style="margin-top:20px; text-align:center;">
+              <div style="width:92px; height:92px; border-radius:999px; margin:0 auto; background:var(--color-accent-brand-soft); border:1px solid var(--color-line);"></div>
+              <p class="muted" style="margin:18px 0 0;">마루는</p>
+              <p style="margin:4px 0 0; font-family:var(--font-serif); font-size:54px; font-weight:700; line-height:1;">ENFP</p>
+              <p style="margin:8px 0 0; color:var(--color-accent-brand); font-weight:800;">문앞 탐험가</p>
+            </div>
+            <div style="display:grid; gap:8px; margin-top:18px;">
+              <div class="option">새로운 장면을 먼저 탐험해</div>
+              <div class="option">사람과 친구를 좋아해</div>
+              <div class="option">기분 좋은 변화를 반겨</div>
+            </div>
+            <blockquote style="margin:16px 0 0; border-left:2px solid var(--color-accent-brand); background:rgba(255,255,255,0.66); padding:14px; font-size:14px; line-height:1.75;">비 오는 날 창밖 보는 걸 좋아해요.</blockquote>
+          </article>
+          <div style="display:flex; justify-content:space-between; margin-top:24px;">
+            <button class="btn-ghost">다시 답할래요</button>
             <button class="btn-primary">저장할게요</button>
           </div>
         </div>
       </div>
     </section>
 
+    <section id="screen-weekly-home" class="screen">
+      <div class="screen-label">/ — 주간 홈</div>
+      <div class="phone">
+        <div class="phone-content" style="padding:24px 16px 0;">
+          <section class="panel" style="background:var(--color-paper);">
+            <div style="display:flex; gap:16px; align-items:flex-start;">
+              <div style="width:96px; height:96px; border-radius:999px; background:var(--color-accent-brand-soft); border:1px solid var(--color-line);"></div>
+              <div style="flex:1;">
+                <p class="meta">buddy card</p>
+                <h1 style="margin:6px 0 0; font-family:var(--font-serif); font-size:42px; line-height:1;">마루</h1>
+                <p style="margin:10px 0 0; color:var(--color-accent-brand); font-weight:700;">ENFP · 문앞 탐험가</p>
+                <p class="copy" style="margin-top:14px;">오늘은 누구를 만났는지 내가 먼저 들려줄게.</p>
+              </div>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:20px;">
+              <div class="stat"><span>함께한 날</span><strong>7일째</strong></div>
+              <div class="stat"><span>버디노트</span><strong>4장</strong></div>
+            </div>
+          </section>
+          <section class="panel" style="margin-top:16px;">
+            <p class="meta">remembered</p>
+            <p class="copy" style="margin-top:8px;">전에 공원에서 새 친구 만난 거, 내가 아직 기억하고 있어.</p>
+          </section>
+          <a href="#" style="display:flex; margin-top:16px; justify-content:space-between; align-items:center; border:1px solid var(--color-accent-brand); background:var(--color-accent-brand-soft); border-radius:12px; padding:16px; text-decoration:none;">
+            <span><strong>사진 한 장 보여줄래?</strong><br><span class="muted">오늘 날짜를 눌러서 버디노트를 남길 수 있어요.</span></span>
+            <span style="color:var(--color-accent-brand); font-size:24px;">●</span>
+          </a>
+          <h2 style="font-size:20px; margin:24px 0 12px;">최근 버디노트</h2>
+          <div style="display:flex; gap:14px; overflow:hidden;">
+            <div class="upload-card" style="width:210px; flex:0 0 auto; transform:rotate(-1deg);"><div class="photo-box">일기 이미지</div><p style="margin:12px 0 0; font-weight:700;">하천길 탐험</p></div>
+            <div class="upload-card" style="width:210px; flex:0 0 auto; transform:rotate(1deg);"><div class="photo-box">일기 이미지</div><p style="margin:12px 0 0; font-weight:700;">소파 낮잠</p></div>
+          </div>
+          <div class="bottom-nav">
+            <a class="active" href="#"><span class="line-icon"></span>주간</a>
+            <a href="#"><span class="line-icon"></span>월간</a>
+            <a href="#"><span class="line-icon user"></span>내 정보</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section id="screen-calendar-empty" class="screen">
-      <div class="screen-label">/ — 캘린더, 빈 날짜 선택</div>
+      <div class="screen-label">/month — 월간, 빈 날짜 선택</div>
       <div class="phone">
         <div class="app-header">
           <a class="logo" href="#">buddy-note</a>
@@ -701,15 +795,16 @@
             </div>
           </div>
           <div class="bottom-nav">
-            <a class="active" href="#"><span class="line-icon"></span>홈</a>
-            <a href="#"><span class="line-icon user"></span>마이페이지</a>
+            <a href="#"><span class="line-icon"></span>주간</a>
+            <a class="active" href="#"><span class="line-icon"></span>월간</a>
+            <a href="#"><span class="line-icon user"></span>내 정보</a>
           </div>
         </div>
       </div>
     </section>
 
     <section id="screen-calendar-detail" class="screen">
-      <div class="screen-label">/ — 캘린더, 기록 날짜 선택</div>
+      <div class="screen-label">/month — 월간, 기록 날짜 선택</div>
       <div class="phone">
         <div class="app-header">
           <a class="logo" href="#">buddy-note</a>
@@ -736,19 +831,20 @@
             </div>
           </div>
           <div class="bottom-nav">
-            <a class="active" href="#"><span class="line-icon"></span>홈</a>
-            <a href="#"><span class="line-icon user"></span>마이페이지</a>
+            <a href="#"><span class="line-icon"></span>주간</a>
+            <a class="active" href="#"><span class="line-icon"></span>월간</a>
+            <a href="#"><span class="line-icon user"></span>내 정보</a>
           </div>
         </div>
       </div>
     </section>
 
     <section id="screen-mypage" class="screen">
-      <div class="screen-label">/pet — 마이페이지</div>
+      <div class="screen-label">/pet — 내 정보</div>
       <div class="phone">
         <div style="height:64px; display:flex; align-items:center; justify-content:center; border-bottom:1px solid var(--color-line); position:relative;">
           <button class="btn-ghost" style="position:absolute; left:8px; font-size:24px; min-width:44px;">‹</button>
-          <h1 style="margin:0; font-size:18px;">마이페이지</h1>
+          <h1 style="margin:0; font-size:18px;">내 정보</h1>
         </div>
         <div class="phone-content" style="padding:24px 16px 92px;">
           <section style="display:flex; align-items:center; gap:16px;">
@@ -773,8 +869,9 @@
           </nav>
         </div>
         <div class="bottom-nav">
-          <a href="#"><span class="line-icon"></span>홈</a>
-          <a class="active" href="#"><span class="line-icon user"></span>마이페이지</a>
+          <a href="#"><span class="line-icon"></span>주간</a>
+          <a href="#"><span class="line-icon"></span>월간</a>
+          <a class="active" href="#"><span class="line-icon user"></span>내 정보</a>
         </div>
       </div>
     </section>
@@ -782,7 +879,7 @@
 
   <template id="calendar-template">
     <div style="padding:28px 20px 92px;">
-      <p class="meta">calendar</p>
+      <p class="meta">monthly note</p>
       <h1 class="h1" style="margin-top:8px;">마루의 이야기 3일째</h1>
       <p class="muted" style="margin-top:6px;">ENFP · 문앞 탐험가</p>
       <div style="display:flex; justify-content:space-between; align-items:center; margin-top:24px;">

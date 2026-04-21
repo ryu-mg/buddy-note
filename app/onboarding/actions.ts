@@ -38,6 +38,7 @@ const InputSchema = z.object({
     .min(1, '반려인 호칭을 적어주세요.')
     .max(20, '반려인 호칭은 20자 이내로 적어주세요.'),
   profilePhotoDataUrl: z.string().optional().default(''),
+  additionalInfo: z.string().trim().max(200, '200자 이내로 적어주세요.').optional().default(''),
   q1: OptionSchema,
   q2: OptionSchema,
   q3: OptionSchema,
@@ -53,6 +54,7 @@ export async function savePet(
     breed: formData.get('breed') ?? '',
     companionRelationship: formData.get('companionRelationship'),
     profilePhotoDataUrl: formData.get('profilePhotoDataUrl') ?? '',
+    additionalInfo: formData.get('additionalInfo') ?? '',
     q1: formData.get('q1'),
     q2: formData.get('q2'),
     q3: formData.get('q3'),
@@ -65,7 +67,13 @@ export async function savePet(
     return { error: first }
   }
 
-  const { name, breed, companionRelationship, profilePhotoDataUrl } = parsed.data
+  const {
+    name,
+    breed,
+    companionRelationship,
+    profilePhotoDataUrl,
+    additionalInfo,
+  } = parsed.data
   const answers: Answers = {
     q1: parsed.data.q1 as OptionKey,
     q2: parsed.data.q2 as OptionKey,
@@ -94,6 +102,7 @@ export async function savePet(
     breed,
     companionRelationship,
     answers,
+    additionalInfo,
   })
   const personality = calculatePersonality(answers)
 
@@ -148,6 +157,7 @@ export async function savePet(
       species: 'dog',
       breed,
       companion_relationship: companionRelationship,
+      additional_info: additionalInfo || null,
       personality_code: personality.code,
       personality_label: personality.label,
       slug: finalSlug,

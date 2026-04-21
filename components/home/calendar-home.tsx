@@ -5,6 +5,9 @@ import Link from 'next/link'
 import { useMemo, useState } from 'react'
 
 import { UploadForm } from '@/app/log/upload-form'
+import { PawPrint } from '@/components/icons/paw-print'
+import { MOOD_CSS_VAR } from '@/lib/mood'
+import type { DiaryMood } from '@/types/database'
 
 export type CalendarPet = {
   id: string
@@ -12,6 +15,7 @@ export type CalendarPet = {
   createdAt: string
   personalityCode: string | null
   personalityLabel: string | null
+  companionRelationship?: string | null
 }
 
 export type CalendarDiary = {
@@ -19,6 +23,7 @@ export type CalendarDiary = {
   title: string
   body: string
   imageUrl: string | null
+  mood: DiaryMood | null
   logDate: string
   createdAt: string
 }
@@ -143,15 +148,15 @@ export function CalendarHome({
     <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col gap-6 px-4 pb-28 pt-8 sm:px-6 md:pt-10">
       <header className="flex flex-col gap-3">
         <p className="text-[12px] font-medium uppercase tracking-[0.14em] text-[var(--color-mute)]">
-          calendar
+          monthly note
         </p>
         <div className="flex flex-col gap-1">
           <h1 className="text-[24px] font-semibold leading-[1.25] text-[var(--color-ink)]">
-            {pet.name}의 이야기 {dayN}일째
+            {pet.name}의 한 달
           </h1>
           <p className="text-[13px] leading-[1.5] text-[var(--color-mute)]">
             {pet.personalityCode && pet.personalityLabel
-              ? `${pet.personalityCode} · ${pet.personalityLabel}`
+              ? `${dayN}일째 · ${pet.personalityCode} · ${pet.personalityLabel}`
               : '하루에 한 장씩, 기억을 차곡차곡 남겨요.'}
           </p>
         </div>
@@ -221,9 +226,13 @@ export function CalendarHome({
               >
                 <span>{day.day}</span>
                 {day.diary ? (
-                  <span
-                    aria-hidden
-                    className="mt-1 h-1.5 w-1.5 rounded-full bg-[var(--color-accent-brand)]"
+                  <PawPrint
+                    className="mt-1 h-3.5 w-3.5"
+                    color={
+                      day.diary.mood
+                        ? MOOD_CSS_VAR[day.diary.mood]
+                        : 'var(--color-accent-brand)'
+                    }
                   />
                 ) : null}
               </button>
@@ -303,6 +312,7 @@ function CalendarSheet({
             petId={pet.id}
             petName={pet.name}
             logDate={dateKeyValue}
+            companionRelationship={pet.companionRelationship}
           />
         )}
       </section>

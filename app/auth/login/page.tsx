@@ -1,7 +1,10 @@
+import { isDevAuthBypassEnabled } from '@/lib/auth/dev-bypass'
+
 import { KakaoButton } from './kakao-button'
 
 export default function LoginPage() {
   const supabaseConfigured = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL)
+  const devBypassEnabled = isDevAuthBypassEnabled()
 
   if (!supabaseConfigured) {
     return (
@@ -18,8 +21,16 @@ export default function LoginPage() {
   }
 
   return (
-    <div>
+    <div className="space-y-3">
       <KakaoButton />
+      {devBypassEnabled ? (
+        <a
+          href="/auth/dev"
+          className="flex min-h-11 w-full items-center justify-center rounded-[var(--radius-button)] border border-[var(--color-line)] bg-[var(--color-bg)] px-4 text-[14px] font-medium text-[var(--color-ink-soft)] transition-colors hover:bg-[var(--color-paper)]"
+        >
+          로컬 개발 로그인
+        </a>
+      ) : null}
     </div>
   )
 }
