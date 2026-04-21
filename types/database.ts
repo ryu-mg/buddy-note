@@ -23,7 +23,7 @@ export type Json =
 // Domain enums (not enforced at DB level for all; see comments)
 // -----------------------------------------------------------------------------
 
-export type PetSpecies = 'dog' | 'cat';
+export type PetSpecies = 'dog';
 
 /**
  * Log tag vocabulary. DB column is text[] with no enum check — the LLM
@@ -58,18 +58,13 @@ export interface RecentCallback {
 }
 
 /**
- * pets.persona_answers jsonb shape. Q1-Q5 from
- * docs/pet-mbti-questions-v0.md. Keys here are placeholders until the doc
- * finalizes identifiers — tighten this type during Week 1.
+ * pets.persona_answers jsonb shape. Q1-Q4 from lib/pet-mbti.ts.
  */
 export interface PersonaAnswers {
   q1?: string;
   q2?: string;
   q3?: string;
   q4?: string;
-  q5?: string;
-  /** Derived axes computed at save time. Optional so early drafts are valid. */
-  axes?: Record<string, number>;
 }
 
 // -----------------------------------------------------------------------------
@@ -82,6 +77,9 @@ export interface PetRow {
   name: string;
   species: PetSpecies;
   breed: string | null;
+  guardian_relationship: string | null;
+  personality_code: string | null;
+  personality_label: string | null;
   persona_answers: PersonaAnswers;
   persona_prompt_fragment: string | null;
   slug: string;
@@ -100,6 +98,9 @@ export type PetInsert = Omit<
   created_at?: string;
   updated_at?: string;
   is_public?: boolean;
+  guardian_relationship?: string | null;
+  personality_code?: string | null;
+  personality_label?: string | null;
   persona_answers?: PersonaAnswers;
   deceased_at?: string | null;
 };
@@ -113,13 +114,15 @@ export interface LogRow {
   photo_storage_path: string;
   tags: LogTag[];
   memo: string | null;
+  log_date: string;
   created_at: string;
 }
 
-export type LogInsert = Omit<LogRow, 'id' | 'created_at' | 'tags'> & {
+export type LogInsert = Omit<LogRow, 'id' | 'created_at' | 'tags' | 'log_date'> & {
   id?: string;
   created_at?: string;
   tags?: LogTag[];
+  log_date?: string;
 };
 
 export type LogUpdate = Partial<LogInsert>;

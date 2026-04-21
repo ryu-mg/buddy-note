@@ -10,7 +10,7 @@ type QuestionCardProps = {
   total: number
   value: OptionKey | null
   onChange: (v: OptionKey) => void
-  /** A/B/C/D 키보드 단축 활성화 여부 */
+  /** A/B 키보드 단축 활성화 여부 */
   keyboardEnabled?: boolean
 }
 
@@ -22,11 +22,12 @@ export function QuestionCard({
   onChange,
   keyboardEnabled = true,
 }: QuestionCardProps) {
-  // A/B/C/D 단축 키 — 입력 필드 안에서만 비활성 (여기선 radio 뿐이라 항상 허용).
+  // A/B 단축 키 — 입력 필드 안에서만 비활성 (여기선 radio 뿐이라 항상 허용).
   useEffect(() => {
     if (!keyboardEnabled) return
     const keys: Record<string, OptionKey> = {
-      a: 'A', b: 'B', c: 'C', d: 'D',
+      a: 'A',
+      b: 'B',
     }
     const onKey = (e: KeyboardEvent) => {
       // 입력 포커스 중엔 무시 (혹시 future input 추가 대비).

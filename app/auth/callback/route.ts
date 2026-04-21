@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     const target = new URL('/auth/login', origin)
     target.searchParams.set(
       'error',
-      '잠시 문제가 생겼어요. 이메일을 다시 확인해주세요.',
+      '잠시 문제가 생겼어요. 카카오 로그인을 다시 시도해주세요.',
     )
     return NextResponse.redirect(target)
   }

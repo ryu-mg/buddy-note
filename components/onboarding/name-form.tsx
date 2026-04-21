@@ -1,10 +1,5 @@
-'use client'
-
-export type Species = 'dog' | 'cat'
-
 export type NameFormValues = {
   name: string
-  species: Species
   breed: string
 }
 
@@ -35,7 +30,7 @@ export function NameForm({ value, onChange, error }: NameFormProps) {
           우리 아이를 소개해주세요
         </h1>
         <p className="mt-1.5 text-[14px] text-[var(--ink-soft,#3f3f3f)]">
-          이름, 종, 그리고 품종까지 알려주면 돼요.
+          MVP에서는 강아지 기록부터 차근차근 시작할게요.
         </p>
 
         <div className="mt-6 flex flex-col gap-5">
@@ -62,43 +57,6 @@ export function NameForm({ value, onChange, error }: NameFormProps) {
               className="w-full rounded-[8px] border border-[var(--line,#e5e7eb)] bg-white px-3 py-2.5 text-[15px] text-[var(--ink,#1a1a1a)] placeholder:text-zinc-400 focus:border-[var(--accent,#e07a5f)] focus:outline-none focus:ring-2 focus:ring-[var(--accent,#e07a5f)]/30"
             />
           </div>
-
-          <fieldset className="flex flex-col gap-1.5">
-            <legend className="text-[13px] font-medium text-[var(--ink,#1a1a1a)]">
-              종
-            </legend>
-            <div className="flex gap-2">
-              {(
-                [
-                  { key: 'dog' as Species, label: '강아지' },
-                  { key: 'cat' as Species, label: '고양이' },
-                ]
-              ).map((opt) => {
-                const selected = value.species === opt.key
-                return (
-                  <label
-                    key={opt.key}
-                    className={[
-                      'flex flex-1 cursor-pointer items-center justify-center rounded-[8px] border-2 px-3 py-2.5 text-[14px] transition-colors motion-reduce:transition-none',
-                      selected
-                        ? 'border-[var(--accent,#e07a5f)] bg-[var(--accent-soft,#fde6e0)] text-[var(--ink,#1a1a1a)]'
-                        : 'border-[var(--line,#e5e7eb)] bg-white text-[var(--ink-soft,#3f3f3f)] hover:border-[var(--ink-soft,#3f3f3f)]',
-                    ].join(' ')}
-                  >
-                    <input
-                      type="radio"
-                      name="species"
-                      value={opt.key}
-                      checked={selected}
-                      onChange={() => set('species', opt.key)}
-                      className="sr-only"
-                    />
-                    {opt.label}
-                  </label>
-                )
-              })}
-            </div>
-          </fieldset>
 
           <div className="flex flex-col gap-1.5">
             <label

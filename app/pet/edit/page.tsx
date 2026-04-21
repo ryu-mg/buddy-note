@@ -10,6 +10,7 @@ type PetForEdit = {
   id: string
   name: string
   breed: string | null
+  guardian_relationship: string | null
   persona_answers: PersonaAnswers | null
 }
 
@@ -30,7 +31,7 @@ export default async function PetEditPage() {
 
   const { data: pet } = await supabase
     .from('pets')
-    .select('id, name, breed, persona_answers')
+    .select('id, name, breed, guardian_relationship, persona_answers')
     .eq('user_id', user.id)
     .limit(1)
     .maybeSingle<PetForEdit>()
@@ -56,6 +57,7 @@ export default async function PetEditPage() {
           id: pet.id,
           name: pet.name,
           breed: pet.breed ?? '',
+          guardianRelationship: pet.guardian_relationship ?? '',
           persona_answers: pet.persona_answers ?? {},
         }}
       />

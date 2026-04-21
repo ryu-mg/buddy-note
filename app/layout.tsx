@@ -4,6 +4,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next'
 import type { Metadata, Viewport } from 'next'
 
 import { AppHeader } from '@/components/layout/app-header'
+import { BottomNavGate } from '@/components/layout/bottom-nav-gate'
 import { Toaster } from '@/components/ui/sonner'
 
 import './globals.css'
@@ -64,6 +65,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col font-sans bg-[var(--color-bg)] text-[var(--color-ink)]">
         <AppHeader />
         <main className="flex-1">{children}</main>
+        <BottomNavGate />
         <Toaster />
         <Analytics />
         <SpeedInsights />

@@ -11,6 +11,9 @@ type PetOverview = {
   breed: string | null
   slug: string
   is_public: boolean
+  guardian_relationship: string | null
+  personality_code: string | null
+  personality_label: string | null
   persona_prompt_fragment: string | null
   created_at: string
 }
@@ -36,7 +39,9 @@ export default async function PetOverviewPage() {
 
   const { data: pet } = await supabase
     .from('pets')
-    .select('id, name, breed, slug, is_public, persona_prompt_fragment, created_at')
+    .select(
+      'id, name, breed, slug, is_public, guardian_relationship, personality_code, personality_label, persona_prompt_fragment, created_at',
+    )
     .eq('user_id', user.id)
     .limit(1)
     .maybeSingle<PetOverview>()
@@ -81,6 +86,22 @@ export default async function PetOverviewPage() {
               <dt className="w-20 shrink-0 text-[var(--color-mute)]">함께한 날</dt>
               <dd className="text-[var(--color-ink-soft)]">{createdLabel} 부터</dd>
             </div>
+            {pet.guardian_relationship ? (
+              <div className="flex items-baseline gap-3">
+                <dt className="w-20 shrink-0 text-[var(--color-mute)]">보호자</dt>
+                <dd className="text-[var(--color-ink-soft)]">
+                  {pet.guardian_relationship}
+                </dd>
+              </div>
+            ) : null}
+            {pet.personality_code && pet.personality_label ? (
+              <div className="flex items-baseline gap-3">
+                <dt className="w-20 shrink-0 text-[var(--color-mute)]">성격</dt>
+                <dd className="text-[var(--color-ink-soft)]">
+                  {pet.personality_code} · {pet.personality_label}
+                </dd>
+              </div>
+            ) : null}
             <div className="flex items-baseline gap-3">
               <dt className="w-20 shrink-0 text-[var(--color-mute)]">공개 주소</dt>
               <dd className="text-[var(--color-ink-soft)]">
@@ -103,7 +124,7 @@ export default async function PetOverviewPage() {
             {pet.name}의 성격
           </h2>
           <p className="text-[12px] text-[var(--color-mute)]">
-            5문항으로 기록한 우리 아이의 한 줄 소개에요.
+            4문항으로 기록한 우리 아이의 MBTI 한 줄 소개에요.
           </p>
         </div>
 

@@ -18,6 +18,7 @@ import { createLog } from './actions'
 type Props = {
   petId: string
   petName: string
+  logDate?: string
 }
 
 const MAX_MEMO = 200
@@ -34,7 +35,20 @@ const TAG_LABELS: Record<LogTag, string> = {
   snack: '간식',
 }
 
-export function UploadForm({ petId, petName }: Props) {
+function todayInSeoul(): string {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Seoul',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(new Date())
+  const year = parts.find((p) => p.type === 'year')?.value ?? '1970'
+  const month = parts.find((p) => p.type === 'month')?.value ?? '01'
+  const day = parts.find((p) => p.type === 'day')?.value ?? '01'
+  return `${year}-${month}-${day}`
+}
+
+export function UploadForm({ petId, petName, logDate }: Props) {
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [file, setFile] = useState<File | null>(null)
@@ -76,6 +90,7 @@ export function UploadForm({ petId, petName }: Props) {
     const fd = new FormData()
     fd.set('photo', cleaned, 'photo.jpg')
     fd.set('petId', petId)
+    fd.set('logDate', logDate ?? todayInSeoul())
     fd.set('tags', JSON.stringify(selectedTags))
     fd.set('memo', memo)
 

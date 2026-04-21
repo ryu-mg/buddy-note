@@ -20,6 +20,7 @@ type PetEditFormProps = {
     id: string
     name: string
     breed: string
+    guardianRelationship: string
     persona_answers: PersonaAnswers
   }
 }
@@ -28,13 +29,13 @@ function toAnswers(input: PersonaAnswers): Partial<Answers> {
   const out: Partial<Answers> = {}
   for (const id of QUESTION_IDS) {
     const v = input[id]
-    if (v === 'A' || v === 'B' || v === 'C' || v === 'D') out[id] = v
+    if (v === 'A' || v === 'B') out[id] = v
   }
   return out
 }
 
 /**
- * PetEditForm — 이름/품종/5문항을 한 화면에서 수정.
+ * PetEditForm — 이름/품종/보호자 호칭/4문항을 한 화면에서 수정.
  *
  * 온보딩 스텝퍼와 달리 여기서는 scroll-form UX (모든 질문을 한 번에 본다).
  * 수정은 반복 작업일 가능성이 낮아 단일 페이지가 마찰이 적다.
@@ -44,6 +45,9 @@ export function PetEditForm({ pet }: PetEditFormProps) {
   const [pending, startTransition] = useTransition()
   const [name, setName] = useState(pet.name)
   const [breed, setBreed] = useState(pet.breed)
+  const [guardianRelationship, setGuardianRelationship] = useState(
+    pet.guardianRelationship,
+  )
   const [answers, setAnswers] = useState<Partial<Answers>>(() =>
     toAnswers(pet.persona_answers),
   )
@@ -51,8 +55,9 @@ export function PetEditForm({ pet }: PetEditFormProps) {
 
   const canSubmit = useMemo(() => {
     if (name.trim().length === 0) return false
+    if (guardianRelationship.trim().length === 0) return false
     return QUESTION_IDS.every((id) => Boolean(answers[id]))
-  }, [name, answers])
+  }, [name, guardianRelationship, answers])
 
   function setAnswer(id: QuestionId, v: OptionKey) {
     setAnswers((a) => ({ ...a, [id]: v }))
@@ -66,6 +71,7 @@ export function PetEditForm({ pet }: PetEditFormProps) {
     const fd = new FormData()
     fd.set('name', name.trim())
     fd.set('breed', breed.trim())
+    fd.set('guardianRelationship', guardianRelationship.trim())
     for (const id of QUESTION_IDS) {
       fd.set(id, answers[id] ?? '')
     }
@@ -154,9 +160,35 @@ export function PetEditForm({ pet }: PetEditFormProps) {
               className="w-full rounded-[var(--radius-input)] border border-[var(--color-line)] bg-white px-3 py-2.5 text-[15px] text-[var(--color-ink)] placeholder:text-zinc-400 focus:border-[var(--color-accent-brand)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-brand)]/30"
             />
           </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label
+              htmlFor="edit-guardian-relationship"
+              className="text-[13px] font-medium text-[var(--color-ink)]"
+            >
+              보호자 호칭
+            </label>
+            <input
+              id="edit-guardian-relationship"
+              type="text"
+              required
+              aria-required="true"
+              maxLength={20}
+              value={guardianRelationship}
+              onChange={(e) => {
+                setGuardianRelationship(e.target.value)
+                setError(null)
+              }}
+              placeholder="예) 누나"
+              className="w-full rounded-[var(--radius-input)] border border-[var(--color-line)] bg-white px-3 py-2.5 text-[15px] text-[var(--color-ink)] placeholder:text-zinc-400 focus:border-[var(--color-accent-brand)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-brand)]/30"
+            />
+          </div>
         </section>
 
-        <section aria-labelledby="edit-persona-title" className="flex flex-col gap-4">
+        <section
+          aria-labelledby="edit-persona-title"
+          className="flex flex-col gap-4"
+        >
           <div className="flex flex-col gap-0.5">
             <h2
               id="edit-persona-title"

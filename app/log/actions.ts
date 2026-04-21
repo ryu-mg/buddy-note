@@ -47,7 +47,15 @@ export type CreateLogSuccess = { ok: true; diaryId: string }
 export type CreateLogFailure = {
   ok: false
   error: string
-  code: 'auth' | 'pet' | 'upload' | 'llm' | 'render' | 'db' | 'rate_limit'
+  code:
+    | 'auth'
+    | 'pet'
+    | 'upload'
+    | 'llm'
+    | 'render'
+    | 'db'
+    | 'rate_limit'
+    | 'duplicate'
 }
 export type CreateLogResult = CreateLogSuccess | CreateLogFailure
 
@@ -66,9 +74,33 @@ const ALLOWED_MIME = new Set([
  */
 const InputSchema = z.object({
   petId: z.string().uuid(),
+  logDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, '날짜를 다시 확인해주세요.'),
   tags: z.array(logTagSchema).max(8),
   memo: z.string().max(200),
 })
+
+type ExistingDailyLog = {
+  id: string
+}
+
+type ExistingDailyDiary = {
+  id: string
+}
+
+function todayInSeoul(): string {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Seoul',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(new Date())
+  const year = parts.find((p) => p.type === 'year')?.value ?? '1970'
+  const month = parts.find((p) => p.type === 'month')?.value ?? '01'
+  const day = parts.find((p) => p.type === 'day')?.value ?? '01'
+  return `${year}-${month}-${day}`
+}
 
 function parseTags(raw: FormDataEntryValue | null): LogTag[] | null {
   if (typeof raw !== 'string' || raw.trim().length === 0) return []
@@ -143,13 +175,22 @@ export async function createLog(formData: FormData): Promise<CreateLogResult> {
 
   const parsed = InputSchema.safeParse({
     petId: formData.get('petId'),
+    logDate: formData.get('logDate') ?? todayInSeoul(),
     tags,
     memo,
   })
   if (!parsed.success) {
     return { ok: false, error: '입력을 다시 확인해주세요.', code: 'pet' }
   }
-  const { petId, tags: validTags, memo: validMemo } = parsed.data
+  const { petId, logDate, tags: validTags, memo: validMemo } = parsed.data
+
+  if (logDate > todayInSeoul()) {
+    return {
+      ok: false,
+      error: '아직 오지 않은 날은 기록할 수 없어요.',
+      code: 'pet',
+    }
+  }
 
   // 3) Verify pet ownership (SSR client — RLS enforced)
   const { data: pet, error: petError } = await supabase
@@ -167,6 +208,31 @@ export async function createLog(formData: FormData): Promise<CreateLogResult> {
       ok: false,
       error: '성격 정보가 비어있어요. 다시 설정해주세요.',
       code: 'pet',
+    }
+  }
+
+  const { data: existingLog } = await supabase
+    .from('logs')
+    .select('id')
+    .eq('pet_id', petId)
+    .eq('log_date', logDate)
+    .maybeSingle<ExistingDailyLog>()
+
+  if (existingLog) {
+    const { data: existingDiary } = await supabase
+      .from('diaries')
+      .select('id')
+      .eq('log_id', existingLog.id)
+      .maybeSingle<ExistingDailyDiary>()
+
+    if (existingDiary) {
+      return { ok: true, diaryId: existingDiary.id }
+    }
+
+    return {
+      ok: false,
+      error: '이미 이 날짜의 기록을 만드는 중이에요. 잠시 후 다시 열어주세요.',
+      code: 'duplicate',
     }
   }
 
@@ -206,6 +272,7 @@ export async function createLog(formData: FormData): Promise<CreateLogResult> {
       photo_storage_path: '',
       tags: validTags,
       memo: validMemo.length > 0 ? validMemo : null,
+      log_date: logDate,
     })
     .select('id')
     .single()

@@ -14,26 +14,21 @@
 // 호출해서 SSR hydration mismatch 를 피한다.
 
 import { QUESTION_IDS, type Answers, type OptionKey } from '@/lib/pet-mbti'
-import type { Species } from './name-form'
 
 const STORAGE_KEY = 'buddy-note:onboarding'
 const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000 // 7일
 
 export type OnboardingDraft = {
   name: string
-  species: Species
   breed: string
+  guardianRelationship: string
   answers: Partial<Answers>
   lastStep: number
   savedAt: string // ISO
 }
 
 function isOptionKey(v: unknown): v is OptionKey {
-  return v === 'A' || v === 'B' || v === 'C' || v === 'D'
-}
-
-function isSpecies(v: unknown): v is Species {
-  return v === 'dog' || v === 'cat'
+  return v === 'A' || v === 'B'
 }
 
 function sanitizeAnswers(x: unknown): Partial<Answers> {
@@ -88,12 +83,15 @@ export function readDraft(): OnboardingDraft | null {
     }
 
     const name = typeof obj.name === 'string' ? obj.name : ''
-    const species = isSpecies(obj.species) ? obj.species : 'dog'
     const breed = typeof obj.breed === 'string' ? obj.breed : ''
+    const guardianRelationship =
+      typeof obj.guardianRelationship === 'string'
+        ? obj.guardianRelationship
+        : ''
     const answers = sanitizeAnswers(obj.answers)
     const lastStep = clampStep(obj.lastStep)
 
-    return { name, species, breed, answers, lastStep, savedAt }
+    return { name, breed, guardianRelationship, answers, lastStep, savedAt }
   } catch {
     return null
   }

@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import {
   buildPersonaPromptFragment,
+  calculatePersonality,
   isCompleteAnswers,
   QUESTION_IDS,
   type Answers,
@@ -16,7 +17,7 @@ export type SavePetState = {
   error?: string
 }
 
-const OptionSchema = z.enum(['A', 'B', 'C', 'D'])
+const OptionSchema = z.enum(['A', 'B'])
 
 const InputSchema = z.object({
   name: z
@@ -24,13 +25,16 @@ const InputSchema = z.object({
     .trim()
     .min(1, '이름을 적어주세요.')
     .max(24, '이름은 24자 이내로 적어주세요.'),
-  species: z.enum(['dog', 'cat']),
   breed: z.string().trim().max(40, '품종은 40자 이내로 적어주세요.').default(''),
+  guardianRelationship: z
+    .string()
+    .trim()
+    .min(1, '보호자 호칭을 적어주세요.')
+    .max(20, '보호자 호칭은 20자 이내로 적어주세요.'),
   q1: OptionSchema,
   q2: OptionSchema,
   q3: OptionSchema,
   q4: OptionSchema,
-  q5: OptionSchema,
 })
 
 export async function savePet(
@@ -39,13 +43,12 @@ export async function savePet(
 ): Promise<SavePetState> {
   const raw = {
     name: formData.get('name'),
-    species: formData.get('species'),
     breed: formData.get('breed') ?? '',
+    guardianRelationship: formData.get('guardianRelationship'),
     q1: formData.get('q1'),
     q2: formData.get('q2'),
     q3: formData.get('q3'),
     q4: formData.get('q4'),
-    q5: formData.get('q5'),
   }
 
   const parsed = InputSchema.safeParse(raw)
@@ -54,17 +57,16 @@ export async function savePet(
     return { error: first }
   }
 
-  const { name, species, breed } = parsed.data
+  const { name, breed, guardianRelationship } = parsed.data
   const answers: Answers = {
     q1: parsed.data.q1 as OptionKey,
     q2: parsed.data.q2 as OptionKey,
     q3: parsed.data.q3 as OptionKey,
     q4: parsed.data.q4 as OptionKey,
-    q5: parsed.data.q5 as OptionKey,
   }
 
   if (!isCompleteAnswers(answers)) {
-    return { error: '5문항을 모두 선택해주세요.' }
+    return { error: '4문항을 모두 선택해주세요.' }
   }
 
   const supabase = await createClient()
@@ -82,8 +84,10 @@ export async function savePet(
   const persona_prompt_fragment = buildPersonaPromptFragment({
     name,
     breed,
+    guardianRelationship,
     answers,
   })
+  const personality = calculatePersonality(answers)
 
   const persona_answers: Record<string, OptionKey> = {}
   for (const id of QUESTION_IDS) persona_answers[id] = answers[id]
@@ -131,8 +135,11 @@ export async function savePet(
   const { error: insertError } = await supabase.from('pets').insert({
     user_id: user.id,
     name,
-    species,
+    species: 'dog',
     breed,
+    guardian_relationship: guardianRelationship,
+    personality_code: personality.code,
+    personality_label: personality.label,
     slug: finalSlug,
     persona_answers,
     persona_prompt_fragment,

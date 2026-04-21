@@ -1,0 +1,352 @@
+'use client'
+
+import Image from 'next/image'
+import Link from 'next/link'
+import { useMemo, useState } from 'react'
+
+import { UploadForm } from '@/app/log/upload-form'
+
+export type CalendarPet = {
+  id: string
+  name: string
+  createdAt: string
+  personalityCode: string | null
+  personalityLabel: string | null
+}
+
+export type CalendarDiary = {
+  id: string
+  title: string
+  body: string
+  imageUrl: string | null
+  logDate: string
+  createdAt: string
+}
+
+type CalendarDay = {
+  key: string
+  day: number
+  inMonth: boolean
+  isToday: boolean
+  isFuture: boolean
+  diary: CalendarDiary | null
+}
+
+const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토']
+
+function todayInSeoul(): string {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Seoul',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(new Date())
+  const year = parts.find((p) => p.type === 'year')?.value ?? '1970'
+  const month = parts.find((p) => p.type === 'month')?.value ?? '01'
+  const day = parts.find((p) => p.type === 'day')?.value ?? '01'
+  return `${year}-${month}-${day}`
+}
+
+function dateKey(date: Date): string {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
+
+function parseDateKey(key: string): Date {
+  const [y, m, d] = key.split('-').map(Number)
+  return new Date(y ?? 1970, (m ?? 1) - 1, d ?? 1)
+}
+
+function monthLabel(date: Date): string {
+  return `${date.getFullYear()}년 ${date.getMonth() + 1}월`
+}
+
+function longDateLabel(key: string): string {
+  const d = parseDateKey(key)
+  return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`
+}
+
+function daysSince(iso: string): number {
+  const start = new Date(iso).getTime()
+  if (Number.isNaN(start)) return 1
+  const diff = Date.now() - start
+  return Math.max(1, Math.floor(diff / 86_400_000) + 1)
+}
+
+function buildMonthDays(
+  month: Date,
+  diariesByDate: Map<string, CalendarDiary>,
+  todayKey: string,
+): CalendarDay[] {
+  const first = new Date(month.getFullYear(), month.getMonth(), 1)
+  const start = new Date(first)
+  start.setDate(first.getDate() - first.getDay())
+
+  return Array.from({ length: 42 }, (_, i) => {
+    const d = new Date(start)
+    d.setDate(start.getDate() + i)
+    const key = dateKey(d)
+    return {
+      key,
+      day: d.getDate(),
+      inMonth: d.getMonth() === month.getMonth(),
+      isToday: key === todayKey,
+      isFuture: key > todayKey,
+      diary: diariesByDate.get(key) ?? null,
+    }
+  })
+}
+
+export function CalendarHome({
+  pet,
+  diaries,
+}: {
+  pet: CalendarPet
+  diaries: CalendarDiary[]
+}) {
+  const todayKey = todayInSeoul()
+  const [activeMonth, setActiveMonth] = useState(() => {
+    const today = parseDateKey(todayKey)
+    return new Date(today.getFullYear(), today.getMonth(), 1)
+  })
+  const [selectedKey, setSelectedKey] = useState<string | null>(null)
+
+  const diariesByDate = useMemo(() => {
+    const map = new Map<string, CalendarDiary>()
+    for (const diary of diaries) map.set(diary.logDate, diary)
+    return map
+  }, [diaries])
+
+  const days = useMemo(
+    () => buildMonthDays(activeMonth, diariesByDate, todayKey),
+    [activeMonth, diariesByDate, todayKey],
+  )
+
+  const selectedDiary = selectedKey
+    ? diariesByDate.get(selectedKey) ?? null
+    : null
+  const selectedIsFuture = selectedKey ? selectedKey > todayKey : false
+  const dayN = daysSince(pet.createdAt)
+
+  function moveMonth(delta: number) {
+    setActiveMonth((current) => {
+      const next = new Date(current)
+      next.setMonth(current.getMonth() + delta)
+      return next
+    })
+    setSelectedKey(null)
+  }
+
+  return (
+    <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col gap-6 px-4 pb-28 pt-8 sm:px-6 md:pt-10">
+      <header className="flex flex-col gap-3">
+        <p className="text-[12px] font-medium uppercase tracking-[0.14em] text-[var(--color-mute)]">
+          calendar
+        </p>
+        <div className="flex flex-col gap-1">
+          <h1 className="text-[24px] font-semibold leading-[1.25] text-[var(--color-ink)]">
+            {pet.name}의 이야기 {dayN}일째
+          </h1>
+          <p className="text-[13px] leading-[1.5] text-[var(--color-mute)]">
+            {pet.personalityCode && pet.personalityLabel
+              ? `${pet.personalityCode} · ${pet.personalityLabel}`
+              : '하루에 한 장씩, 기억을 차곡차곡 남겨요.'}
+          </p>
+        </div>
+      </header>
+
+      <section
+        aria-label="월간 기록 달력"
+        className="flex flex-col gap-4"
+      >
+        <div className="flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => moveMonth(-1)}
+            className="min-h-11 rounded-[var(--radius-button)] px-3 text-[14px] font-medium text-[var(--color-ink-soft)] transition-colors hover:bg-[var(--color-paper)]"
+          >
+            이전
+          </button>
+          <h2 className="text-[20px] font-bold text-[var(--color-ink)]">
+            {monthLabel(activeMonth)}
+          </h2>
+          <button
+            type="button"
+            onClick={() => moveMonth(1)}
+            className="min-h-11 rounded-[var(--radius-button)] px-3 text-[14px] font-medium text-[var(--color-ink-soft)] transition-colors hover:bg-[var(--color-paper)]"
+          >
+            다음
+          </button>
+        </div>
+
+        <div className="grid grid-cols-7 gap-1 text-center">
+          {WEEKDAYS.map((day) => (
+            <div
+              key={day}
+              className="py-2 text-[12px] font-medium text-[var(--color-mute)]"
+            >
+              {day}
+            </div>
+          ))}
+          {days.map((day) => {
+            const selected = selectedKey === day.key
+            return (
+              <button
+                key={day.key}
+                type="button"
+                onClick={() => {
+                  if (!day.inMonth || day.isFuture) return
+                  setSelectedKey(day.key)
+                }}
+                disabled={!day.inMonth || day.isFuture}
+                aria-pressed={selected}
+                aria-label={`${longDateLabel(day.key)}${day.diary ? ', 기록 있음' : ''}`}
+                className={[
+                  'relative flex aspect-square min-h-12 flex-col items-center justify-center rounded-[var(--radius-input)] border text-[14px] transition-colors',
+                  day.inMonth
+                    ? 'border-[var(--color-line)] bg-[var(--color-bg)] text-[var(--color-ink)]'
+                    : 'border-transparent bg-transparent text-[var(--color-line)]',
+                  day.isFuture
+                    ? 'cursor-not-allowed opacity-35'
+                    : 'hover:border-[var(--color-accent-brand)]',
+                  selected
+                    ? 'border-[var(--color-accent-brand)] bg-[var(--color-accent-brand-soft)]'
+                    : '',
+                  day.isToday && !selected
+                    ? 'ring-1 ring-[var(--color-accent-brand)]'
+                    : '',
+                ].join(' ')}
+              >
+                <span>{day.day}</span>
+                {day.diary ? (
+                  <span
+                    aria-hidden
+                    className="mt-1 h-1.5 w-1.5 rounded-full bg-[var(--color-accent-brand)]"
+                  />
+                ) : null}
+              </button>
+            )
+          })}
+        </div>
+      </section>
+
+      {selectedKey ? (
+        <CalendarSheet
+          pet={pet}
+          dateKeyValue={selectedKey}
+          diary={selectedDiary}
+          isFuture={selectedIsFuture}
+          onClose={() => setSelectedKey(null)}
+        />
+      ) : null}
+    </main>
+  )
+}
+
+function CalendarSheet({
+  pet,
+  dateKeyValue,
+  diary,
+  isFuture,
+  onClose,
+}: {
+  pet: CalendarPet
+  dateKeyValue: string
+  diary: CalendarDiary | null
+  isFuture: boolean
+  onClose: () => void
+}) {
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="calendar-sheet-title"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-[var(--color-ink)]/20 px-3 pb-3"
+      onClick={onClose}
+    >
+      <section
+        className="max-h-[86vh] w-full max-w-md overflow-y-auto rounded-t-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-bg)] px-4 pb-6 pt-4 shadow-[0_-16px_40px_-24px_rgba(0,0,0,0.35)]"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="mx-auto mb-4 h-1 w-10 rounded-[var(--radius-pill)] bg-[var(--color-line)]" />
+        <div className="mb-5 flex items-start justify-between gap-4">
+          <div className="flex flex-col gap-1">
+            <p className="text-[12px] font-medium uppercase tracking-[0.14em] text-[var(--color-mute)]">
+              {longDateLabel(dateKeyValue)}
+            </p>
+            <h2
+              id="calendar-sheet-title"
+              className="text-[20px] font-semibold text-[var(--color-ink)]"
+            >
+              {diary ? '이 날의 일기' : `${pet.name}의 기록 남기기`}
+            </h2>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="min-h-11 rounded-[var(--radius-button)] px-3 text-[13px] text-[var(--color-mute)] transition-colors hover:bg-[var(--color-paper)]"
+          >
+            닫기
+          </button>
+        </div>
+
+        {isFuture ? (
+          <p className="rounded-[var(--radius-input)] bg-[var(--color-paper)] px-4 py-3 text-[14px] text-[var(--color-ink-soft)]">
+            아직 오지 않은 날은 기록할 수 없어요.
+          </p>
+        ) : diary ? (
+          <DiaryPreview diary={diary} petName={pet.name} />
+        ) : (
+          <UploadForm
+            petId={pet.id}
+            petName={pet.name}
+            logDate={dateKeyValue}
+          />
+        )}
+      </section>
+    </div>
+  )
+}
+
+function DiaryPreview({
+  diary,
+  petName,
+}: {
+  diary: CalendarDiary
+  petName: string
+}) {
+  return (
+    <article className="flex flex-col gap-4">
+      {diary.imageUrl ? (
+        <div className="relative aspect-[4/5] overflow-hidden bg-[var(--color-paper)]">
+          <Image
+            src={diary.imageUrl}
+            alt={`${petName}의 ${diary.title} 사진`}
+            fill
+            sizes="(max-width: 640px) 100vw, 420px"
+            className="object-cover"
+          />
+        </div>
+      ) : null}
+      <div className="flex flex-col gap-2">
+        <h3 className="text-[20px] font-semibold leading-[1.35] text-[var(--color-ink)]">
+          {diary.title}
+        </h3>
+        <p
+          className="max-h-[6.8em] overflow-hidden whitespace-pre-wrap text-[15px] leading-[1.7] text-[var(--color-ink-soft)]"
+          style={{ fontFamily: 'var(--font-serif)' }}
+        >
+          {diary.body}
+        </p>
+      </div>
+      <Link
+        href={`/diary/${diary.id}`}
+        className="inline-flex min-h-11 items-center justify-center rounded-[var(--radius-button)] bg-[var(--color-accent-brand)] px-4 text-[14px] font-semibold text-white transition-opacity hover:opacity-90"
+      >
+        자세히 보기
+      </Link>
+    </article>
+  )
+}

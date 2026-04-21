@@ -50,12 +50,6 @@ export async function AppHeader() {
     <HeaderShell
       right={
         <div className="flex items-center gap-4">
-          <Link
-            href="/logs"
-            className="text-[13px] text-[var(--color-mute)] transition-colors hover:text-[var(--color-accent-brand)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent-brand)] focus-visible:ring-offset-2"
-          >
-            기록
-          </Link>
           {pet?.name ? (
             <Link
               href="/pet"

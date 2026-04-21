@@ -11,6 +11,7 @@ import {
 import { useRouter } from 'next/navigation'
 import {
   buildPersonaPromptFragment,
+  calculatePersonality,
   isCompleteAnswers,
   QUESTIONS,
   QUESTION_IDS,
@@ -24,6 +25,7 @@ import {
   NameForm,
   type NameFormValues,
 } from '@/components/onboarding/name-form'
+import { RelationshipForm } from '@/components/onboarding/relationship-form'
 import {
   clearDraft,
   readDraft,
@@ -31,15 +33,17 @@ import {
 } from '@/components/onboarding/onboarding-storage'
 import { savePet, type SavePetState } from '../../actions'
 
-const TOTAL_STEPS = 7 // 0 (정보) + 5 (질문) + 1 (확정) = 7
+const TOTAL_STEPS = 7 // 0 (정보) + 1 (관계) + 4 (질문) + 1 (확정)
 
 type Draft = {
   info: NameFormValues
+  guardianRelationship: string
   answers: Partial<Answers>
 }
 
 const emptyDraft: Draft = {
-  info: { name: '', species: 'dog', breed: '' },
+  info: { name: '', breed: '' },
+  guardianRelationship: '',
   answers: {},
 }
 
@@ -71,9 +75,9 @@ export default function OnboardingStepPage(props: PageProps) {
       setDraft({
         info: {
           name: stored.name,
-          species: stored.species,
           breed: stored.breed,
         },
+        guardianRelationship: stored.guardianRelationship,
         answers: stored.answers,
       })
       /* eslint-enable react-hooks/set-state-in-effect */
@@ -86,8 +90,8 @@ export default function OnboardingStepPage(props: PageProps) {
     if (!hydrated) return
     saveDraft({
       name: draft.info.name,
-      species: draft.info.species,
       breed: draft.info.breed,
+      guardianRelationship: draft.guardianRelationship,
       answers: draft.answers,
       lastStep: step,
     })
@@ -95,6 +99,11 @@ export default function OnboardingStepPage(props: PageProps) {
 
   const setInfo = useCallback((next: NameFormValues) => {
     setDraft((d) => ({ ...d, info: next }))
+    setStepError(null)
+  }, [])
+
+  const setGuardianRelationship = useCallback((next: string) => {
+    setDraft((d) => ({ ...d, guardianRelationship: next }))
     setStepError(null)
   }, [])
 
@@ -116,8 +125,11 @@ export default function OnboardingStepPage(props: PageProps) {
     if (step === 0) {
       return draft.info.name.trim().length > 0
     }
-    if (step >= 1 && step <= 5) {
-      const id = QUESTION_IDS[step - 1]
+    if (step === 1) {
+      return draft.guardianRelationship.trim().length > 0
+    }
+    if (step >= 2 && step <= 5) {
+      const id = QUESTION_IDS[step - 2]
       return Boolean(draft.answers[id])
     }
     // step 6 — advancing means submit, handled by form.
@@ -129,8 +141,12 @@ export default function OnboardingStepPage(props: PageProps) {
       setStepError('이름을 적어주세요.')
       return
     }
-    if (step >= 1 && step <= 5) {
-      const id = QUESTION_IDS[step - 1]
+    if (step === 1 && !draft.guardianRelationship.trim()) {
+      setStepError('보호자 호칭을 적어주세요.')
+      return
+    }
+    if (step >= 2 && step <= 5) {
+      const id = QUESTION_IDS[step - 2]
       if (!draft.answers[id]) {
         setStepError('하나를 골라주세요.')
         return
@@ -188,18 +204,25 @@ export default function OnboardingStepPage(props: PageProps) {
       >
         {step === 0 ? (
           <NameForm value={draft.info} onChange={setInfo} error={stepError} />
-        ) : step >= 1 && step <= 5 ? (
+        ) : step === 1 ? (
+          <RelationshipForm
+            petName={draft.info.name}
+            value={draft.guardianRelationship}
+            onChange={setGuardianRelationship}
+            error={stepError}
+          />
+        ) : step >= 2 && step <= 5 ? (
           <QuestionCard
-            index={step}
-            total={5}
-            question={QUESTIONS[step - 1]}
-            value={draft.answers[QUESTION_IDS[step - 1]] ?? null}
-            onChange={(v) => setAnswer(QUESTION_IDS[step - 1], v)}
+            index={step - 1}
+            total={4}
+            question={QUESTIONS[step - 2]}
+            value={draft.answers[QUESTION_IDS[step - 2]] ?? null}
+            onChange={(v) => setAnswer(QUESTION_IDS[step - 2], v)}
           />
         ) : (
           <ConfirmStep draft={draft} />
         )}
-        {stepError && step >= 1 && step <= 5 ? (
+        {stepError && step >= 2 && step <= 5 ? (
           <p
             role="alert"
             className="mt-3 text-center text-[13px] text-[var(--error,#b04a4a)]"
@@ -235,14 +258,21 @@ export default function OnboardingStepPage(props: PageProps) {
 }
 
 function ConfirmStep({ draft }: { draft: Draft }) {
-  const ready = isCompleteAnswers(draft.answers) && draft.info.name.trim().length > 0
+  const ready =
+    isCompleteAnswers(draft.answers) &&
+    draft.info.name.trim().length > 0 &&
+    draft.guardianRelationship.trim().length > 0
   const fragment = ready
     ? buildPersonaPromptFragment({
         name: draft.info.name,
         breed: draft.info.breed,
+        guardianRelationship: draft.guardianRelationship,
         answers: draft.answers as Answers,
       })
     : ''
+  const personality = ready
+    ? calculatePersonality(draft.answers as Answers)
+    : null
 
   return (
     <section
@@ -264,15 +294,25 @@ function ConfirmStep({ draft }: { draft: Draft }) {
         </p>
 
         {ready ? (
-          <blockquote
-            className="mt-5 whitespace-pre-wrap border-l-2 border-[var(--accent,#e07a5f)] bg-white/60 px-4 py-4 text-[15px] leading-[1.7] text-[var(--ink,#1a1a1a)]"
-            style={{ fontFamily: '"Nanum Myeongjo", "RIDIBatang", serif' }}
-          >
-            {fragment}
-          </blockquote>
+          <>
+            <div className="mt-5 rounded-[10px] bg-white/70 px-4 py-4">
+              <p className="text-[13px] font-medium text-[var(--mute,#6b7280)]">
+                {draft.info.name}은
+              </p>
+              <p className="mt-1 text-[22px] font-bold leading-[1.25] text-[var(--ink,#1a1a1a)]">
+                {personality?.code} · {personality?.label}
+              </p>
+            </div>
+            <blockquote
+              className="mt-4 whitespace-pre-wrap border-l-2 border-[var(--accent,#e07a5f)] bg-white/60 px-4 py-4 text-[15px] leading-[1.7] text-[var(--ink,#1a1a1a)]"
+              style={{ fontFamily: '"Nanum Myeongjo", "RIDIBatang", serif' }}
+            >
+              {fragment}
+            </blockquote>
+          </>
         ) : (
           <p className="mt-5 rounded-[8px] bg-[var(--accent-soft,#fde6e0)] px-3 py-2 text-[13px] text-[var(--error,#b04a4a)]">
-            앞 단계에서 이름과 5문항을 마저 채워주세요.
+            앞 단계에서 이름, 보호자 호칭, 4문항을 마저 채워주세요.
           </p>
         )}
       </article>
@@ -333,7 +373,9 @@ function SubmitRow({
   const initial: SavePetState = {}
   const [state, formAction, pending] = useActionState(savePet, initial)
   const ready =
-    isCompleteAnswers(draft.answers) && draft.info.name.trim().length > 0
+    isCompleteAnswers(draft.answers) &&
+    draft.info.name.trim().length > 0 &&
+    draft.guardianRelationship.trim().length > 0
 
   // 저장 성공 시 서버에서 redirect('/') — 클라는 localStorage 정리만.
   // redirect 후 이 컴포넌트는 언마운트되므로 useEffect cleanup 이 처리.
@@ -347,8 +389,12 @@ function SubmitRow({
   return (
     <form action={formAction} className="flex flex-col gap-3">
       <input type="hidden" name="name" value={draft.info.name} />
-      <input type="hidden" name="species" value={draft.info.species} />
       <input type="hidden" name="breed" value={draft.info.breed} />
+      <input
+        type="hidden"
+        name="guardianRelationship"
+        value={draft.guardianRelationship}
+      />
       {QUESTION_IDS.map((id) => (
         <input
           key={id}
