@@ -2,6 +2,11 @@
 
 Last updated: 2026-04-21
 
+Interactive Swagger UI:
+
+- `/api-docs`
+- Raw OpenAPI JSON: `/api/openapi.json`
+
 buddy-note는 일반적인 public JSON API 제품이 아니라 Next.js App Router 앱이다. 사용자-facing write flow는 대부분 **Server Actions**로 처리하고, `app/api/*`는 운영 cron/worker 용도의 내부 API만 둔다.
 
 ## Base URLs
@@ -303,7 +308,7 @@ Full template: `.envs/example.env`.
 ## Versioning Policy
 
 - Route Handlers under `app/api/*` are internal and may change without semantic versioning until v1 public API requirements exist.
-- If a public JSON API is introduced later, use `/api/v1/*`, write an OpenAPI spec, and keep backward compatibility within the v1 namespace.
+- If a public JSON API is introduced later, use `/api/v1/*`, update `lib/openapi/spec.ts`, and keep backward compatibility within the v1 namespace.
 - Server Actions are app-internal contracts and should be changed together with their consuming components.
 
 ## Local Verification

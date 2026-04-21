@@ -102,6 +102,8 @@ SUPABASE_PROJECT_REF=xxxx bun run gen:types
 - `/api/memory/process` — 메모리 요약 워커 (pg_cron 호출)
 - `/api/cleanup/orphan-images` — `diary-images` orphan cleanup cron
 - `/api/health/llm` — LLM health check + Discord webhook 알림
+- `/api/openapi.json` — OpenAPI 3.1 JSON
+- `/api-docs` — Swagger UI
 
 ## 프로젝트 구조
 
@@ -125,6 +127,7 @@ types/           # database.ts
 - [rules/code-conventions.md](./rules/code-conventions.md) — 코드 스타일, AI 작업 규칙
 - [DESIGN.md](./DESIGN.md) — 폴라로이드 비주얼 시스템
 - [docs/API.md](./docs/API.md) — Route Handler / Server Action API 문서
+- Swagger UI — `/api-docs` (dev 서버 실행 후 브라우저에서 확인)
 - [TODOS.md](./TODOS.md) — deferred items + 유저 action items
 - [AGENTS_TODOS.md](./AGENTS_TODOS.md) — AI 잔여 코드 작업 실행 플랜
 - [CHANGELOG.md](./CHANGELOG.md) — v0.1 pre-release 변경 이력
