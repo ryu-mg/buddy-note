@@ -124,6 +124,7 @@ types/           # database.ts
 - [rules/architecture.md](./rules/architecture.md) — 시스템 구조, 데이터 흐름
 - [rules/code-conventions.md](./rules/code-conventions.md) — 코드 스타일, AI 작업 규칙
 - [DESIGN.md](./DESIGN.md) — 폴라로이드 비주얼 시스템
+- [docs/API.md](./docs/API.md) — Route Handler / Server Action API 문서
 - [TODOS.md](./TODOS.md) — deferred items + 유저 action items
 - [AGENTS_TODOS.md](./AGENTS_TODOS.md) — AI 잔여 코드 작업 실행 플랜
 - [CHANGELOG.md](./CHANGELOG.md) — v0.1 pre-release 변경 이력
