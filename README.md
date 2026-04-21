@@ -65,10 +65,12 @@ bun run dev    # http://localhost:4000
 | `bun run test` | 유닛 테스트 (`lib/` 한정, Bun 내장) |
 | `bun run test:e2e` | Playwright E2E (dev 서버 + Supabase env 필요) |
 | `bun run gen:types` | Supabase 스키마 타입 재생성 |
+| `bun run storybook` | Storybook dev 서버 (6006 포트) |
+| `bun run build-storybook` | Storybook 정적 빌드 |
 | `bunx tsc --noEmit` | 타입 체크 |
 
 현재 기준 품질 게이트는 `bun run lint`, `bunx tsc --noEmit`, `bun run test`
-155 pass, `bun run build` 통과 상태다.
+166 pass, `bun run build`, `bun run build-storybook` 통과 상태다.
 
 ### 타입 재생성
 
@@ -93,11 +95,13 @@ SUPABASE_PROJECT_REF=xxxx bun run gen:types
 - `/auth/login` — 이메일 매직링크 + 카카오
 - `/onboarding` — 5문항 MBTI 온보딩
 - `/log` — 사진 업로드 + AI 일기 생성
-- `/logs` — 월별 기록 히스토리 (예정)
+- `/logs` — 월별 기록 히스토리
 - `/diary/[id]` — 결과 뷰 + 공유 모달
 - `/b/[slug]` — 공개 프로필 (ISR 24h, OG 메타)
 - `/pet` — 프로필 편집 + 탈퇴
 - `/api/memory/process` — 메모리 요약 워커 (pg_cron 호출)
+- `/api/cleanup/orphan-images` — `diary-images` orphan cleanup cron
+- `/api/health/llm` — LLM health check + Discord webhook 알림
 
 ## 프로젝트 구조
 
@@ -130,7 +134,8 @@ types/           # database.ts
 - ✅ 메모리 파이프라인 (pg_cron + 워커 API)
 - ✅ Rate limit, 프롬프트 인젝션 방어, 에러 경계, PWA manifest
 - ✅ GitHub Actions CI, Dependabot, Sentry, Vercel Analytics, Speed Insights
-- ✅ Supabase 타입 생성 래퍼 (`bun run gen:types`) + 테스트 155 pass
+- ✅ Storybook, Supabase 타입 생성 래퍼 (`bun run gen:types`) + 테스트 166 pass
+- ✅ Vercel Cron route 2종 (`orphan-images`, `health/llm`)
 - ⏳ Kakao 비즈앱 승인 대기 (C1)
 - ⏳ Supabase 프로젝트 생성 + migration apply (C2)
 - ⏳ LLM A/B 벤치마크 (C5)
