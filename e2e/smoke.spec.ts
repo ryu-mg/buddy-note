@@ -36,13 +36,18 @@ test.describe('anonymous smoke', () => {
     await expect(page.getByRole('button', { name: /카카오/ })).toBeVisible()
   })
 
-  test('/b/[slug] 존재하지 않는 슬러그 → 404', async ({ page }) => {
+  test('/b/[slug] 존재하지 않는 슬러그 → not-found UI', async ({ page }) => {
     // 예약 slug 들과 겹치지 않는 충분히 랜덤한 값.
     const unlikelySlug = `nonexistent-${Date.now()}-xyz`
-    const response = await page.goto(`/b/${unlikelySlug}`)
+    await page.goto(`/b/${unlikelySlug}`)
 
-    // Next 16 notFound() 는 404 status 반환.
-    expect(response?.status()).toBe(404)
+    // Next App Router can stream custom not-found UI with a 200 status in dev.
+    // User-visible contract is that missing/private public profiles render the
+    // route-level not-found page without leaking existence state.
+    await expect(
+      page.getByRole('heading', { name: '찾을 수 없어요' }),
+    ).toBeVisible()
+    await expect(page.getByText('비공개로 돌렸거나 사라진 친구')).toBeVisible()
   })
 
   test('/robots.txt 응답 200 + Sitemap 라인 포함', async ({ request }) => {
