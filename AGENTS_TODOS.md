@@ -9,11 +9,11 @@
 
 ## 📍 현재 상태 스냅샷 (2026-04-21)
 
-- git: `main` @ `d41d612` (30 커밋, `ryu-mg/buddy-note` 에 푸시 완료)
+- git: local `main` @ `448b9c5` (48 커밋, `origin/main` @ `8aa6428`)
 - 빌드: `bunx next build` ✅
-- 테스트: `bun test` 120 pass (lib/ 한정)
+- 테스트: `bun run test` 155 pass (lib/ 한정)
 - 타입체크: `bunx tsc --noEmit` ✅
-- lint: `bunx eslint` ✅
+- lint: `bun run lint` ✅ (warning 7개 잔존)
 - dev 서버: `bun run dev` (port 4000) — Supabase env 없으면 로그인 이후 블록
 
 ### 이미 완성된 영역
@@ -527,6 +527,8 @@ test: sanitize / schemas / rate-limit 단위 테스트 추가
 
 ## C-1. CHANGELOG.md 시드
 
+**Status**: 완료 — `CHANGELOG.md` v0.1.0 pre-release 시드 추가
+
 ### Why
 현재 30 커밋. `ship` skill 이 실행될 때 CHANGELOG 에 append 하는데, 시드 파일이 없으면 첫 ship 에서 혼란.
 
@@ -604,6 +606,8 @@ docs: CHANGELOG.md 시드 (30 커밋 기반 Unreleased)
 ---
 
 ## C-2. Dependabot config
+
+**Status**: 완료 — `.github/dependabot.yml` 추가 (npm weekly, GitHub Actions monthly)
 
 ### Why
 Next 16 / Supabase SDK / Sentry / @anthropic-ai/sdk 등 빠르게 움직이는 의존성. 주간 PR 로 자동 업데이트.
@@ -1341,7 +1345,9 @@ bun run test:e2e smoke      # 특정 스펙만
 - ✅ 온보딩 + localStorage 복구
 - ✅ 보안 3종 (EXIF / 프롬프트 인젝션 / RLS)
 - ✅ 운영 기초 (로거 / Sentry / CI / PR 템플릿)
-- ✅ GitHub 원격 (30 커밋)
+- ✅ 배포 품질 세트 B (Vercel Analytics / gen-types / 테스트 155 pass)
+- ✅ DX 세트 C 일부 (CHANGELOG seed / Dependabot)
+- ✅ GitHub 원격 (origin/main 연결)
 - ✅ a11y sweep
 - ✅ AGENTS_TODOS.md 상세화 ← **본 파일**
 
@@ -1349,10 +1355,10 @@ bun run test:e2e smoke      # 특정 스펙만
 
 # 🧭 추천 실행 순서
 
-1. **세트 B-1 → B-2 → B-3** (1시간 40분, 3 독립 작업 or 순차)
-2. **세트 C-1 → C-2 → C-3** (1시간, DX 세팅)
+1. **lint warning 정리** — 현재 7 warning. error는 없지만 CI 로그 노이즈 제거.
+2. **C-3 README 최종 점검** — 이미 프로젝트 README로 교체됨. 최신 테스트/툴링 상태와 맞는지 drift만 확인.
 3. 이후 세트 D-3 (다크팔레트 DESIGN.md 확정 후 구현) 또는 세트 E-1 / E-2 (cron 세트)
-4. C2 블로커 해제되면 → B-2 실행 → C-4 싱크 감사 → E-3 E2E 확장
+4. C2 블로커 해제되면 → `bun run gen:types` 실제 실행 → C-4 싱크 감사 → E-3 E2E 확장
 
 커밋은 항목당 1개. 커밋 메시지 템플릿은 각 항목 블록에 포함.
 
