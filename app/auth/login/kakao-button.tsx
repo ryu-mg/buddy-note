@@ -10,7 +10,7 @@ export function KakaoButton() {
 
   function handleClick() {
     startTransition(async () => {
-      const result = await signInWithKakao(new FormData())
+      const result = await signInWithKakao()
       if (!result.ok) {
         toast.error(result.error)
         return

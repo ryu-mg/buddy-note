@@ -65,9 +65,7 @@ export type KakaoResult =
   | { ok: true; redirectUrl: string }
   | { ok: false; error: string }
 
-export async function signInWithKakao(
-  _formData: FormData,
-): Promise<KakaoResult> {
+export async function signInWithKakao(): Promise<KakaoResult> {
   const supabase = await createClient()
   if (!supabase) {
     return {

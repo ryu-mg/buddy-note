@@ -157,7 +157,11 @@ describe('memorySummarySchema', () => {
   })
 
   it('필수 필드가 빠지면 실패', () => {
-    const { toneDescription: _drop, ...missing } = valid
+    const missing = {
+      recurringHabits: valid.recurringHabits,
+      favoriteThings: valid.favoriteThings,
+      recentCallbacks: valid.recentCallbacks,
+    }
     const r = memorySummarySchema.safeParse(missing)
     expect(r.success).toBeFalsy()
   })
@@ -220,13 +224,23 @@ describe('memorySummaryInputSchema', () => {
   })
 
   it('petName 누락 시 실패', () => {
-    const { petName: _drop, ...missing } = base
+    const missing = {
+      breed: base.breed,
+      personaFragment: base.personaFragment,
+      previousSummary: base.previousSummary,
+      newLogs: base.newLogs,
+    }
     const r = memorySummaryInputSchema.safeParse(missing)
     expect(r.success).toBeFalsy()
   })
 
   it('personaFragment 누락 시 실패', () => {
-    const { personaFragment: _drop, ...missing } = base
+    const missing = {
+      petName: base.petName,
+      breed: base.breed,
+      previousSummary: base.previousSummary,
+      newLogs: base.newLogs,
+    }
     const r = memorySummaryInputSchema.safeParse(missing)
     expect(r.success).toBeFalsy()
   })
@@ -258,7 +272,12 @@ describe('memorySummaryInputSchema', () => {
   })
 
   it('breed 생략 OK (optional)', () => {
-    const { breed: _drop, ...withoutBreed } = base
+    const withoutBreed = {
+      petName: base.petName,
+      personaFragment: base.personaFragment,
+      previousSummary: base.previousSummary,
+      newLogs: base.newLogs,
+    }
     const r = memorySummaryInputSchema.safeParse(withoutBreed)
     expect(r.success).toBeTruthy()
   })

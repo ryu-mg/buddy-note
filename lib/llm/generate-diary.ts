@@ -53,7 +53,7 @@ const MAX_OUTPUT_TOKENS = 1200
  * 회복 액션) 을 따른다. 유저에게는 Title/Body 가 그대로 보이되, UI 가 토스트로
  * "AI 가 잠시 놓쳤어요..." 를 띄우고 재시도 버튼을 노출한다.
  */
-function buildFallback(input: DiaryInput, reason: string): DiaryOutput {
+function buildFallback(input: DiaryInput): DiaryOutput {
   const memo = input.memo.trim()
   const name = input.petName
   const bodyParts: string[] = []
@@ -84,7 +84,7 @@ function fallbackResult(
 ): DiaryResult {
   return {
     ok: true,
-    data: buildFallback(input, reason),
+    data: buildFallback(input),
     meta: {
       modelUsed: `fallback@${DIARY_PROMPT_VERSION}`,
       latencyMs: Date.now() - startMs,
