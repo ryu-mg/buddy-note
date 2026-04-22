@@ -4,12 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>buddy-note v0.2 — UI/UX 개선 프리뷰</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700&family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@kfonts/maruburi@0.1.0/index.css" />
   <style>
     /* ============================================================
-       Tokens (DESIGN.md v0.1 + 제안된 v0.2 변경)
+       Tokens (DESIGN.md v0.2 + implemented app tokens)
     ============================================================ */
     :root {
       --color-paper: #fafaf5;
@@ -20,28 +19,36 @@
       --color-bg: #ffffff;
       --color-accent-brand: #e07a5f;
       --color-accent-brand-soft: #fde6e0;
+      --primary-foreground: #ffffff;
       --color-success: #4a7c59;
       --color-error: #b04a4a;
       --color-warn: #d4a256;
 
-      /* v0.2 제안 — mood palette (D-10) */
-      --mood-bright: #e07a5f;
-      --mood-calm: #a8b5a0;
-      --mood-tired: #9ca3af;
-      --mood-curious: #d4a256;
-      --mood-grumpy: #8a6650;
-      --mood-lonely: #5a7a8a;
+      /* v0.2 — mood palette (matches app/globals.css) */
+      --color-mood-bright: #e0a83f;
+      --color-mood-calm: #6f9f86;
+      --color-mood-tired: #9b9489;
+      --color-mood-curious: #5f8aa8;
+      --color-mood-grumpy: #8a6650;
+      --color-mood-lonely: #7f8f9f;
+      --mood-bright: var(--color-mood-bright);
+      --mood-calm: var(--color-mood-calm);
+      --mood-tired: var(--color-mood-tired);
+      --mood-curious: var(--color-mood-curious);
+      --mood-grumpy: var(--color-mood-grumpy);
+      --mood-lonely: var(--color-mood-lonely);
 
-      /* v0.2 제안 — warm-dark (D-14) */
-      --wd-bg: #2a241f;
-      --wd-paper: #342c25;
-      --wd-ink: #f4eee5;
-      --wd-ink-soft: #c9bfb0;
-      --wd-mute: #8a8073;
-      --wd-line: rgba(244, 238, 229, 0.08);
+      /* v0.2 — warm-dark (matches app/globals.css) */
+      --wd-bg: #17120f;
+      --wd-paper: #211b17;
+      --wd-ink: #f5efe6;
+      --wd-ink-soft: #d8cabe;
+      --wd-mute: #aa9a8d;
+      --wd-line: #3a302a;
+      --wd-accent-soft: #3a2620;
 
       /* Milestone cream */
-      --cream: #f4e4c1;
+      --cream: var(--color-accent-brand-soft);
 
       --radius-card: 12px;
       --radius-button: 10px;
@@ -49,15 +56,20 @@
       --radius-pill: 9999px;
 
       --font-sans: "Pretendard Variable", "Pretendard", -apple-system, BlinkMacSystemFont, "Noto Sans KR", sans-serif;
-      --font-serif: "Nanum Myeongjo", "Gowun Batang", "Apple SD Gothic Neo", serif;
+      --font-serif: "마루 부리", "MaruBuri", "Nanum Myeongjo", "Noto Serif KR", serif;
       --ease-soft-out: cubic-bezier(0.2, 0.9, 0.3, 1);
+      --duration-default: 200ms;
+      --shadow-card: 0 1px 2px rgb(26 26 26 / 0.04), 0 14px 32px -18px rgb(26 26 26 / 0.18);
+      --shadow-card-soft: 0 1px 2px rgb(26 26 26 / 0.04), 0 8px 24px -12px rgb(26 26 26 / 0.08);
+      --shadow-polaroid: 0 24px 55px -30px rgb(26 26 26 / 0.42);
+      --shadow-accent: 0 10px 24px -16px rgb(224 122 95 / 0.82);
     }
 
     * { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; }
     body {
       min-height: 100vh;
-      background: #efece6;
+      background: var(--color-paper);
       color: var(--color-ink);
       font-family: var(--font-sans);
       display: flex;
@@ -218,7 +230,7 @@
       border: 1px solid var(--color-line);
       border-radius: 28px;
       overflow: hidden;
-      box-shadow: 0 2px 4px -1px rgba(0,0,0,0.04), 0 24px 60px -20px rgba(0,0,0,0.18);
+      box-shadow: var(--shadow-polaroid);
     }
     .phone-body {
       position: relative;
@@ -304,7 +316,7 @@
       border: 1px solid var(--color-line);
       border-radius: 12px;
       transform: rotate(-0.6deg);
-      box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 8px 24px -12px rgba(0,0,0,0.08);
+      box-shadow: var(--shadow-card-soft);
     }
     .free-desc-card .eyebrow {
       font-size: 11px; color: var(--color-mute); letter-spacing: 0.14em; text-transform: uppercase;
@@ -323,7 +335,7 @@
     }
     .free-desc-card textarea {
       width: 100%;
-      background: #fff;
+      background: var(--color-bg);
       border: 1px solid var(--color-line);
       border-radius: 8px;
       padding: 12px 14px;
@@ -345,7 +357,7 @@
       border: 1px solid var(--color-line);
       border-radius: 12px;
       overflow: hidden;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+      box-shadow: var(--shadow-card-soft);
     }
     .nav-preview-hdr {
       padding: 10px 16px;
@@ -368,7 +380,7 @@
     .polaroid {
       background: var(--color-paper);
       padding: 10px 10px 22px;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 12px 28px -16px rgba(0,0,0,0.18);
+      box-shadow: var(--shadow-card);
       ring: 1px solid var(--color-line);
       outline: 1px solid var(--color-line);
       outline-offset: -1px;
@@ -394,7 +406,7 @@
 
     /* Notes card */
     .note {
-      background: #fff;
+      background: var(--color-bg);
       border: 1px solid var(--color-line);
       border-radius: 12px;
       padding: 16px 18px;
@@ -421,10 +433,10 @@
       width: 100%;
       border-collapse: collapse;
       margin-top: 12px;
-      background: #fff;
+      background: var(--color-bg);
       border-radius: 12px;
       overflow: hidden;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+      box-shadow: var(--shadow-card-soft);
     }
     .copy-diff th {
       text-align: left;
@@ -503,7 +515,7 @@
       background: var(--color-paper);
       border-radius: 16px;
       padding: 18px 18px 16px;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 10px 24px -14px rgba(0,0,0,0.15);
+      box-shadow: var(--shadow-card);
       position: relative;
     }
     .buddy-card::before {
@@ -1373,7 +1385,7 @@
 
     <div class="nav-section">추가 요청 · 4/22</div>
     <a href="#d16" data-target="d16">D-16 · 하단 3-탭 재편</a>
-    <a href="#d17" data-target="d17">D-17 · 발자국 마커 🐾</a>
+    <a href="#d17" data-target="d17">D-17 · 발자국 마커</a>
     <a href="#d18" data-target="d18">D-18 · 온보딩 자유 기술</a>
   </nav>
 
@@ -1419,7 +1431,7 @@
     <h2 style="font-family: var(--font-serif); font-size: 20px; margin-top: 32px;">티켓 스냅샷 (15)</h2>
 
     <div class="tier-card">
-      <h3>🟢 Tier 1 — 즉시 효과, 브랜드 규율 내 (5개)</h3>
+      <h3>Tier 1 — 즉시 효과, 브랜드 규율 내 (5개)</h3>
       <div class="ticket"><span class="id">D-1</span><span>홈 Hero "오늘의 버디 카드" — 주인공 배치</span><span class="effort">M · 2-3일</span></div>
       <div class="ticket"><span class="id">D-2</span><span>UI 카피 1인칭 리라이트 — 강아지 voice로 bending</span><span class="effort">S · 0.5일</span></div>
       <div class="ticket"><span class="id">D-3</span><span>Diary 완료 "찰칵" moment — 폴라로이드 인쇄 셀레브레이션</span><span class="effort">S · 1일</span></div>
@@ -1428,7 +1440,7 @@
     </div>
 
     <div class="tier-card">
-      <h3>🟡 Tier 2 — 브랜드 살짝 확장, 깊이 (5개)</h3>
+      <h3>Tier 2 — 브랜드 살짝 확장, 깊이 (5개)</h3>
       <div class="ticket"><span class="id">D-6</span><span>명조체 key moment 확장 <span class="nav-tag" style="background: rgba(224,122,95,0.12);">design-system</span></span><span class="effort">XS</span></div>
       <div class="ticket"><span class="id">D-7</span><span>캘린더 → 폴라로이드 타임라인</span><span class="effort">L · 3-4일</span></div>
       <div class="ticket"><span class="id">D-8</span><span>Onboarding Step 6 리빌 재설계</span><span class="effort">S · 1일</span></div>
@@ -1437,7 +1449,7 @@
     </div>
 
     <div class="tier-card">
-      <h3>🔴 Tier 3 — Moat, 10x (5개)</h3>
+      <h3>Tier 3 — Moat, 10x (5개)</h3>
       <div class="ticket"><span class="id">D-11</span><span>"오늘의 callback" 홈 모듈 — moat를 UI로</span><span class="effort">L · 3일</span></div>
       <div class="ticket"><span class="id">D-12</span><span>마일스톤 자동 recap 폴라로이드</span><span class="effort">L · 3-4일</span></div>
       <div class="ticket"><span class="id">D-13</span><span>Upload = 대화형 UX</span><span class="effort">M · 2일</span></div>
@@ -1446,8 +1458,8 @@
     </div>
 
     <div class="tier-card" style="border-color: var(--color-accent-brand); background: linear-gradient(to bottom, rgba(224,122,95,0.03), transparent);">
-      <h3>🟢 추가 요청 (4/22 반영) — Tier 1 편입 (3개)</h3>
-      <div class="ticket"><span class="id">D-16</span><span>하단 네비게이션 3-탭 재편 (주간 / 월간 / 내 정보)</span><span class="effort">S · 1일</span></div>
+      <h3>추가 요청 (4/22 반영) — Tier 1 편입 (3개)</h3>
+      <div class="ticket"><span class="id">D-16</span><span>하단 네비게이션 3-탭 재편 (주간 / 홈 / 내 정보)</span><span class="effort">S · 1일</span></div>
       <div class="ticket"><span class="id">D-17</span><span>캘린더 기록 마커 → 강아지 발자국 SVG</span><span class="effort">XS · 0.5일</span></div>
       <div class="ticket"><span class="id">D-18</span><span>Onboarding 자유 기술 단계 (최대 200자)</span><span class="effort">S · 1일</span></div>
     </div>
@@ -1502,7 +1514,7 @@
             </div>
             <div class="bottom-nav">
               <div class="active">홈</div>
-              <div>마이페이지</div>
+              <div>내 정보</div>
             </div>
           </div>
         </div>
@@ -1538,7 +1550,7 @@
 
             <div style="padding: 8px 16px 0; display: flex; justify-content: space-between; align-items: center;">
               <span style="font-size: 11px; color: var(--color-mute); letter-spacing: 0.14em; text-transform: uppercase;">이번 주</span>
-              <span style="font-size: 11px; color: var(--color-accent-brand);">월간 보기 →</span>
+              <span style="font-size: 11px; color: var(--color-accent-brand);">홈 보기 →</span>
             </div>
 
             <!-- Mini timeline preview -->
@@ -1554,7 +1566,7 @@
                 <div class="day-date"><strong>19</strong>토</div>
                 <div class="thumb"><div class="ph"></div></div>
                 <div class="day-meta">
-                  <h3><span class="mood-dot" style="background: var(--mood-curious);"></span>공원에서 토끼 닮은 바람</h3>
+                  <h3><span class="mood-dot" style="background: var(--color-mood-curious);"></span>공원에서 토끼 닮은 바람</h3>
                   <p>비가 올 줄 알았는데 너무 쨍해서 오히려 놀랐어. 공원 한바퀴 돌다가…</p>
                 </div>
               </div>
@@ -1562,7 +1574,7 @@
                 <div class="day-date"><strong>17</strong>목</div>
                 <div class="thumb"><div class="ph" style="background: linear-gradient(135deg, #c4a57a, #6b4c2e);"></div></div>
                 <div class="day-meta">
-                  <h3><span class="mood-dot" style="background: var(--mood-calm);"></span>저녁 낮잠 습관</h3>
+                  <h3><span class="mood-dot" style="background: var(--color-mood-calm);"></span>저녁 낮잠 습관</h3>
                   <p>요즘 저녁 6시쯤 되면 잠깐 꾸벅꾸벅. 엄마가 '아가야' 하면서 깨워…</p>
                 </div>
               </div>
@@ -1575,7 +1587,7 @@
               </div>
               <div>
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-                <span>월간</span>
+                <span>홈</span>
               </div>
               <div>
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
@@ -1592,9 +1604,9 @@
       <ul>
         <li>상단 <span class="spec-key">buddy-card</span> — 아바타 + 이름(명조체) + MBTI 칩 + 1인칭 인사 + 스탯</li>
         <li>인사 문구는 시간대(아침/낮/저녁/밤) × 성격(E/I, F/T) 조합으로 <span class="spec-key">lib/greeting.ts</span>에서 선택</li>
-        <li>캘린더 그리드 → 타임라인 (D-7 연결). 월간 뷰는 <span class="spec-key">/logs</span>로 이관</li>
+        <li>캘린더 그리드 → 주간 타임라인 (D-7 연결). 월간 뷰는 홈 화면의 보조 진입으로 유지</li>
         <li>mood 컬러 dot (D-10 연결)로 기록마다 감정 시각화</li>
-        <li>Bottom nav "마이페이지" → "내 정보" (D-2 카피)</li>
+        <li>Bottom nav "홈 / 마이페이지" → "주간 / 홈 / 내 정보" (실제 앱 반영)</li>
       </ul>
     </div>
   </section>
@@ -1618,14 +1630,14 @@
 
     <table class="copy-diff">
       <thead>
-        <tr><th>위치</th><th>카피 (before → after)</th></tr>
+        <tr><th>위치</th><th>카피 (before → implemented)</th></tr>
       </thead>
       <tbody>
         <tr><td class="location">upload / photo label</td><td><div class="before" style="text-decoration: line-through; color: var(--color-mute);">오늘의 사진</div><div class="after" style="color: var(--color-ink); font-weight: 500;">→ 오늘 뭐 했어?</div></td></tr>
-        <tr><td class="location">upload / placeholder</td><td><div style="text-decoration: line-through; color: var(--color-mute);">사진 한 장을 올려주세요</div><div style="color: var(--color-ink); font-weight: 500;">→ 사진 한 장 보여줄래?</div></td></tr>
-        <tr><td class="location">upload / hint (filled)</td><td><div style="text-decoration: line-through; color: var(--color-mute);">마음에 들면 아래 버튼을 눌러주세요</div><div style="color: var(--color-ink); font-weight: 500;">→ 이거면 돼. 아래 버튼 눌러줘.</div></td></tr>
-        <tr><td class="location">upload / memo label</td><td><div style="text-decoration: line-through; color: var(--color-mute);">남겨두고 싶은 메모 (선택)</div><div style="color: var(--color-ink); font-weight: 500;">→ 엄마가 한 마디 (선택) <span style="font-size: 10px; color: var(--color-mute);">※ companion_relationship 동적 삽입</span></div></td></tr>
-        <tr><td class="location">upload / submit</td><td><div style="text-decoration: line-through; color: var(--color-mute);">마루의 일기 만들기</div><div style="color: var(--color-ink); font-weight: 500;">→ 오늘 이야기 만들어줘</div></td></tr>
+        <tr><td class="location">upload / placeholder</td><td><div style="text-decoration: line-through; color: var(--color-mute);">사진 한 장을 올려주세요</div><div style="color: var(--color-ink); font-weight: 500;">→ 사진 한 장을 올려주세요</div></td></tr>
+        <tr><td class="location">upload / hint (filled)</td><td><div style="text-decoration: line-through; color: var(--color-mute);">마음에 들면 아래 버튼을 눌러주세요</div><div style="color: var(--color-ink); font-weight: 500;">→ 마음에 들면 아래 버튼을 눌러주세요</div></td></tr>
+        <tr><td class="location">upload / memo heading</td><td><div style="text-decoration: line-through; color: var(--color-mute);">{반려인 호칭}가 뭐 말해줄 거 있어?</div><div style="color: var(--color-ink); font-weight: 500;">→ {withJosa(반려인 호칭, "이/가")} 뭐 말해줄 거 있어?</div></td></tr>
+        <tr><td class="location">upload / submit</td><td><div style="text-decoration: line-through; color: var(--color-mute);">마루의 일기 만들기</div><div style="color: var(--color-ink); font-weight: 500;">→ 마루의 일기 만들기</div></td></tr>
         <tr><td class="location">PhaseCopy phase 0</td><td><div style="text-decoration: line-through; color: var(--color-mute);">사진을 살펴보는 중이에요</div><div style="color: var(--color-ink); font-weight: 500;">→ 사진 들여다보는 중…</div></td></tr>
         <tr><td class="location">PhaseCopy phase 2</td><td><div style="text-decoration: line-through; color: var(--color-mute);">마루의 말투로 적는 중이에요</div><div style="color: var(--color-ink); font-weight: 500;">→ 나 평소처럼 적어볼게</div></td></tr>
         <tr><td class="location">diary / 자세히 보기</td><td><div style="text-decoration: line-through; color: var(--color-mute);">자세히 보기</div><div style="color: var(--color-ink); font-weight: 500;">→ 그날 이야기 보기</div></td></tr>
@@ -1633,7 +1645,7 @@
         <tr><td class="location">calendar / 미래 메시지</td><td><div style="text-decoration: line-through; color: var(--color-mute);">아직 오지 않은 날은 기록할 수 없어요.</div><div style="color: var(--color-ink); font-weight: 500;">→ 아직 오지 않은 날이에요. 그때 만나요.</div></td></tr>
         <tr><td class="location">diary fallback banner</td><td><div style="text-decoration: line-through; color: var(--color-mute);">AI가 잠시 놓쳤어요. 이건 임시 일기예요.</div><div style="color: var(--color-ink); font-weight: 500;">→ 내가 오늘 말이 잘 안 떠올랐어. 잠깐 임시로 적어둘게.</div></td></tr>
         <tr><td class="location">empty / 공개 프로필</td><td><div style="text-decoration: line-through; color: var(--color-mute);">아직 첫 일기를 준비 중이에요 / 다음에 다시 놀러 와주세요.</div><div style="color: var(--color-ink); font-weight: 500;">→ 아직 준비 중 / 조금 있다 다시 올래?</div></td></tr>
-        <tr><td class="location">bottom nav</td><td><div style="text-decoration: line-through; color: var(--color-mute);">홈 / 마이페이지</div><div style="color: var(--color-ink); font-weight: 500;">→ 홈 / 내 정보</div></td></tr>
+        <tr><td class="location">bottom nav</td><td><div style="text-decoration: line-through; color: var(--color-mute);">홈 / 마이페이지</div><div style="color: var(--color-ink); font-weight: 500;">→ 주간 / 홈 / 내 정보</div></td></tr>
         <tr><td class="location">overlay cancel</td><td><div style="text-decoration: line-through; color: var(--color-mute);">뒤로 갈래요</div><div style="color: var(--color-ink); font-weight: 500;">→ 조금 있다 다시 할래</div></td></tr>
       </tbody>
     </table>
@@ -1684,7 +1696,7 @@
         <div class="col-label after">타임라인 · 1.4초</div>
         <div class="shutter-timeline">
           <div class="step"><b>0ms</b><span>overlay fade-out</span></div>
-          <div class="step"><b>200ms</b><span>흰 플래시 ⚡<br/>opacity 0→0.9→0</span></div>
+          <div class="step"><b>200ms</b><span>흰 플래시<br/>opacity 0→0.9→0</span></div>
           <div class="step"><b>500ms</b><span>폴라로이드 착지<br/>scale + rotate</span></div>
           <div class="step"><b>900ms</b><span>"저장됐어"<br/>명조체 페이드인</span></div>
           <div class="step"><b>1400ms</b><span>router.push<br/>→ diary 상세</span></div>
@@ -1892,8 +1904,8 @@
     <div class="note">
       <strong>DESIGN.md §2 추가 섹션 (<span class="spec-key">[design-system]</span> PR)</strong>
       <pre style="font-size: 11px; background: var(--color-paper); padding: 10px 12px; border-radius: 6px; overflow-x: auto; margin-top: 8px;">
-**Emotional / Name 강조:** Nanum Myeongjo
-—  강아지 이름 (홈 hero, 공개 프로필, 마이페이지)
+**Emotional / Name 강조:** MaruBuri
+—  강아지 이름 (홈 hero, 공개 프로필, 내 정보)
 —  마일스톤 숫자 (N일째, 기록 47장)
 —  완료 confirmation ("저장됐어")
 —  섹션 구분자 (월 label, 타임라인 sticky header)
@@ -1949,7 +1961,7 @@
                 <div class="day-date"><strong>19</strong>토</div>
                 <div class="thumb"><div class="ph" style="background: linear-gradient(135deg, #e8d9c5, #a8805c);"></div></div>
                 <div class="day-meta">
-                  <h3><span class="mood-dot" style="background: var(--mood-curious);"></span>공원의 토끼바람</h3>
+                  <h3><span class="mood-dot" style="background: var(--color-mood-curious);"></span>공원의 토끼바람</h3>
                   <p>비가 올 줄 알았는데 너무 쨍해서 오히려 놀랐어.</p>
                 </div>
               </div>
@@ -1957,7 +1969,7 @@
                 <div class="day-date"><strong>17</strong>목</div>
                 <div class="thumb"><div class="ph" style="background: linear-gradient(135deg, #c4a57a, #6b4c2e);"></div></div>
                 <div class="day-meta">
-                  <h3><span class="mood-dot" style="background: var(--mood-calm);"></span>저녁 낮잠 습관</h3>
+                  <h3><span class="mood-dot" style="background: var(--color-mood-calm);"></span>저녁 낮잠 습관</h3>
                   <p>요즘 저녁 6시쯤 되면 잠깐 꾸벅꾸벅 졸아.</p>
                 </div>
               </div>
@@ -1965,7 +1977,7 @@
                 <div class="day-date"><strong>15</strong>화</div>
                 <div class="thumb"><div class="ph" style="background: linear-gradient(135deg, #d4b792, #8f6f4e);"></div></div>
                 <div class="day-meta">
-                  <h3><span class="mood-dot" style="background: var(--mood-bright);"></span>엄마가 한참 떠난 금요일</h3>
+                  <h3><span class="mood-dot" style="background: var(--color-mood-bright);"></span>엄마가 한참 떠난 금요일</h3>
                   <p>너무 기다려서 창문 앞에 한참 앉아 있었어.</p>
                 </div>
               </div>
@@ -1979,7 +1991,7 @@
                 <div class="day-date"><strong>13</strong>일</div>
                 <div class="thumb milestone"><div class="ph" style="background: linear-gradient(135deg, #f0e4d2, #a88561);"></div></div>
                 <div class="day-meta">
-                  <h3><span class="mood-dot" style="background: var(--mood-bright);"></span>100일 축하받은 날</h3>
+                  <h3><span class="mood-dot" style="background: var(--color-mood-bright);"></span>100일 축하받은 날</h3>
                   <p>엄마가 작은 케이크 모양 간식을 줬어. 한 입에 다 먹었지.</p>
                 </div>
               </div>
@@ -1989,7 +2001,7 @@
                 <div class="day-date"><strong>28</strong>금</div>
                 <div class="thumb"><div class="ph" style="background: linear-gradient(135deg, #c9a787, #7a5c3e);"></div></div>
                 <div class="day-meta">
-                  <h3><span class="mood-dot" style="background: var(--mood-tired);"></span>긴 산책 후 곯아떨어짐</h3>
+                  <h3><span class="mood-dot" style="background: var(--color-mood-tired);"></span>긴 산책 후 곯아떨어짐</h3>
                   <p>한강 끝까지 가봤어. 처음 가보는 곳 냄새가 다 달랐어.</p>
                 </div>
               </div>
@@ -2001,7 +2013,7 @@
               </div>
               <div>
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-                <span>월간</span>
+                <span>홈</span>
               </div>
               <div>
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
@@ -2210,12 +2222,12 @@
 
     <h3 style="font-family: var(--font-serif); margin-top: 16px;">6 mood palette</h3>
     <div class="mood-grid">
-      <div class="mood-swatch"><div class="chip" style="background: var(--mood-bright);"></div><div class="name">bright</div><div class="hex">#e07a5f</div></div>
-      <div class="mood-swatch"><div class="chip" style="background: var(--mood-calm);"></div><div class="name">calm</div><div class="hex">#a8b5a0</div></div>
-      <div class="mood-swatch"><div class="chip" style="background: var(--mood-tired);"></div><div class="name">tired</div><div class="hex">#9ca3af</div></div>
-      <div class="mood-swatch"><div class="chip" style="background: var(--mood-curious);"></div><div class="name">curious</div><div class="hex">#d4a256</div></div>
-      <div class="mood-swatch"><div class="chip" style="background: var(--mood-grumpy);"></div><div class="name">grumpy</div><div class="hex">#8a6650</div></div>
-      <div class="mood-swatch"><div class="chip" style="background: var(--mood-lonely);"></div><div class="name">lonely</div><div class="hex">#5a7a8a</div></div>
+      <div class="mood-swatch"><div class="chip" style="background: var(--color-mood-bright);"></div><div class="name">bright</div><div class="hex">#e0a83f</div></div>
+      <div class="mood-swatch"><div class="chip" style="background: var(--color-mood-calm);"></div><div class="name">calm</div><div class="hex">#6f9f86</div></div>
+      <div class="mood-swatch"><div class="chip" style="background: var(--color-mood-tired);"></div><div class="name">tired</div><div class="hex">#9b9489</div></div>
+      <div class="mood-swatch"><div class="chip" style="background: var(--color-mood-curious);"></div><div class="name">curious</div><div class="hex">#5f8aa8</div></div>
+      <div class="mood-swatch"><div class="chip" style="background: var(--color-mood-grumpy);"></div><div class="name">grumpy</div><div class="hex">#8a6650</div></div>
+      <div class="mood-swatch"><div class="chip" style="background: var(--color-mood-lonely);"></div><div class="name">lonely</div><div class="hex">#7f8f9f</div></div>
     </div>
 
     <div class="mood-map-preview">
@@ -2226,7 +2238,7 @@
         (function() {
           const map = document.getElementById('moodMap');
           if (!map) return;
-          const moods = ['--mood-bright', '--mood-calm', '--mood-tired', '--mood-curious', '--mood-grumpy', '--mood-lonely', 'transparent', 'transparent', 'transparent'];
+          const moods = ['--color-mood-bright', '--color-mood-calm', '--color-mood-tired', '--color-mood-curious', '--color-mood-grumpy', '--color-mood-lonely', 'transparent', 'transparent', 'transparent'];
           for (let i = 0; i < 90; i++) {
             const m = document.createElement('div');
             m.className = 'm';
@@ -2296,7 +2308,7 @@ ALTER TABLE diaries ADD COLUMN mood TEXT
             <div class="day-row" style="padding: 12px 0;">
               <div class="day-date"><strong>19</strong>토</div>
               <div class="thumb"><div class="ph"></div></div>
-              <div class="day-meta"><h3><span class="mood-dot" style="background: var(--mood-curious);"></span>공원의 토끼바람</h3><p>비가 올 줄 알았는데…</p></div>
+              <div class="day-meta"><h3><span class="mood-dot" style="background: var(--color-mood-curious);"></span>공원의 토끼바람</h3><p>비가 올 줄 알았는데…</p></div>
             </div>
           </div>
         </div>
@@ -2308,7 +2320,7 @@ ALTER TABLE diaries ADD COLUMN mood TEXT
           </div>
           <div>
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-            <span>월간</span>
+            <span>홈</span>
           </div>
           <div>
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
@@ -2460,14 +2472,14 @@ ALTER TABLE diaries ADD COLUMN mood TEXT
             <div class="conv-upload">
               <div class="conv-bubble">
                 <div class="mini-avatar"></div>
-                <div class="text">엄마가 한 마디 해줄래? <span style="color: var(--color-mute); font-size: 11px;">(선택)</span></div>
+                <div class="text">엄마가 뭐 말해줄 거 있어? <span style="color: var(--color-mute); font-size: 11px;">(조사: withJosa)</span></div>
               </div>
               <textarea style="margin-left: 38px; width: calc(100% - 38px); min-height: 100px; border: 1px solid var(--color-line); border-radius: 12px; padding: 12px 14px; font-size: 13px; font-family: var(--font-sans); resize: none;" placeholder="오늘 있었던 일을 짧게…">공원 한 바퀴 돌고 와서 낮잠까지. 완벽한 하루.</textarea>
               <div style="text-align: right; font-size: 10px; color: var(--color-mute); margin-top: 4px; margin-right: 4px;">27 / 200</div>
 
               <div style="margin-top: 20px; display: flex; justify-content: space-between;">
                 <button style="background: transparent; border: 0; color: var(--color-mute); font-size: 13px;">이전</button>
-                <button style="background: var(--color-accent-brand); color: #fff; border: 0; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 600;">오늘 이야기 만들어줘</button>
+                <button style="background: var(--color-accent-brand); color: var(--primary-foreground, #fff); border: 0; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 600;">마루의 일기 만들기</button>
               </div>
             </div>
           </div>
@@ -2533,7 +2545,7 @@ ALTER TABLE diaries ADD COLUMN mood TEXT
             </div>
             <div class="bottom-nav three-tab">
               <div class="active"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>주간</span></div>
-              <div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>월간</span></div>
+              <div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10.5V20h14v-9.5"/><path d="M9 20v-6h6v6"/></svg><span>홈</span></div>
               <div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><span>내 정보</span></div>
             </div>
           </div>
@@ -2573,7 +2585,7 @@ ALTER TABLE diaries ADD COLUMN mood TEXT
             </div>
             <div class="bottom-nav three-tab">
               <div class="active"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>주간</span></div>
-              <div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>월간</span></div>
+              <div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10.5V20h14v-9.5"/><path d="M9 20v-6h6v6"/></svg><span>홈</span></div>
               <div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><span>내 정보</span></div>
             </div>
           </div>
@@ -2647,8 +2659,8 @@ ALTER TABLE diaries ADD COLUMN mood TEXT
       <div class="eyebrow">D-16 · Tier 1 · 1일 · 추가 요청</div>
       <h1>하단 네비게이션 3-탭 재편</h1>
       <p class="lead">
-        현재 <b>홈 / 마이페이지</b> 2탭 구조는 "홈이 캘린더인지 주간 피드인지" 불명확.
-        <b>주간 · 월간 · 내 정보</b> 3탭으로 분리해 두 가지 보기 방식을 탭 수준에서 노출합니다.
+        이전 <b>홈 / 마이페이지</b> 2탭 구조는 "홈이 캘린더인지 주간 피드인지" 불명확했습니다.
+        실제 앱은 <b>주간 · 홈 · 내 정보</b> 3탭으로 분리해 기록 흐름과 내 정보를 탭 수준에서 노출합니다.
       </p>
       <div class="tag-row">
         <span class="pill">정보 아키텍처</span>
@@ -2669,7 +2681,7 @@ ALTER TABLE diaries ADD COLUMN mood TEXT
             </div>
             <div>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
-              <span>마이페이지</span>
+              <span>내 정보</span>
             </div>
           </div>
         </div>
@@ -2681,7 +2693,7 @@ ALTER TABLE diaries ADD COLUMN mood TEXT
       <div>
         <div class="col-label after">After — 3탭</div>
         <div class="nav-preview">
-          <div class="nav-preview-hdr" style="color: var(--color-accent-brand);">주간 / 월간 / 내 정보</div>
+          <div class="nav-preview-hdr" style="color: var(--color-accent-brand);">주간 / 홈 / 내 정보</div>
           <div class="bottom-nav three-tab">
             <div class="active">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h3M8 18h3" stroke-width="2.2"/></svg>
@@ -2689,7 +2701,7 @@ ALTER TABLE diaries ADD COLUMN mood TEXT
             </div>
             <div>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-              <span>월간</span>
+              <span>홈</span>
             </div>
             <div>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
@@ -2698,7 +2710,7 @@ ALTER TABLE diaries ADD COLUMN mood TEXT
           </div>
         </div>
         <p style="font-size: 12px; color: var(--color-accent-brand); margin-top: 10px; text-align: center;">
-          주간 = buddy card + 이번 주 타임라인 · 월간 = 캘린더 그리드
+          주간 = 이번 주 타임라인 · 홈 = 버디 카드 + 월간 진입 · 내 정보 = 프로필 관리
         </p>
       </div>
     </div>
@@ -2735,7 +2747,7 @@ ALTER TABLE diaries ADD COLUMN mood TEXT
             </div>
             <div class="bottom-nav three-tab">
               <div class="active"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>주간</span></div>
-              <div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>월간</span></div>
+              <div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10.5V20h14v-9.5"/><path d="M9 20v-6h6v6"/></svg><span>홈</span></div>
               <div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><span>내 정보</span></div>
             </div>
           </div>
@@ -2743,7 +2755,7 @@ ALTER TABLE diaries ADD COLUMN mood TEXT
       </div>
 
       <div>
-        <div class="col-label after">2. 월간 (발자국 🐾 D-17)</div>
+        <div class="col-label after">2. 홈 (발자국 D-17)</div>
         <div class="phone">
           <div class="phone-body">
             <div class="status-bar"><span>9:41</span><div class="dots"><span></span><span></span><span></span></div></div>
@@ -2783,7 +2795,7 @@ ALTER TABLE diaries ADD COLUMN mood TEXT
             </div>
             <div class="bottom-nav three-tab">
               <div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>주간</span></div>
-              <div class="active"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>월간</span></div>
+              <div class="active"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10.5V20h14v-9.5"/><path d="M9 20v-6h6v6"/></svg><span>홈</span></div>
               <div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><span>내 정보</span></div>
             </div>
           </div>
@@ -2810,7 +2822,7 @@ ALTER TABLE diaries ADD COLUMN mood TEXT
             </nav>
             <div class="bottom-nav three-tab">
               <div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>주간</span></div>
-              <div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>월간</span></div>
+              <div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10.5V20h14v-9.5"/><path d="M9 20v-6h6v6"/></svg><span>홈</span></div>
               <div class="active"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><span>내 정보</span></div>
             </div>
           </div>
