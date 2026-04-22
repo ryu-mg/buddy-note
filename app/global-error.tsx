@@ -19,7 +19,7 @@ type GlobalErrorProps = {
  *   - #6b7280 = --color-mute
  *   - #e07a5f = --color-accent-brand (테라코타 primary)
  *   - #ffffff = 카드 배경 / primary text
- * CDN 폰트 (Pretendard / Nanum Myeongjo)도 layout이 죽었으면 미로드 상태라
+ * CDN 폰트 (Pretendard / MaruBuri)도 layout이 죽었으면 미로드 상태라
  * system font stack으로 fallback.
  */
 export default function GlobalError({ error, reset }: GlobalErrorProps) {

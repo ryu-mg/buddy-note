@@ -60,7 +60,7 @@ export function WeeklyHome({
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col gap-7 px-4 pb-28 pt-8 sm:px-6 md:pt-10">
-      <section className="rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-paper)] px-5 py-6 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_18px_42px_-28px_rgba(0,0,0,0.24)]">
+      <section className="rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-paper)] px-5 py-6 shadow-[var(--shadow-card)]">
         <div className="flex items-start gap-4">
           <BuddyAvatar name={pet.name} imageUrl={pet.avatarUrl} size="lg" />
           <div className="min-w-0 flex-1">
@@ -145,7 +145,7 @@ export function WeeklyHome({
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-[var(--radius-button)] bg-white/70 px-4 py-3">
+    <div className="rounded-[var(--radius-button)] bg-[var(--color-bg)]/70 px-4 py-3">
       <p className="text-[12px] text-[var(--color-mute)]">{label}</p>
       <p className="mt-1 font-serif text-[24px] font-semibold leading-none text-[var(--color-ink)]">
         {value}
@@ -187,7 +187,7 @@ function TimelineCard({
     >
       <article
         className={[
-          'bg-[var(--color-paper)] p-4 pb-8 ring-1 ring-[var(--color-line)] shadow-[0_12px_30px_-20px_rgba(0,0,0,0.28)]',
+          'bg-[var(--color-paper)] p-4 pb-8 ring-1 ring-[var(--color-line)] shadow-[var(--shadow-card)]',
           'motion-safe:transition-transform motion-safe:duration-200 motion-safe:group-hover/card:[transform:rotate(0deg)_translateY(-3px)]',
           tilt === 'left' ? 'motion-safe:-rotate-[1deg]' : 'motion-safe:rotate-[0.8deg]',
         ].join(' ')}

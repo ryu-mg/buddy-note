@@ -22,7 +22,7 @@ export function BuddyAvatar({
   return (
     <div
       className={[
-        'flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-[var(--color-line)] bg-white shadow-[0_16px_34px_-24px_rgba(0,0,0,0.35)]',
+        'flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-[var(--color-line)] bg-[var(--color-bg)] shadow-[var(--shadow-card)]',
         sizeClass[size],
         className,
       ].join(' ')}

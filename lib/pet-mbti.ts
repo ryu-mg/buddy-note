@@ -1,6 +1,8 @@
 // Pet MBTI 4축 데이터 + 페르소나 프롬프트 조립.
 // MVP는 강아지 전용이며, 사람 MBTI 코드(E/I, S/N, T/F, J/P)를 차용한다.
 
+import { selectJosa, withJosa } from '@/lib/korean-josa'
+
 export type AxisKey = 'ei' | 'sn' | 'tf' | 'jp'
 
 export type MbtiLetter = 'E' | 'I' | 'S' | 'N' | 'T' | 'F' | 'J' | 'P'
@@ -248,27 +250,10 @@ export function buildPersonaPromptFragment(input: {
   const joined = fragments.join(' / ')
   const subject = breed ? `${name}, ${breed}` : name
   const companion = companionRelationship || '반려인'
-  const base = `나는 ${subject}${josaYa(subject)}. ${companion}${josaNeun(companion)} 내 반려인이야.\n내 성격 유형은 ${personality.code} · ${personality.label}.\n나를 한 줄로 말하면:\n${joined}.`
+  const base = `나는 ${subject}${selectJosa(subject, '이야/야')}. ${withJosa(companion, '은/는')} 내 반려인이야.\n내 성격 유형은 ${personality.code} · ${personality.label}.\n나를 한 줄로 말하면:\n${joined}.`
   const additionalInfo = input.additionalInfo?.trim()
 
   if (!additionalInfo) return base
 
   return `${base}\n반려인이 들려준 이야기: "${additionalInfo}"`
-}
-
-// 마지막 음절에 받침이 있으면 '이야', 없으면 '야'. 한글이 아니면 '야'로 폴백.
-function josaYa(word: string): '이야' | '야' {
-  if (!word) return '야'
-  const last = word[word.length - 1]
-  const code = last.charCodeAt(0)
-  if (code < 0xac00 || code > 0xd7a3) return '야'
-  return (code - 0xac00) % 28 === 0 ? '야' : '이야'
-}
-
-function josaNeun(word: string): '은' | '는' {
-  if (!word) return '는'
-  const last = word[word.length - 1]
-  const code = last.charCodeAt(0)
-  if (code < 0xac00 || code > 0xd7a3) return '는'
-  return (code - 0xac00) % 28 === 0 ? '는' : '은'
 }

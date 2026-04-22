@@ -44,7 +44,7 @@ B. 바뀐 흐름에도 금방 맞춘다 (P)
 4문항 답을 `lib/pet-mbti.ts`에서 1인칭 자기소개 문장으로 변환해 `pets.persona_prompt_fragment`에 저장한다.
 
 ```
-나는 {name}, {breed}야. {companionRelationship}는 내 반려인이야.
+나는 {subject}{selectJosa(subject, "이야/야")}. {withJosa(companionRelationship, "은/는")} 내 반려인이야.
 내 성격 유형은 {personalityCode} · {personalityLabel}.
 나를 한 줄로 말하면:
 {Q1 결과 자연어} / {Q2 결과 자연어} / {Q3 결과 자연어} / {Q4 결과 자연어}

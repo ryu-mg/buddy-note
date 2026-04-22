@@ -28,7 +28,7 @@ export default function DiaryLoading() {
       {/* Hero 폴라로이드 */}
       <article
         aria-hidden="true"
-        className="relative mx-auto w-full max-w-[420px] bg-[var(--color-paper)] px-6 pb-11 pt-6 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_14px_38px_-18px_rgba(0,0,0,0.18)] ring-1 ring-[var(--color-line)] motion-safe:-rotate-[1.2deg] motion-reduce:rotate-0"
+        className="relative mx-auto w-full max-w-[420px] bg-[var(--color-paper)] px-6 pb-11 pt-6 shadow-[var(--shadow-card)] ring-1 ring-[var(--color-line)] motion-safe:-rotate-[1.2deg] motion-reduce:rotate-0"
       >
         {/* 상단 메타 — 좌 날짜, 우 이름 */}
         <div className="flex items-baseline justify-between gap-3">

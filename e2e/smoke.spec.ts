@@ -15,7 +15,7 @@ test.describe('anonymous smoke', () => {
     await expect(envMissing.or(cta)).toBeVisible()
   })
 
-  test('/auth/login — 이메일 input + 카카오 버튼 보임', async ({ page }) => {
+  test('/auth/login — 카카오 로그인 진입점 보임', async ({ page }) => {
     await page.goto('/auth/login')
 
     // env 미설정이면 "Supabase 설정이 필요해요" 안내. env 있으면 로그인 폼.
@@ -25,14 +25,6 @@ test.describe('anonymous smoke', () => {
       return
     }
 
-    await expect(
-      page.getByRole('heading', { name: 'buddy-note에 로그인' }),
-    ).toBeVisible()
-    await expect(page.getByLabel('이메일')).toBeVisible()
-    await expect(
-      page.getByRole('button', { name: /매직 링크 보내기|보내는 중/ }),
-    ).toBeVisible()
-    // 카카오 버튼 — aria-label 또는 text "카카오" 포함.
     await expect(page.getByRole('button', { name: /카카오/ })).toBeVisible()
   })
 

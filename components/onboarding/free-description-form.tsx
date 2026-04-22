@@ -17,7 +17,7 @@ export function FreeDescriptionForm({
 
   return (
     <section aria-labelledby="free-description-title">
-      <article className="rounded-[12px] border border-[var(--color-line)] bg-[var(--color-paper)] px-6 py-7 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_-12px_rgba(0,0,0,0.08)] motion-safe:[transform:rotate(-0.35deg)] motion-reduce:rotate-0">
+      <article className="rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-paper)] px-6 py-7 shadow-[var(--shadow-card-soft)] motion-safe:[transform:rotate(-0.35deg)] motion-reduce:rotate-0">
         <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-[var(--color-mute)]">
           더 들려줄 이야기
         </p>
@@ -41,7 +41,7 @@ export function FreeDescriptionForm({
           maxLength={200}
           rows={5}
           placeholder="예) 비 오는 날 창밖 보는 걸 좋아해요"
-          className="mt-5 min-h-32 w-full resize-none rounded-[var(--radius-input)] border border-[var(--color-line)] bg-white px-4 py-3 text-[15px] leading-[1.55] text-[var(--color-ink)] placeholder:text-zinc-400 focus:border-[var(--color-accent-brand)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-brand)]/25"
+          className="mt-5 min-h-32 w-full resize-none rounded-[var(--radius-input)] border border-[var(--color-line)] bg-[var(--color-bg)] px-4 py-3 text-[15px] leading-[1.55] text-[var(--color-ink)] placeholder:text-[var(--color-mute)]/60 focus:border-[var(--color-accent-brand)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-brand)]/25"
         />
         <div className="mt-2 flex items-center justify-between gap-3">
           <p className="text-[12px] text-[var(--color-mute)]">선택 입력이에요.</p>

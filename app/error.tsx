@@ -43,7 +43,7 @@ export default function Error({ error, reset }: ErrorProps) {
         <button
           type="button"
           onClick={reset}
-          className="rounded-[10px] bg-[var(--color-ink)] px-5 py-2.5 text-[14px] font-medium text-white transition-opacity hover:opacity-90"
+          className="rounded-[var(--radius-button)] bg-[var(--color-ink)] px-5 py-2.5 text-[14px] font-medium text-[var(--color-bg)] transition-opacity hover:opacity-90"
         >
           다시 시도
         </button>

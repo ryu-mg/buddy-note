@@ -276,7 +276,7 @@ function CalendarSheet({
       onClick={onClose}
     >
       <section
-        className="max-h-[86vh] w-full max-w-md overflow-y-auto rounded-t-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-bg)] px-4 pb-6 pt-4 shadow-[0_-16px_40px_-24px_rgba(0,0,0,0.35)]"
+        className="max-h-[86vh] w-full max-w-md overflow-y-auto rounded-t-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-bg)] px-4 pb-6 pt-4 shadow-[var(--shadow-polaroid)]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mx-auto mb-4 h-1 w-10 rounded-[var(--radius-pill)] bg-[var(--color-line)]" />
@@ -353,7 +353,7 @@ function DiaryPreview({
       </div>
       <Link
         href={`/diary/${diary.id}`}
-        className="inline-flex min-h-11 items-center justify-center rounded-[var(--radius-button)] bg-[var(--color-accent-brand)] px-4 text-[14px] font-semibold text-white transition-opacity hover:opacity-90"
+        className="inline-flex min-h-11 items-center justify-center rounded-[var(--radius-button)] bg-[var(--color-accent-brand)] px-4 text-[14px] font-semibold text-[var(--primary-foreground)] shadow-[var(--shadow-accent)] transition-opacity hover:opacity-90"
       >
         자세히 보기
       </Link>

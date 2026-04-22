@@ -57,13 +57,13 @@ export function NameForm({
       aria-labelledby="step0-title"
       className="mx-auto w-full max-w-md"
     >
-      <article className="rounded-[12px] border border-[var(--line,#e5e7eb)] bg-[var(--paper,#fafaf5)] px-6 py-7 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_-12px_rgba(0,0,0,0.08)] motion-safe:[transform:rotate(-0.6deg)] motion-reduce:rotate-0">
-        <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-[var(--mute,#6b7280)]">
+      <article className="rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-paper)] px-6 py-7 shadow-[var(--shadow-card-soft)] motion-safe:[transform:rotate(-0.6deg)] motion-reduce:rotate-0">
+        <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-[var(--color-mute)]">
           시작하기
         </p>
         <h1
           id="step0-title"
-          className="mt-3 text-[20px] font-bold leading-[1.35] text-[var(--ink,#1a1a1a)]"
+          className="mt-3 text-[20px] font-bold leading-[1.35] text-[var(--color-ink)]"
         >
           버디를 소개해주세요
         </h1>
@@ -72,7 +72,7 @@ export function NameForm({
           <div className="flex flex-col items-center gap-3">
             <div
               aria-label="대표 사진 미리보기"
-              className="relative grid size-28 place-items-center overflow-hidden rounded-full border border-[var(--color-line)] bg-white"
+              className="relative grid size-28 place-items-center overflow-hidden rounded-full border border-[var(--color-line)] bg-[var(--color-bg)]"
             >
               {profilePhotoDataUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -87,7 +87,7 @@ export function NameForm({
             </div>
             <label
               htmlFor="pet-profile-photo"
-              className="inline-flex min-h-10 cursor-pointer items-center justify-center rounded-[var(--radius-button)] border border-[var(--color-line)] bg-white px-4 text-[13px] font-medium text-[var(--color-ink)] transition-colors hover:bg-[var(--color-bg)]"
+              className="inline-flex min-h-10 cursor-pointer items-center justify-center rounded-[var(--radius-button)] border border-[var(--color-line)] bg-[var(--color-bg)] px-4 text-[13px] font-medium text-[var(--color-ink)] transition-colors hover:bg-[var(--color-paper)]"
             >
               버디 사진 선택하기
             </label>
@@ -111,7 +111,7 @@ export function NameForm({
           <div className="flex flex-col gap-1.5">
             <label
               htmlFor="pet-name"
-              className="text-[13px] font-medium text-[var(--ink,#1a1a1a)]"
+              className="text-[13px] font-medium text-[var(--color-ink)]"
             >
               이름
             </label>
@@ -128,14 +128,14 @@ export function NameForm({
               value={value.name}
               onChange={(e) => set('name', e.target.value)}
               placeholder="예) 마루"
-              className="w-full rounded-[8px] border border-[var(--line,#e5e7eb)] bg-white px-3 py-2.5 text-[15px] text-[var(--color-ink-soft)] placeholder:text-[var(--color-mute)]/60 focus:border-[var(--accent,#e07a5f)] focus:outline-none focus:ring-2 focus:ring-[var(--accent,#e07a5f)]/30"
+              className="w-full rounded-[var(--radius-input)] border border-[var(--color-line)] bg-[var(--color-bg)] px-3 py-2.5 text-[15px] text-[var(--color-ink-soft)] placeholder:text-[var(--color-mute)]/60 focus:border-[var(--color-accent-brand)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-brand)]/30"
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
             <label
               htmlFor="pet-breed"
-              className="text-[13px] font-medium text-[var(--ink,#1a1a1a)]"
+              className="text-[13px] font-medium text-[var(--color-ink)]"
             >
               견종
             </label>
@@ -149,7 +149,7 @@ export function NameForm({
               value={value.breed}
               onChange={(e) => set('breed', e.target.value)}
               placeholder="예) 푸들"
-              className="w-full rounded-[8px] border border-[var(--line,#e5e7eb)] bg-white px-3 py-2.5 text-[15px] text-[var(--color-ink-soft)] placeholder:text-[var(--color-mute)]/60 focus:border-[var(--accent,#e07a5f)] focus:outline-none focus:ring-2 focus:ring-[var(--accent,#e07a5f)]/30"
+              className="w-full rounded-[var(--radius-input)] border border-[var(--color-line)] bg-[var(--color-bg)] px-3 py-2.5 text-[15px] text-[var(--color-ink-soft)] placeholder:text-[var(--color-mute)]/60 focus:border-[var(--color-accent-brand)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-brand)]/30"
             />
           </div>
 
@@ -157,7 +157,7 @@ export function NameForm({
             <p
               id="name-form-error"
               role="alert"
-              className="rounded-[8px] bg-[var(--accent-soft,#fde6e0)] px-3 py-2 text-[13px] text-[var(--error,#b04a4a)]"
+              className="rounded-[var(--radius-input)] bg-[var(--color-accent-brand-soft)] px-3 py-2 text-[13px] text-[var(--color-error)]"
             >
               {error}
             </p>

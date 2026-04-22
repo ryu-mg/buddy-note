@@ -22,13 +22,13 @@ Classifier: APP UI (with light MARKETING surface for public profile)
 
 **Display / Heading (English, Latin):** Söhne (IF licensed) 또는 Inter Tight (fallback)
 
-**Diary body (폴라로이드 + 앱 내):** Nanum Myeongjo (웹폰트, 무료) 또는 RIDI 바탕.
+**Diary body (폴라로이드 + 앱 내):** MaruBuri (웹폰트, 무료) 또는 Nanum Myeongjo fallback.
 
 - Diary 텍스트 본문은 명조체로. "쓰여진 기록" 메타포 강화. 나머지 앱 UI는 sans.
 
 **System font 금지.** Pretendard / Söhne 없으면 fallback은 Noto Sans KR.
 
-**Week 0 주의:** satori는 한국어 웹폰트를 자동 로드하지 않음. Pretendard + Nanum Myeongjo 한글 subset을 빌드 타임에 생성해 Edge Function에서 fetch (~1.5MB bundle).
+**Week 0 주의:** satori는 한국어 웹폰트를 자동 로드하지 않음. Pretendard + MaruBuri 한글 subset을 빌드 타임에 생성해 Edge Function에서 fetch (~1.5MB bundle).
 
 ## 3. Color
 
@@ -139,7 +139,7 @@ shadcn/ui base + 오버라이드:
 - 사진: 1:1 square crop, 내부 border 없음
 - Grain: 5% opacity SVG turbulence filter (고정 seed로 재현성)
 - 본문 영역 (bottom 44px):
-  - 강아지 이름 (우측, Nanum Myeongjo, 14/18, `--ink`)
+  - 강아지 이름 (우측, MaruBuri, 14/18, `--ink`)
   - 날짜 (좌측, Pretendard Meta 12, `--mute`)
   - 날씨 아이콘 (날짜 옆, 12×12 line SVG)
 - 로고 (우하단 12×12, opacity 0.3, 자연스럽게 섞임)

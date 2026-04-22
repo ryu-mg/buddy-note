@@ -42,6 +42,12 @@
   --radius-input: 8px;
   --radius-pill: 9999px;
 
+  /* DESIGN v0.2 — Elevation tokens. Keep shadows warm and low-contrast. */
+  --shadow-card: 0 1px 2px rgb(26 26 26 / 0.04), 0 14px 32px -18px rgb(26 26 26 / 0.18);
+  --shadow-card-soft: 0 1px 2px rgb(26 26 26 / 0.04), 0 8px 24px -12px rgb(26 26 26 / 0.08);
+  --shadow-polaroid: 0 24px 55px -30px rgb(26 26 26 / 0.42);
+  --shadow-accent: 0 10px 24px -16px rgb(224 122 95 / 0.82);
+
   /* DESIGN §6 — Motion */
   --ease-soft-out: cubic-bezier(0.2, 0.9, 0.3, 1);
   --duration-default: 200ms;
@@ -51,7 +57,7 @@
     "Pretendard Variable", "Pretendard", -apple-system, BlinkMacSystemFont,
     "Noto Sans KR", "Segoe UI", Roboto, sans-serif;
   --font-serif:
-    "Nanum Myeongjo", "Apple SD Gothic Neo", "Noto Serif KR", serif;
+    "마루 부리", "MaruBuri", "Nanum Myeongjo", "Noto Serif KR", serif;
 
   /* --------------------------------------------------------------------------
    * shadcn/ui semantic vars — remapped onto DESIGN.md palette.
@@ -115,6 +121,10 @@
   --color-line: #3a302a;
   --color-bg: #17120f;
   --color-accent-brand-soft: #3a2620;
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.18), 0 16px 38px -22px rgb(0 0 0 / 0.55);
+  --shadow-card-soft: 0 1px 2px rgb(0 0 0 / 0.14), 0 10px 28px -18px rgb(0 0 0 / 0.5);
+  --shadow-polaroid: 0 24px 55px -30px rgb(0 0 0 / 0.72);
+  --shadow-accent: 0 10px 24px -16px rgb(224 122 95 / 0.55);
 
   --background: var(--color-bg);
   --foreground: var(--color-ink);
@@ -153,6 +163,10 @@
     --color-line: #3a302a;
     --color-bg: #17120f;
     --color-accent-brand-soft: #3a2620;
+    --shadow-card: 0 1px 2px rgb(0 0 0 / 0.18), 0 16px 38px -22px rgb(0 0 0 / 0.55);
+    --shadow-card-soft: 0 1px 2px rgb(0 0 0 / 0.14), 0 10px 28px -18px rgb(0 0 0 / 0.5);
+    --shadow-polaroid: 0 24px 55px -30px rgb(0 0 0 / 0.72);
+    --shadow-accent: 0 10px 24px -16px rgb(224 122 95 / 0.55);
     --background: var(--color-bg);
     --foreground: var(--color-ink);
     --card: var(--color-bg);

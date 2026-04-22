@@ -46,7 +46,7 @@ export default async function MilestonePage({ params }: PageProps) {
       <p className="text-[12px] font-medium uppercase tracking-[0.18em] text-[var(--color-mute)]">
         milestone
       </p>
-      <section className="w-full bg-[var(--color-paper)] px-6 py-6 shadow-[0_24px_55px_-32px_rgba(0,0,0,0.38)] ring-1 ring-[var(--color-line)] motion-safe:-rotate-[1deg]">
+      <section className="w-full bg-[var(--color-paper)] px-6 py-6 shadow-[var(--shadow-polaroid)] ring-1 ring-[var(--color-line)] motion-safe:-rotate-[1deg]">
         {imageUrl ? (
           <div className="relative aspect-[9/16] w-full overflow-hidden bg-[var(--color-line)]">
             <Image

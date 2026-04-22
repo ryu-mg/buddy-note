@@ -184,7 +184,7 @@ export function ShareModal({
       <DialogTrigger asChild>
         <button
           type="button"
-          className="w-full rounded-[10px] bg-[var(--color-accent-brand)] px-5 py-3 text-[15px] font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+          className="w-full rounded-[var(--radius-button)] bg-[var(--color-accent-brand)] px-5 py-3 text-[15px] font-semibold text-[var(--primary-foreground)] shadow-[var(--shadow-accent)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
         >
           공유하기
         </button>
@@ -220,7 +220,7 @@ export function ShareModal({
                 className={
                   'flex-1 rounded-[8px] px-2 py-1.5 text-[13px] font-medium transition-opacity ' +
                   (active
-                    ? 'bg-[var(--color-bg)] text-[var(--color-ink)] shadow-[0_1px_2px_rgba(0,0,0,0.08)]'
+                    ? 'bg-[var(--color-bg)] text-[var(--color-ink)] shadow-[var(--shadow-card-soft)]'
                     : 'text-[var(--color-mute)] hover:text-[var(--color-ink-soft)]') +
                   ' disabled:cursor-not-allowed disabled:opacity-40'
                 }

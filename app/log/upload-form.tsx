@@ -10,6 +10,7 @@ import { PhaseCopy } from '@/components/log/phase-copy'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { stripExifClient } from '@/lib/image/exif-strip-client'
+import { withJosa } from '@/lib/korean-josa'
 import { LOG_TAG_VALUES } from '@/lib/llm/schemas'
 import { cn } from '@/lib/utils'
 import type { LogTag } from '@/types/database'
@@ -254,7 +255,7 @@ export function UploadForm({
               3
             </p>
             <h3 className="text-[18px] font-semibold text-[var(--color-ink)]">
-              {companion}가 뭐 말해줄 거 있어?
+              {withJosa(companion, '이/가')} 뭐 말해줄 거 있어?
             </h3>
           </div>
           <Label

@@ -30,7 +30,7 @@ function formatDate(iso: string): string {
  *   `logs.photo_url`은 owner only.
  *
  * DESIGN §12 폴라로이드: -1.2deg 기울임, 24px white border, photo 4:5,
- * Nanum Myeongjo 본문, 흰 paper bg.
+ * MaruBuri 본문, paper bg.
  */
 export function PublicDiaryCard({
   title,
@@ -44,7 +44,7 @@ export function PublicDiaryCard({
   return (
     <article
       aria-labelledby={`pdc-title-${createdAt}`}
-      className="relative mx-auto w-full max-w-[420px] bg-[var(--color-paper)] px-6 pb-11 pt-6 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_14px_38px_-18px_rgba(0,0,0,0.18)] ring-1 ring-[var(--color-line)] motion-safe:-rotate-[1.2deg] motion-reduce:rotate-0"
+      className="relative mx-auto w-full max-w-[420px] bg-[var(--color-paper)] px-6 pb-11 pt-6 shadow-[var(--shadow-card)] ring-1 ring-[var(--color-line)] motion-safe:-rotate-[1.2deg] motion-reduce:rotate-0"
     >
       <div className="flex items-baseline justify-between gap-3">
         <p className="text-[12px] font-medium uppercase tracking-[0.12em] text-[var(--color-mute)]">

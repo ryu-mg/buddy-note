@@ -53,7 +53,7 @@ export function EmptyState({
         className={cn(
           'w-full bg-[var(--color-paper)] px-6 py-6',
           'ring-1 ring-[var(--color-line)]',
-          'shadow-[0_1px_2px_rgba(0,0,0,0.04),0_14px_32px_-18px_rgba(0,0,0,0.18)]',
+          'shadow-[var(--shadow-card)]',
           'motion-safe:-rotate-[0.6deg] motion-reduce:rotate-0',
         )}
       >

@@ -48,7 +48,7 @@ export function ProfileHero({
               <div
                 key={image}
                 className={[
-                  'public-polaroid absolute inset-0 bg-[var(--color-paper)] p-4 pb-10 shadow-[0_24px_55px_-30px_rgba(0,0,0,0.42)] ring-1 ring-[var(--color-line)]',
+                  'public-polaroid absolute inset-0 bg-[var(--color-paper)] p-4 pb-10 shadow-[var(--shadow-polaroid)] ring-1 ring-[var(--color-line)]',
                   index === 0
                     ? 'z-30 motion-safe:-rotate-[4deg]'
                     : index === 1

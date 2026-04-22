@@ -11,7 +11,7 @@ import { loadFonts } from '@/lib/image/fonts'
  * Per AGENTS.md / DESIGN §12:
  *   - 24px white border around photo (bottom 44px caption area)
  *   - -1.2deg tilt
- *   - Nanum Myeongjo for diary body, Pretendard SemiBold for title
+ *   - MaruBuri for diary body, Pretendard SemiBold for title
  *   - Terracotta accent (var(--color-accent-brand) = #e07a5f) used ONLY
  *     as a small decorative dot beside the title — never dominant.
  *   - 5% grain: see note at bottom of this file. satori does NOT support
@@ -71,7 +71,7 @@ export async function renderPolaroid(args: RenderArgs): Promise<Buffer> {
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: COLOR_BG,
-        fontFamily: 'Pretendard, Nanum Myeongjo, sans-serif',
+        fontFamily: 'Pretendard, MaruBuri, sans-serif',
         position: 'relative',
       }}
     >
@@ -143,10 +143,10 @@ export async function renderPolaroid(args: RenderArgs): Promise<Buffer> {
             </div>
           </div>
 
-          {/* Diary body — Nanum Myeongjo, truncated to ~3 lines */}
+          {/* Diary body — MaruBuri, truncated to ~3 lines */}
           <div
             style={{
-              fontFamily: 'Nanum Myeongjo',
+              fontFamily: 'MaruBuri',
               fontSize: '22px',
               color: COLOR_INK_SOFT,
               lineHeight: 1.55,
@@ -166,7 +166,7 @@ export async function renderPolaroid(args: RenderArgs): Promise<Buffer> {
               alignItems: 'center',
               marginTop: 'auto',
               paddingTop: '12px',
-              fontFamily: 'Nanum Myeongjo',
+              fontFamily: 'MaruBuri',
               fontSize: '18px',
               color: COLOR_MUTE,
             }}

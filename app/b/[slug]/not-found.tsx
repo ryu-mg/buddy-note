@@ -26,7 +26,7 @@ export default function NotFound() {
 
       <Link
         href="/"
-        className="rounded-[10px] bg-[var(--color-ink)] px-5 py-2.5 text-[14px] font-medium text-white transition-opacity hover:opacity-90"
+        className="rounded-[var(--radius-button)] bg-[var(--color-ink)] px-5 py-2.5 text-[14px] font-medium text-[var(--color-bg)] transition-opacity hover:opacity-90"
       >
         홈으로 가기
       </Link>

@@ -154,7 +154,7 @@ export default async function LogsPage() {
         </div>
         <Link
           href="/log"
-          className="inline-flex min-h-11 items-center justify-center rounded-[10px] bg-[var(--color-accent-brand)] px-4 text-[14px] font-semibold text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent-brand)] focus-visible:ring-offset-2"
+          className="inline-flex min-h-11 items-center justify-center rounded-[var(--radius-button)] bg-[var(--color-accent-brand)] px-4 text-[14px] font-semibold text-[var(--primary-foreground)] shadow-[var(--shadow-accent)] transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent-brand)] focus-visible:ring-offset-2"
         >
           새 일기 쓰기
         </Link>

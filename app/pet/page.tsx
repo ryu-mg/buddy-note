@@ -129,7 +129,7 @@ async function getSignedProfilePhotoUrl(path: string): Promise<string | null> {
 
 function ProfileAvatar({ src, name }: { src: string | null; name: string }) {
   return (
-    <div className="grid size-[74px] shrink-0 place-items-center overflow-hidden rounded-full bg-white ring-1 ring-[var(--color-line)]">
+    <div className="grid size-[74px] shrink-0 place-items-center overflow-hidden rounded-full bg-[var(--color-bg)] ring-1 ring-[var(--color-line)]">
       {src ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={src} alt={`${name} 대표 사진`} className="size-full object-cover" />

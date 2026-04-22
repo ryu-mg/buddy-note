@@ -57,9 +57,7 @@ export function QuestionCard({
       aria-labelledby={`${question.id}-title`}
       className="mx-auto w-full max-w-md"
     >
-      <article
-        className="relative rounded-[12px] border border-[var(--color-line)] bg-[var(--color-paper)] px-6 py-7 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_-12px_rgba(0,0,0,0.08)] motion-safe:[transform:rotate(-0.6deg)] motion-reduce:rotate-0"
-      >
+      <article className="relative rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-paper)] px-6 py-7 shadow-[var(--shadow-card-soft)] motion-safe:[transform:rotate(-0.6deg)] motion-reduce:rotate-0">
         <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-[var(--color-mute)]">
           질문 {index} / {total}
         </p>
@@ -106,8 +104,8 @@ function OptionRow({
       className={[
         'group/option flex cursor-pointer items-start gap-3 rounded-[10px] border-2 px-4 py-3 transition-all duration-200 ease-out motion-reduce:transition-none',
         checked
-          ? 'border-[var(--color-accent-brand)] bg-[var(--color-accent-brand-soft)] shadow-[0_10px_24px_-18px_rgba(224,122,95,0.8)]'
-          : 'border-transparent bg-white hover:border-[var(--color-line)]',
+          ? 'border-[var(--color-accent-brand)] bg-[var(--color-accent-brand-soft)] shadow-[var(--shadow-accent)]'
+          : 'border-transparent bg-[var(--color-bg)] hover:border-[var(--color-line)]',
       ].join(' ')}
     >
       <input
@@ -123,8 +121,8 @@ function OptionRow({
         className={[
           'mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 text-[11px] font-semibold transition-colors',
           checked
-            ? 'border-[var(--color-accent-brand)] bg-[var(--color-accent-brand)] text-white'
-            : 'border-[var(--color-line)] bg-white text-[var(--color-mute)] group-hover/option:border-[var(--color-ink-soft)]',
+            ? 'border-[var(--color-accent-brand)] bg-[var(--color-accent-brand)] text-[var(--primary-foreground)]'
+            : 'border-[var(--color-line)] bg-[var(--color-bg)] text-[var(--color-mute)] group-hover/option:border-[var(--color-ink-soft)]',
         ].join(' ')}
       >
         {option.key}

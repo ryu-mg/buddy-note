@@ -9,8 +9,7 @@ import 'server-only'
  * Font sources:
  *   - Pretendard SemiBold (Korean UI) from jsDelivr mirror of the official
  *     orioncactus/pretendard release.
- *   - Nanum Myeongjo Regular (Korean serif) from jsDelivr mirror of the
- *     google/fonts repo.
+ *   - MaruBuri Regular (Korean serif) from NAVER Hangeul official CDN.
  *
  * If fetching fails (offline build, CDN outage) we return an empty array
  * and satori falls back to its default sans font. Worst case the shared
@@ -27,10 +26,8 @@ type SatoriFont = {
 const PRETENDARD_SEMIBOLD_URL =
   'https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/packages/pretendard/dist/public/static/Pretendard-SemiBold.otf'
 
-// Google Fonts repo on GitHub, mirrored via jsDelivr. Stable URL for the
-// regular weight TTF.
-const NANUM_MYEONGJO_REGULAR_URL =
-  'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/nanummyeongjo/NanumMyeongjo-Regular.ttf'
+const MARU_BURI_REGULAR_URL =
+  'https://hangeul.pstatic.net/hangeul_static/webfont/MaruBuri/MaruBuri-Regular.ttf'
 
 let cache: SatoriFont[] | null = null
 
@@ -39,7 +36,7 @@ export async function loadFonts(): Promise<SatoriFont[]> {
 
   const fetched = await Promise.allSettled([
     fetchFont(PRETENDARD_SEMIBOLD_URL),
-    fetchFont(NANUM_MYEONGJO_REGULAR_URL),
+    fetchFont(MARU_BURI_REGULAR_URL),
   ])
 
   const fonts: SatoriFont[] = []
@@ -53,7 +50,7 @@ export async function loadFonts(): Promise<SatoriFont[]> {
   }
   if (fetched[1].status === 'fulfilled') {
     fonts.push({
-      name: 'Nanum Myeongjo',
+      name: 'MaruBuri',
       data: fetched[1].value,
       weight: 400,
       style: 'normal',

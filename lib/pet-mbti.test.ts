@@ -128,6 +128,18 @@ describe('buildPersonaPromptFragment', () => {
     expect(out).toContain('ENFP · 문앞 탐험가')
   })
 
+  it('이름/견종과 반려인 호칭의 조사를 받침에 맞춘다', () => {
+    const out = buildPersonaPromptFragment({
+      name: '콩',
+      breed: '비숑',
+      companionRelationship: '형',
+      answers,
+    })
+
+    expect(out).toContain('나는 콩, 비숑이야.')
+    expect(out).toContain('형은 내 반려인이야.')
+  })
+
   it('4개 prompt_fragment 가 " / " 로 이어진다', () => {
     const out = buildPersonaPromptFragment({
       name: '마루',

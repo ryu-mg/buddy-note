@@ -45,7 +45,7 @@ export function DiaryCard({
     >
       <article
         className={cn(
-          'bg-[var(--color-paper)] p-6 pb-11 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_12px_28px_-16px_rgba(0,0,0,0.18)] ring-1 ring-[var(--color-line)]',
+          'bg-[var(--color-paper)] p-6 pb-11 shadow-[var(--shadow-card)] ring-1 ring-[var(--color-line)]',
           'motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-[var(--ease-soft-out)]',
           'motion-safe:group-hover/card:[transform:rotate(0deg)_translateY(-3px)]',
           'motion-reduce:rotate-0',

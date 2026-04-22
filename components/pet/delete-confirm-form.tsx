@@ -86,7 +86,7 @@ export function DeleteConfirmForm({
           }}
           placeholder={hint ?? confirmTarget}
           disabled={pending}
-          className="w-full rounded-[var(--radius-input)] border border-[var(--color-line)] bg-white px-3 py-2.5 text-[15px] text-[var(--color-ink)] placeholder:text-zinc-400 focus:border-[var(--color-error)] focus:outline-none focus:ring-2 focus:ring-[var(--color-error)]/30 disabled:bg-[var(--color-paper)] disabled:opacity-60"
+          className="w-full rounded-[var(--radius-input)] border border-[var(--color-line)] bg-[var(--color-bg)] px-3 py-2.5 text-[15px] text-[var(--color-ink)] placeholder:text-[var(--color-mute)]/60 focus:border-[var(--color-error)] focus:outline-none focus:ring-2 focus:ring-[var(--color-error)]/30 disabled:bg-[var(--color-paper)] disabled:opacity-60"
         />
       </div>
 
@@ -112,7 +112,7 @@ export function DeleteConfirmForm({
           disabled={!matched || pending}
           aria-busy={pending}
           aria-describedby={!matched ? 'delete-confirm-disabled-reason' : undefined}
-          className="rounded-[var(--radius-button)] bg-[var(--color-error)] px-5 py-2.5 text-[14px] font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+          className="rounded-[var(--radius-button)] bg-[var(--color-error)] px-5 py-2.5 text-[14px] font-semibold text-[var(--primary-foreground)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
         >
           {pending ? '탈퇴 처리 중…' : '영구 삭제'}
         </button>

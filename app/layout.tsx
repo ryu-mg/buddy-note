@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-page-custom-font */
 import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import type { Metadata, Viewport } from 'next'
@@ -54,12 +53,10 @@ export default function RootLayout({
           rel="stylesheet"
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css"
         />
-        {/* DESIGN §2 — Nanum Myeongjo (serif, diary body) */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        {/* DESIGN §2 — MaruBuri (serif, diary/display) */}
         <link
           rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700&display=swap"
+          href="https://cdn.jsdelivr.net/npm/@kfonts/maruburi@0.1.0/index.css"
         />
       </head>
       <body className="min-h-full flex flex-col font-sans bg-[var(--color-bg)] text-[var(--color-ink)]">

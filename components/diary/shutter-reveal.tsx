@@ -19,7 +19,7 @@ export function ShutterReveal({ title, imageUrl, className = '' }: ShutterReveal
       <div className="absolute inset-0 motion-safe:animate-[shutter-flash_1.4s_ease-out_both] motion-reduce:animate-none" />
       <article className="relative flex w-full max-w-[260px] flex-col items-center">
         <div className="motion-safe:animate-[polaroid-drop_1.4s_cubic-bezier(0.2,0.9,0.25,1)_both] motion-reduce:animate-[soft-fade_600ms_ease-out_both]">
-          <div className="-rotate-2 border-[14px] border-white border-b-[38px] bg-[var(--color-paper)] shadow-[0_24px_55px_-30px_rgba(0,0,0,0.5)]">
+          <div className="-rotate-2 border-[14px] border-[var(--color-bg)] border-b-[38px] bg-[var(--color-paper)] shadow-[var(--shadow-polaroid)]">
             {imageUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={imageUrl} alt="" className="aspect-[4/5] w-full object-cover" />

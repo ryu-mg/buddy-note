@@ -146,7 +146,7 @@ function AnonymousLanding() {
 
       <Link
         href="/auth/login"
-        className="rounded-[10px] bg-[var(--color-accent-brand)] px-6 py-3 text-[15px] font-semibold text-white transition-opacity duration-200 hover:opacity-90"
+        className="rounded-[var(--radius-button)] bg-[var(--color-accent-brand)] px-6 py-3 text-[15px] font-semibold text-[var(--primary-foreground)] shadow-[var(--shadow-accent)] transition-opacity duration-200 hover:opacity-90"
       >
         카카오로 시작하기
       </Link>

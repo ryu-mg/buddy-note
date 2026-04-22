@@ -138,7 +138,7 @@ export function PetEditForm({ pet }: PetEditFormProps) {
                 setError(null)
               }}
               placeholder="예) 마루"
-              className="w-full rounded-[var(--radius-input)] border border-[var(--color-line)] bg-white px-3 py-2.5 text-[15px] text-[var(--color-ink)] placeholder:text-zinc-400 focus:border-[var(--color-accent-brand)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-brand)]/30"
+              className="w-full rounded-[var(--radius-input)] border border-[var(--color-line)] bg-[var(--color-bg)] px-3 py-2.5 text-[15px] text-[var(--color-ink)] placeholder:text-[var(--color-mute)]/60 focus:border-[var(--color-accent-brand)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-brand)]/30"
             />
           </div>
 
@@ -161,7 +161,7 @@ export function PetEditForm({ pet }: PetEditFormProps) {
                 setError(null)
               }}
               placeholder="예) 푸들"
-              className="w-full rounded-[var(--radius-input)] border border-[var(--color-line)] bg-white px-3 py-2.5 text-[15px] text-[var(--color-ink)] placeholder:text-zinc-400 focus:border-[var(--color-accent-brand)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-brand)]/30"
+              className="w-full rounded-[var(--radius-input)] border border-[var(--color-line)] bg-[var(--color-bg)] px-3 py-2.5 text-[15px] text-[var(--color-ink)] placeholder:text-[var(--color-mute)]/60 focus:border-[var(--color-accent-brand)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-brand)]/30"
             />
           </div>
 
@@ -184,7 +184,7 @@ export function PetEditForm({ pet }: PetEditFormProps) {
                 setError(null)
               }}
               placeholder="예) 누나"
-              className="w-full rounded-[var(--radius-input)] border border-[var(--color-line)] bg-white px-3 py-2.5 text-[15px] text-[var(--color-ink)] placeholder:text-zinc-400 focus:border-[var(--color-accent-brand)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-brand)]/30"
+              className="w-full rounded-[var(--radius-input)] border border-[var(--color-line)] bg-[var(--color-bg)] px-3 py-2.5 text-[15px] text-[var(--color-ink)] placeholder:text-[var(--color-mute)]/60 focus:border-[var(--color-accent-brand)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-brand)]/30"
             />
           </div>
 
@@ -205,7 +205,7 @@ export function PetEditForm({ pet }: PetEditFormProps) {
                 setError(null)
               }}
               placeholder="예) 비 오는 날 창밖 보는 걸 좋아해요"
-              className="min-h-28 w-full resize-none rounded-[var(--radius-input)] border border-[var(--color-line)] bg-white px-3 py-2.5 text-[15px] leading-[1.55] text-[var(--color-ink)] placeholder:text-zinc-400 focus:border-[var(--color-accent-brand)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-brand)]/30"
+              className="min-h-28 w-full resize-none rounded-[var(--radius-input)] border border-[var(--color-line)] bg-[var(--color-bg)] px-3 py-2.5 text-[15px] leading-[1.55] text-[var(--color-ink)] placeholder:text-[var(--color-mute)]/60 focus:border-[var(--color-accent-brand)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-brand)]/30"
             />
             <p className="text-right text-[12px] tabular-nums text-[var(--color-mute)]">
               {additionalInfo.length}/200
@@ -270,7 +270,7 @@ export function PetEditForm({ pet }: PetEditFormProps) {
             type="submit"
             disabled={!canSubmit || pending}
             aria-busy={pending}
-            className="rounded-[var(--radius-button)] bg-[var(--color-accent-brand)] px-5 py-2.5 text-[14px] font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+            className="rounded-[var(--radius-button)] bg-[var(--color-accent-brand)] px-5 py-2.5 text-[14px] font-semibold text-[var(--primary-foreground)] shadow-[var(--shadow-accent)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
           >
             {pending ? '저장하는 중…' : '저장'}
           </button>
@@ -322,7 +322,7 @@ function PersonaQuestionRow({
                 'group/option flex cursor-pointer items-start gap-3 rounded-[var(--radius-button)] border-2 px-4 py-2.5 transition-all duration-200 ease-out motion-reduce:transition-none',
                 checked
                   ? 'border-[var(--color-accent-brand)] bg-[var(--color-accent-brand-soft)]'
-                  : 'border-transparent bg-white hover:border-[var(--color-line)]',
+                  : 'border-transparent bg-[var(--color-bg)] hover:border-[var(--color-line)]',
               ].join(' ')}
             >
               <input
@@ -338,8 +338,8 @@ function PersonaQuestionRow({
                 className={[
                   'mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 text-[10px] font-semibold transition-colors',
                   checked
-                    ? 'border-[var(--color-accent-brand)] bg-[var(--color-accent-brand)] text-white'
-                    : 'border-[var(--color-line)] bg-white text-[var(--color-mute)] group-hover/option:border-[var(--color-ink-soft)]',
+                    ? 'border-[var(--color-accent-brand)] bg-[var(--color-accent-brand)] text-[var(--primary-foreground)]'
+                    : 'border-[var(--color-line)] bg-[var(--color-bg)] text-[var(--color-mute)] group-hover/option:border-[var(--color-ink-soft)]',
                 ].join(' ')}
               >
                 {opt.key}

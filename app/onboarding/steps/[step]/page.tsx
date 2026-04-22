@@ -9,6 +9,8 @@ import {
   useCallback,
 } from 'react'
 import { useRouter } from 'next/navigation'
+
+import { withJosa } from '@/lib/korean-josa'
 import {
   buildPersonaPromptFragment,
   calculatePersonality,
@@ -270,7 +272,7 @@ export default function OnboardingStepPage(props: PageProps) {
         {stepError && step >= 2 && step <= 5 ? (
           <p
             role="alert"
-            className="mt-3 text-center text-[13px] text-[var(--error,#b04a4a)]"
+            className="mt-3 text-center text-[13px] text-[var(--color-error)]"
           >
             {stepError}
           </p>
@@ -326,7 +328,7 @@ function ConfirmStep({ draft }: { draft: Draft }) {
       aria-labelledby="confirm-title"
       className="mx-auto w-full max-w-md"
     >
-      <article className="rounded-[12px] border border-[var(--color-line)] bg-[var(--color-paper)] px-6 py-7 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_-12px_rgba(0,0,0,0.08)] motion-safe:[transform:rotate(-0.4deg)] motion-reduce:rotate-0">
+      <article className="rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-paper)] px-6 py-7 shadow-[var(--shadow-card-soft)] motion-safe:[transform:rotate(-0.4deg)] motion-reduce:rotate-0">
         <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-[var(--color-mute)]">
           소개 확인
         </p>
@@ -343,7 +345,7 @@ function ConfirmStep({ draft }: { draft: Draft }) {
         {ready ? (
           <>
             <div className="mt-6 flex flex-col items-center text-center">
-              <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border border-[var(--color-line)] bg-white shadow-[0_12px_30px_-20px_rgba(0,0,0,0.35)]">
+              <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border border-[var(--color-line)] bg-[var(--color-bg)] shadow-[var(--shadow-card)]">
                 {draft.profilePhotoDataUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -358,7 +360,7 @@ function ConfirmStep({ draft }: { draft: Draft }) {
                 )}
               </div>
               <p className="mt-5 text-[15px] font-medium text-[var(--color-mute)]">
-                {draft.info.name}는
+                {withJosa(draft.info.name, '은/는')}
               </p>
               <p className="mt-1 font-serif text-[54px] font-semibold leading-none text-[var(--color-ink)]">
                 {personality?.code}
@@ -372,7 +374,7 @@ function ConfirmStep({ draft }: { draft: Draft }) {
                 {CHARACTER_TRAITS[personality.code].map((trait) => (
                   <li
                     key={trait}
-                    className="rounded-[var(--radius-button)] bg-white/70 px-4 py-2.5 text-[14px] leading-[1.45] text-[var(--color-ink-soft)]"
+                    className="rounded-[var(--radius-button)] bg-[var(--color-bg)]/70 px-4 py-2.5 text-[14px] leading-[1.45] text-[var(--color-ink-soft)]"
                   >
                     {trait}
                   </li>
@@ -380,11 +382,11 @@ function ConfirmStep({ draft }: { draft: Draft }) {
               </ul>
             ) : null}
             {draft.additionalInfo.trim() ? (
-              <blockquote className="mt-4 border-l-2 border-[var(--color-accent-brand)] bg-white/60 px-4 py-3 text-[14px] leading-[1.7] text-[var(--color-ink)]">
+              <blockquote className="mt-4 border-l-2 border-[var(--color-accent-brand)] bg-[var(--color-bg)]/60 px-4 py-3 text-[14px] leading-[1.7] text-[var(--color-ink)]">
                 {draft.additionalInfo.trim()}
               </blockquote>
             ) : null}
-            <details className="mt-4 rounded-[var(--radius-button)] bg-white/55 px-4 py-3 text-[13px] text-[var(--color-mute)]">
+            <details className="mt-4 rounded-[var(--radius-button)] bg-[var(--color-bg)]/55 px-4 py-3 text-[13px] text-[var(--color-mute)]">
               <summary className="cursor-pointer font-medium text-[var(--color-ink-soft)]">
                 프롬프트 조각 보기
               </summary>
@@ -436,7 +438,7 @@ function StepNav({
         type="button"
         onClick={onNext}
         disabled={!canAdvance}
-        className="rounded-[10px] bg-[var(--color-accent-brand)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_10px_24px_-16px_rgba(224,122,95,0.9)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:bg-[var(--color-line)] disabled:text-[var(--color-mute)] disabled:shadow-none"
+        className="rounded-[var(--radius-button)] bg-[var(--color-accent-brand)] px-5 py-2.5 text-sm font-semibold text-[var(--primary-foreground)] shadow-[var(--shadow-accent)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:bg-[var(--color-line)] disabled:text-[var(--color-mute)] disabled:shadow-none"
       >
         다음
       </button>
@@ -514,7 +516,7 @@ function SubmitRow({
           type="submit"
           disabled={!ready || pending}
           aria-busy={pending}
-          className="rounded-[10px] bg-[var(--color-accent-brand)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_10px_24px_-16px_rgba(224,122,95,0.9)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:bg-[var(--color-line)] disabled:text-[var(--color-mute)] disabled:shadow-none"
+          className="rounded-[var(--radius-button)] bg-[var(--color-accent-brand)] px-5 py-2.5 text-sm font-semibold text-[var(--primary-foreground)] shadow-[var(--shadow-accent)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:bg-[var(--color-line)] disabled:text-[var(--color-mute)] disabled:shadow-none"
         >
           {pending ? '저장하는 중…' : '저장할게요'}
         </button>
