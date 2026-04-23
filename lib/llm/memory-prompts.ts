@@ -7,7 +7,7 @@
  * 가 안정적이지 않다는 동일한 이유, AGENTS.md "LLM 호출" 규칙).
  *
  * A/B 실험 시 버전 tag 를 `diaries.model_used` (호환 위해) 또는 future
- * `pet_memory_summary.model_used` 컬럼에 포함 (예: 'claude-sonnet-4-5@memory-summary-v1').
+ * `pet_memory_summary.model_used` 컬럼에 포함 (예: 'claude-haiku-4-5@memory-summary-v1').
  */
 
 export const MEMORY_SUMMARY_PROMPT_VERSION = 'memory-summary-v1' as const

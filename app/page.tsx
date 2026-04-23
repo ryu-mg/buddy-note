@@ -7,6 +7,7 @@ import {
   type CalendarPet,
 } from '@/components/home/calendar-home'
 import { BuddyHappy } from '@/components/illustrations/buddy-happy'
+import { isDevAuthBypassEnabled } from '@/lib/auth/dev-bypass'
 import { createClient } from '@/lib/supabase/server'
 import { getSignedPhotoUrl } from '@/lib/storage'
 import type { DiaryMood } from '@/types/database'
@@ -127,6 +128,8 @@ export default async function Home() {
 }
 
 function AnonymousLanding() {
+  const devBypassEnabled = isDevAuthBypassEnabled()
+
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-md flex-col items-center justify-center gap-7 px-6 py-12 text-center">
       <BuddyHappy className="h-32 w-44" />
@@ -144,12 +147,22 @@ function AnonymousLanding() {
         </p>
       </div>
 
-      <Link
-        href="/auth/login"
-        className="rounded-[var(--radius-button)] bg-[var(--color-accent-brand)] px-6 py-3 text-[15px] font-semibold text-[var(--primary-foreground)] shadow-[var(--shadow-accent)] transition-opacity duration-200 hover:opacity-90"
-      >
-        카카오로 시작하기
-      </Link>
+      <div className="flex w-full max-w-[310px] flex-col gap-3">
+        <Link
+          href="/auth/login"
+          className="rounded-[var(--radius-button)] bg-[var(--color-accent-brand)] px-6 py-3 text-[15px] font-semibold text-[var(--primary-foreground)] shadow-[var(--shadow-accent)] transition-opacity duration-200 hover:opacity-90"
+        >
+          카카오로 시작하기
+        </Link>
+        {devBypassEnabled ? (
+          <Link
+            href="/auth/dev"
+            className="rounded-[var(--radius-button)] border border-[var(--color-line)] bg-[var(--color-bg)] px-6 py-3 text-[15px] font-semibold text-[var(--color-ink-soft)] transition-colors duration-200 hover:bg-[var(--color-paper)]"
+          >
+            로컬 개발 로그인
+          </Link>
+        ) : null}
+      </div>
     </main>
   )
 }

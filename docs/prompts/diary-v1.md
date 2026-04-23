@@ -4,7 +4,7 @@
 > `lib/llm/prompts.ts` 의 `DIARY_SYSTEM_PROMPT_V1` 상수는 이 파일 본문 ("## System prompt (한국어)" 블록)을 **그대로 복사**한 값이다. 이 파일을 수정하면 `lib/llm/prompts.ts` 도 같이 수정해야 한다 (Next.js 번들러가 `.md?raw` import 를 안정적으로 지원하지 않기 때문에 수작업 sync).
 
 - **Version**: v1 (2026-04-20)
-- **Model target**: `claude-sonnet-4-5` (Week 0 A/B 로 `claude-sonnet-4-6` 확정 예정, AGENTS.md D4)
+- **Model target**: `claude-sonnet-4-6`
 - **호출 경로**: `lib/llm/generate-diary.ts` → `lib/llm/client.ts`
 - **출력**: `diarySchema` (title / body / suggestedTags / mood) — `lib/llm/schemas.ts`
 - **입력**: 사진 (multimodal) + `{ petName, personaFragment, memo, recentCallbacks }`

@@ -4,7 +4,7 @@
 > `lib/llm/memory-prompts.ts` 의 `MEMORY_SUMMARY_SYSTEM_PROMPT_V1` 상수는 이 파일 본문 ("## System prompt (한국어)" 블록)을 **그대로 복사**한 값이다. 이 파일을 수정하면 `lib/llm/memory-prompts.ts` 도 같이 수정해야 한다 (수작업 sync — diary-v1.md 와 동일 정책).
 
 - **Version**: v1 (2026-04-20)
-- **Model target**: `claude-sonnet-4-5` (Week 0 A/B 후 최종 확정, AGENTS.md D4)
+- **Model target**: `claude-haiku-4-5`
 - **호출 경로**: pg_cron worker → Edge Function → `lib/llm/generate-memory-summary.ts` → `lib/llm/client.ts`
 - **출력**: `memorySummarySchema` (toneDescription / recurringHabits / favoriteThings / recentCallbacks) — `lib/llm/memory-schemas.ts`
 - **입력**: 직전 `pet_memory_summary` snapshot + 최근 N개 logs (with their diaries) + pet 메타

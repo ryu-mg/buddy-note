@@ -23,10 +23,18 @@ export function getAnthropic(): Anthropic | null {
 }
 
 /**
- * Diary 생성용 모델 ID.
- *
- * TODO: Week 0 A/B — AGENTS.md D4 에 따라 `claude-sonnet-4-6` 을 tentative 로
- * 명시했으나, Week 0 벤치마크 종료 후 최종 확정. 그 전까지는 안전하게 4-5 를
- * default 로 두고 `diaries.model_used` 로 A/B 추적.
+ * Diary 생성은 제품 품질의 핵심 경로라 Sonnet 계열을 유지한다.
+ * 사진 해석 + 한국어 감성 문체 + 페르소나 반영 품질이 비용보다 우선이다.
  */
-export const DIARY_MODEL = 'claude-sonnet-4-5'
+export const DIARY_MODEL = 'claude-sonnet-4-6'
+
+/**
+ * Memory 요약은 사용자에게 직접 보이는 문장이 아니라 내부 압축 작업이다.
+ * 비용/지연을 줄이기 위해 Haiku 계열을 사용한다.
+ */
+export const MEMORY_MODEL = 'claude-haiku-4-5'
+
+/**
+ * Health check 는 모델 연결성만 검증하면 되므로 가장 저렴하고 빠른 모델을 쓴다.
+ */
+export const HEALTHCHECK_MODEL = MEMORY_MODEL

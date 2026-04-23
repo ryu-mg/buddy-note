@@ -1,6 +1,6 @@
 import 'server-only'
 
-import { DIARY_MODEL, getAnthropic } from '@/lib/llm/client'
+import { MEMORY_MODEL, getAnthropic } from '@/lib/llm/client'
 import {
   MEMORY_SUMMARY_PROMPT_VERSION,
   MEMORY_SUMMARY_SYSTEM_PROMPT_V1,
@@ -30,7 +30,7 @@ const log = createLogger('llm:memory')
 export type MemorySummaryMeta = {
   /**
    * `model_used` 컬럼에 그대로 들어갈 태그.
-   * 성공 시 `claude-sonnet-4-5@memory-summary-v1`, fallback 시 `fallback@memory-summary-v1`.
+   * 성공 시 `claude-haiku-4-5@memory-summary-v1`, fallback 시 `fallback@memory-summary-v1`.
    */
   modelUsed: string
   latencyMs: number
@@ -217,7 +217,7 @@ export async function generateMemorySummary(
     ].join('\n')
 
     const response = await client.messages.create({
-      model: DIARY_MODEL,
+      model: MEMORY_MODEL,
       max_tokens: MAX_OUTPUT_TOKENS,
       system: MEMORY_SUMMARY_SYSTEM_PROMPT_V1,
       messages: [
@@ -264,7 +264,7 @@ export async function generateMemorySummary(
       ok: true,
       data: validated.data,
       meta: {
-        modelUsed: `${DIARY_MODEL}@${MEMORY_SUMMARY_PROMPT_VERSION}`,
+        modelUsed: `${MEMORY_MODEL}@${MEMORY_SUMMARY_PROMPT_VERSION}`,
         latencyMs: Date.now() - start,
         tokensInput: response.usage.input_tokens,
         tokensOutput: response.usage.output_tokens,

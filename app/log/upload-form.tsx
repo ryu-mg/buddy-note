@@ -194,16 +194,18 @@ export function UploadForm({
             className="sr-only"
             onChange={onFileChange}
           />
-          <label
-            htmlFor="photo-input"
+          <button
+            type="button"
+            aria-describedby="photo-input-hint"
+            onClick={() => fileInputRef.current?.click()}
             className={cn(
-              'relative block cursor-pointer',
+              'relative block w-full cursor-pointer text-left',
               'bg-[var(--color-paper)] p-6 pb-11',
               'ring-1 ring-[var(--color-line)]',
               'motion-safe:-rotate-[1.2deg] motion-safe:transition-transform',
               'motion-safe:duration-[var(--duration-default)] motion-safe:ease-[var(--ease-soft-out)]',
               'hover:motion-safe:rotate-0',
-              'focus-within:ring-2 focus-within:ring-[var(--color-accent-brand)] focus-within:ring-offset-2',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent-brand)] focus-visible:ring-offset-2',
             )}
             style={{ borderRadius: 'var(--radius-card)' }}
           >
@@ -239,13 +241,13 @@ export function UploadForm({
               </div>
             )}
             <p
-            id="photo-input-hint"
-            className="mt-3 text-center text-[12px] text-[var(--color-mute)]"
+              id="photo-input-hint"
+              className="mt-3 text-center text-[12px] text-[var(--color-mute)]"
               style={{ fontFamily: 'var(--font-serif)' }}
             >
-            {file ? '마음에 들면 아래 버튼을 눌러주세요' : '눌러서 고르기'}
-          </p>
-          </label>
+              {file ? '마음에 들면 아래 버튼을 눌러주세요' : '눌러서 고르기'}
+            </p>
+          </button>
         </section>
 
         {/* Memo — native textarea, 토큰 스타일 */}

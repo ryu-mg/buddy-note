@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 
-import { DIARY_MODEL, getAnthropic } from '@/lib/llm/client'
+import { HEALTHCHECK_MODEL, getAnthropic } from '@/lib/llm/client'
 import { createLogger } from '@/lib/logger'
 import { hasValidBearerToken } from '@/lib/ops/cron-auth'
 
@@ -78,7 +78,7 @@ async function handleHealthCheck(request: NextRequest) {
 
   try {
     const response = await client.messages.create({
-      model: DIARY_MODEL,
+      model: HEALTHCHECK_MODEL,
       max_tokens: 12,
       messages: [
         {
@@ -98,7 +98,7 @@ async function handleHealthCheck(request: NextRequest) {
         {
           ok: false,
           error: 'LLM 응답이 비어 있어요.',
-          model: DIARY_MODEL,
+          model: HEALTHCHECK_MODEL,
           latencyMs,
           notified,
         },
@@ -108,7 +108,7 @@ async function handleHealthCheck(request: NextRequest) {
 
     return NextResponse.json({
       ok: true,
-      model: DIARY_MODEL,
+      model: HEALTHCHECK_MODEL,
       latencyMs,
       tokensInput: response.usage.input_tokens,
       tokensOutput: response.usage.output_tokens,
@@ -123,7 +123,7 @@ async function handleHealthCheck(request: NextRequest) {
       {
         ok: false,
         error: 'LLM health check가 실패했어요.',
-        model: DIARY_MODEL,
+        model: HEALTHCHECK_MODEL,
         latencyMs,
         notified,
       },

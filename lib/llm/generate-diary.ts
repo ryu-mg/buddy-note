@@ -25,7 +25,7 @@ const log = createLogger('llm:diary')
 export type DiaryMeta = {
   /**
    * `diaries.model_used` 에 그대로 들어가는 태그.
-   * 성공 시 `claude-sonnet-4-5@diary-v1`, fallback 시 `fallback@diary-v1`.
+   * 성공 시 `claude-sonnet-4-6@diary-v1`, fallback 시 `fallback@diary-v1`.
    * Week 0 A/B 를 위해 프롬프트 버전까지 같이 박아둔다.
    */
   modelUsed: string

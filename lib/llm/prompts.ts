@@ -6,7 +6,7 @@
  * 반드시 둘을 같이 수정한다. Next.js 번들러가 `.md?raw` import 를 안정적으로
  * 지원하지 않기 때문에 sync 는 수작업이다 (AGENTS.md "LLM 호출" 규칙).
  *
- * A/B 실험 시 버전 tag 를 `diaries.model_used` 에 포함 (예: 'claude-sonnet-4-5@diary-v1').
+ * A/B 실험 시 버전 tag 를 `diaries.model_used` 에 포함 (예: 'claude-sonnet-4-6@diary-v1').
  */
 
 export const DIARY_PROMPT_VERSION = 'diary-v1' as const
