@@ -20,8 +20,9 @@
   --color-bg: #ffffff;
 
   /* DESIGN §3 — Accent (warm, pet-safe) */
-  --color-accent-brand: #e07a5f;       /* 테라코타 */
+  --color-accent-brand: #e07a5f;       /* 테라코타 — 브랜드 색 (장식, border, 아이콘) */
   --color-accent-brand-soft: #fde6e0;
+  --color-accent-cta: #b85038;         /* 버튼 전용 어두운 테라코타 — WCAG AA 흰 글씨 4.95:1 */
 
   /* DESIGN v0.2 — Mood palette (no purple; grumpy uses muted umber). */
   --color-mood-bright: #e0a83f;
@@ -72,7 +73,7 @@
   --popover: var(--color-bg);
   --popover-foreground: var(--color-ink);
 
-  --primary: var(--color-accent-brand);
+  --primary: var(--color-accent-cta);
   --primary-foreground: #ffffff;
 
   --secondary: var(--color-paper);
@@ -132,7 +133,7 @@
   --card-foreground: var(--color-ink);
   --popover: var(--color-bg);
   --popover-foreground: var(--color-ink);
-  --primary: var(--color-accent-brand);
+  --primary: var(--color-accent-cta);
   --primary-foreground: #ffffff;
   --secondary: var(--color-paper);
   --secondary-foreground: var(--color-ink);
@@ -237,6 +238,7 @@
   --color-bg: var(--color-bg);
   --color-accent-brand: var(--color-accent-brand);
   --color-accent-brand-soft: var(--color-accent-brand-soft);
+  --color-accent-cta: var(--color-accent-cta);
   --color-mood-bright: var(--color-mood-bright);
   --color-mood-calm: var(--color-mood-calm);
   --color-mood-tired: var(--color-mood-tired);

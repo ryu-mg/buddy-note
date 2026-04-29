@@ -121,7 +121,7 @@ function OptionRow({
         className={[
           'mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 text-[11px] font-semibold transition-colors',
           checked
-            ? 'border-[var(--color-accent-brand)] bg-[var(--color-accent-brand)] text-[var(--primary-foreground)]'
+            ? 'border-[var(--color-accent-brand)] bg-[var(--color-accent-cta)] text-[var(--primary-foreground)]'
             : 'border-[var(--color-line)] bg-[var(--color-bg)] text-[var(--color-mute)] group-hover/option:border-[var(--color-ink-soft)]',
         ].join(' ')}
       >

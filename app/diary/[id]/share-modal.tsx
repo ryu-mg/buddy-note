@@ -184,7 +184,7 @@ export function ShareModal({
       <DialogTrigger asChild>
         <button
           type="button"
-          className="w-full rounded-[var(--radius-button)] bg-[var(--color-accent-brand)] px-5 py-3 text-[15px] font-semibold text-[var(--primary-foreground)] shadow-[var(--shadow-accent)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
+          className="w-full rounded-[var(--radius-button)] bg-[var(--color-accent-cta)] px-5 py-3 text-[15px] font-semibold text-[var(--primary-foreground)] shadow-[var(--shadow-accent)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
         >
           공유하기
         </button>

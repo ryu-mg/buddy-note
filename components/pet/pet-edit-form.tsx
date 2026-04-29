@@ -270,7 +270,7 @@ export function PetEditForm({ pet }: PetEditFormProps) {
             type="submit"
             disabled={!canSubmit || pending}
             aria-busy={pending}
-            className="rounded-[var(--radius-button)] bg-[var(--color-accent-brand)] px-5 py-2.5 text-[14px] font-semibold text-[var(--primary-foreground)] shadow-[var(--shadow-accent)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
+            className="rounded-[var(--radius-button)] bg-[var(--color-accent-cta)] px-5 py-2.5 text-[14px] font-semibold text-[var(--primary-foreground)] shadow-[var(--shadow-accent)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
           >
             {pending ? '저장하는 중…' : '저장'}
           </button>
@@ -338,7 +338,7 @@ function PersonaQuestionRow({
                 className={[
                   'mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 text-[10px] font-semibold transition-colors',
                   checked
-                    ? 'border-[var(--color-accent-brand)] bg-[var(--color-accent-brand)] text-[var(--primary-foreground)]'
+                    ? 'border-[var(--color-accent-brand)] bg-[var(--color-accent-cta)] text-[var(--primary-foreground)]'
                     : 'border-[var(--color-line)] bg-[var(--color-bg)] text-[var(--color-mute)] group-hover/option:border-[var(--color-ink-soft)]',
                 ].join(' ')}
               >

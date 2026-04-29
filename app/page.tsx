@@ -150,7 +150,7 @@ function AnonymousLanding() {
       <div className="flex w-full max-w-[310px] flex-col gap-3">
         <Link
           href="/auth/login"
-          className="rounded-[var(--radius-button)] bg-[var(--color-accent-brand)] px-6 py-3 text-[15px] font-semibold text-[var(--primary-foreground)] shadow-[var(--shadow-accent)] transition-opacity duration-200 hover:opacity-90"
+          className="rounded-[var(--radius-button)] bg-[var(--color-accent-cta)] px-6 py-3 text-[15px] font-semibold text-[var(--primary-foreground)] shadow-[var(--shadow-accent)] transition-opacity duration-200 hover:opacity-90"
         >
           카카오로 시작하기
         </Link>

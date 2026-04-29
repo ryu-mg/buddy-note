@@ -438,7 +438,7 @@ function StepNav({
         type="button"
         onClick={onNext}
         disabled={!canAdvance}
-        className="rounded-[var(--radius-button)] bg-[var(--color-accent-brand)] px-5 py-2.5 text-sm font-semibold text-[var(--primary-foreground)] shadow-[var(--shadow-accent)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:bg-[var(--color-line)] disabled:text-[var(--color-mute)] disabled:shadow-none"
+        className="rounded-[var(--radius-button)] bg-[var(--color-accent-cta)] px-5 py-2.5 text-sm font-semibold text-[var(--primary-foreground)] shadow-[var(--shadow-accent)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:bg-[var(--color-line)] disabled:text-[var(--color-mute)] disabled:shadow-none"
       >
         다음
       </button>
@@ -516,7 +516,7 @@ function SubmitRow({
           type="submit"
           disabled={!ready || pending}
           aria-busy={pending}
-          className="rounded-[var(--radius-button)] bg-[var(--color-accent-brand)] px-5 py-2.5 text-sm font-semibold text-[var(--primary-foreground)] shadow-[var(--shadow-accent)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:bg-[var(--color-line)] disabled:text-[var(--color-mute)] disabled:shadow-none"
+          className="rounded-[var(--radius-button)] bg-[var(--color-accent-cta)] px-5 py-2.5 text-sm font-semibold text-[var(--primary-foreground)] shadow-[var(--shadow-accent)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:bg-[var(--color-line)] disabled:text-[var(--color-mute)] disabled:shadow-none"
         >
           {pending ? '저장하는 중…' : '저장할게요'}
         </button>

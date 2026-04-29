@@ -49,7 +49,7 @@ export function PublicToggle({
           aria-live="polite"
           className={
             isPublic
-              ? 'inline-flex items-center gap-1.5 rounded-[var(--radius-pill)] bg-[var(--color-accent-brand-soft)] px-2.5 py-0.5 text-[12px] font-semibold text-[var(--color-accent-brand)]'
+              ? 'inline-flex items-center gap-1.5 rounded-[var(--radius-pill)] bg-[var(--color-accent-brand-soft)] px-2.5 py-0.5 text-[12px] font-semibold text-[var(--color-ink-soft)]'
               : 'inline-flex items-center gap-1.5 rounded-[var(--radius-pill)] bg-[var(--color-line)] px-2.5 py-0.5 text-[12px] font-semibold text-[var(--color-ink-soft)]'
           }
         >
