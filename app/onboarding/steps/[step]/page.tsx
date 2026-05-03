@@ -10,7 +10,7 @@ import {
 } from 'react'
 import { useRouter } from 'next/navigation'
 
-import { withJosa } from '@/lib/korean-josa'
+
 import {
   buildPersonaPromptFragment,
   calculatePersonality,
@@ -24,6 +24,7 @@ import {
 } from '@/lib/pet-mbti'
 import { QuestionCard } from '@/components/onboarding/question-card'
 import { Progress } from '@/components/onboarding/progress'
+import { PersonaReveal } from '@/components/onboarding/persona-reveal'
 import {
   NameForm,
   type NameFormValues,
@@ -229,7 +230,20 @@ export default function OnboardingStepPage(props: PageProps) {
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-6 px-4 pb-12 pt-8">
-      <Progress current={step + 1} total={TOTAL_STEPS} />
+      <Progress
+        current={step + 1}
+        total={TOTAL_STEPS}
+        mbtiSlots={
+          step >= 2 && step <= 5
+            ? {
+                current: step - 1,
+                answers: QUESTION_IDS.map((id) =>
+                  draft.answers[id] ? { key: draft.answers[id]! } : null,
+                ),
+              }
+            : undefined
+        }
+      />
 
       <div
         key={step}
@@ -323,82 +337,67 @@ function ConfirmStep({ draft }: { draft: Draft }) {
     ? calculatePersonality(draft.answers as Answers)
     : null
 
-  return (
-    <section
-      aria-labelledby="confirm-title"
-      className="mx-auto w-full max-w-md"
-    >
-      <article className="rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-paper)] px-6 py-7 shadow-[var(--shadow-card-soft)] motion-safe:[transform:rotate(-0.4deg)] motion-reduce:rotate-0">
-        <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-[var(--color-mute)]">
-          소개 확인
-        </p>
-        <h1
-          id="confirm-title"
-          className="mt-3 text-[21px] font-bold leading-[1.35] text-[var(--color-ink)]"
-        >
-          이제 {draft.info.name || '버디'}답게 적어볼게요
-        </h1>
-        <p className="mt-1.5 text-[14px] text-[var(--color-ink-soft)]">
-          내용이 맞으면 저장해주세요. 다음 버디노트부터 이 성격을 기억할게요.
-        </p>
-
-        {ready ? (
-          <>
-            <div className="mt-6 flex flex-col items-center text-center">
-              <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border border-[var(--color-line)] bg-[var(--color-bg)] shadow-[var(--shadow-card)]">
-                {draft.profilePhotoDataUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={draft.profilePhotoDataUrl}
-                    alt=""
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <span className="text-[38px] font-serif text-[var(--color-accent-brand)]">
-                    {draft.info.name.trim().slice(0, 1)}
-                  </span>
-                )}
-              </div>
-              <p className="mt-5 text-[15px] font-medium text-[var(--color-mute)]">
-                {withJosa(draft.info.name, '은/는')}
-              </p>
-              <p className="mt-1 font-serif text-[54px] font-semibold leading-none text-[var(--color-ink)]">
-                {personality?.code}
-              </p>
-              <p className="mt-2 text-[18px] font-semibold text-[var(--color-accent-brand)]">
-                {personality?.label}
-              </p>
-            </div>
-            {personality ? (
-              <ul className="mt-5 grid gap-2">
-                {CHARACTER_TRAITS[personality.code].map((trait) => (
-                  <li
-                    key={trait}
-                    className="rounded-[var(--radius-button)] bg-[var(--color-bg)]/70 px-4 py-2.5 text-[14px] leading-[1.45] text-[var(--color-ink-soft)]"
-                  >
-                    {trait}
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-            {draft.additionalInfo.trim() ? (
-              <blockquote className="mt-4 border-l-2 border-[var(--color-accent-brand)] bg-[var(--color-bg)]/60 px-4 py-3 text-[14px] leading-[1.7] text-[var(--color-ink)]">
-                {draft.additionalInfo.trim()}
-              </blockquote>
-            ) : null}
-            <details className="mt-4 rounded-[var(--radius-button)] bg-[var(--color-bg)]/55 px-4 py-3 text-[13px] text-[var(--color-mute)]">
-              <summary className="cursor-pointer font-medium text-[var(--color-ink-soft)]">
-                프롬프트 조각 보기
-              </summary>
-              <p className="mt-3 whitespace-pre-wrap leading-[1.65]">{fragment}</p>
-            </details>
-          </>
-        ) : (
+  if (!ready) {
+    return (
+      <section aria-labelledby="confirm-title" className="mx-auto w-full max-w-md">
+        <article className="rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-paper)] px-6 py-7 shadow-[var(--shadow-card-soft)] motion-safe:[transform:rotate(-0.4deg)] motion-reduce:rotate-0">
+          <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-[var(--color-mute)]">
+            소개 확인
+          </p>
+          <h1
+            id="confirm-title"
+            className="mt-3 text-[21px] font-bold leading-[1.35] text-[var(--color-ink)]"
+          >
+            이제 {draft.info.name || '버디'}답게 적어볼게요
+          </h1>
           <p className="mt-5 rounded-[8px] bg-[var(--color-accent-brand-soft)] px-3 py-2 text-[13px] text-[var(--color-error)]">
             앞 단계에서 이름, 견종, 반려인 호칭, 4문항을 마저 채워주세요.
           </p>
-        )}
-      </article>
+        </article>
+      </section>
+    )
+  }
+
+  const answerSlots = QUESTION_IDS.map((id) => ({
+    key: (draft.answers as Answers)[id],
+  }))
+
+  return (
+    <section aria-labelledby="confirm-title" className="mx-auto w-full max-w-md">
+      {/* magic moment — fan + name + MBTI reveal */}
+      <PersonaReveal
+        petName={draft.info.name}
+        personalityCode={personality!.code}
+        personalityLabel={personality!.label}
+        answers={answerSlots}
+      />
+
+      {/* 성격 특성 카드 */}
+      {personality ? (
+        <ul className="grid gap-2">
+          {CHARACTER_TRAITS[personality.code].map((trait) => (
+            <li
+              key={trait}
+              className="rounded-[var(--radius-button)] bg-[var(--color-paper)] border border-[var(--color-line)] px-4 py-2.5 text-[14px] leading-[1.45] text-[var(--color-ink-soft)]"
+            >
+              {trait}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+
+      {draft.additionalInfo.trim() ? (
+        <blockquote className="mt-4 border-l-2 border-[var(--color-accent-brand)] bg-[var(--color-paper)] px-4 py-3 text-[14px] leading-[1.7] text-[var(--color-ink)]">
+          {draft.additionalInfo.trim()}
+        </blockquote>
+      ) : null}
+
+      <details className="mt-4 rounded-[var(--radius-button)] bg-[var(--color-paper)] border border-[var(--color-line)] px-4 py-3 text-[13px] text-[var(--color-mute)]">
+        <summary className="cursor-pointer font-medium text-[var(--color-ink-soft)]">
+          프롬프트 조각 보기
+        </summary>
+        <p className="mt-3 whitespace-pre-wrap leading-[1.65]">{fragment}</p>
+      </details>
     </section>
   )
 }

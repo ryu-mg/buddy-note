@@ -83,6 +83,18 @@ export function QuestionCard({
             />
           ))}
         </fieldset>
+
+        <p className="mt-3 hidden md:block text-[11px] text-[var(--color-mute)]">
+          키보드{' '}
+          <kbd className="rounded border border-[var(--color-line)] bg-[var(--color-paper)] px-1.5 py-0.5 font-mono text-[10px]">
+            A
+          </kbd>{' '}
+          또는{' '}
+          <kbd className="rounded border border-[var(--color-line)] bg-[var(--color-paper)] px-1.5 py-0.5 font-mono text-[10px]">
+            B
+          </kbd>
+          로 빠르게 선택할 수 있어요.
+        </p>
       </article>
     </section>
   )

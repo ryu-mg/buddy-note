@@ -63,7 +63,7 @@ export default async function MilestonePage({ params }: PageProps) {
             <BuddyHappy className="h-40 w-52" />
           </div>
         )}
-        <h1 className="mt-6 font-serif text-[32px] font-semibold leading-[1.2] text-[var(--color-ink)]">
+        <h1 className="mt-6 font-serif text-[var(--text-display-sm)] font-semibold leading-[1.2] text-[var(--color-ink)]">
           {card.title}
         </h1>
         <p className="mt-3 text-[15px] leading-[1.65] text-[var(--color-ink-soft)]">

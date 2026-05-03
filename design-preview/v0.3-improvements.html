@@ -1,0 +1,1683 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>buddy-note v0.3 — Memory Album Direction</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@kfonts/maruburi@0.1.0/index.css" />
+  <style>
+    /* ============================================================
+       buddy-note v0.3 Design Tokens
+       (mirrors app/globals.css 1:1 — keep in sync)
+    ============================================================ */
+    :root {
+      /* Neutrals */
+      --color-paper: #fafaf5;
+      --color-ink: #1a1a1a;
+      --color-ink-soft: #3f3f3f;
+      --color-mute: #6b7280;
+      --color-line: #e5e7eb;
+      --color-bg: #ffffff;
+
+      /* Accent (terracotta) */
+      --color-accent-brand: #e07a5f;
+      --color-accent-brand-soft: #fde6e0;
+      --primary-foreground: #ffffff;
+
+      /* Semantic */
+      --color-success: #4a7c59;
+      --color-error: #b04a4a;
+      --color-warn: #d4a256;
+
+      /* Mood palette (v0.2) */
+      --color-mood-bright: #e0a83f;
+      --color-mood-calm: #6f9f86;
+      --color-mood-tired: #9b9489;
+      --color-mood-curious: #5f8aa8;
+      --color-mood-grumpy: #8a6650;
+      --color-mood-lonely: #7f8f9f;
+
+      /* Radius */
+      --radius-card: 12px;
+      --radius-button: 10px;
+      --radius-input: 8px;
+      --radius-pill: 9999px;
+
+      /* Shadows (v0.2) */
+      --shadow-card: 0 1px 2px rgb(26 26 26 / 0.04), 0 14px 32px -18px rgb(26 26 26 / 0.18);
+      --shadow-card-soft: 0 1px 2px rgb(26 26 26 / 0.04), 0 8px 24px -12px rgb(26 26 26 / 0.08);
+      --shadow-polaroid: 0 24px 55px -30px rgb(26 26 26 / 0.42);
+      --shadow-accent: 0 10px 24px -16px rgb(224 122 95 / 0.82);
+
+      /* Motion */
+      --ease-soft-out: cubic-bezier(0.2, 0.9, 0.3, 1);
+      --duration-default: 200ms;
+
+      /* Typography */
+      --font-sans: "Pretendard Variable", "Pretendard", -apple-system, BlinkMacSystemFont, "Noto Sans KR", "Segoe UI", Roboto, sans-serif;
+      --font-serif: "마루 부리", "MaruBuri", "Nanum Myeongjo", "Noto Serif KR", serif;
+
+      /* v0.3 — Display typography (NEW) */
+      --text-display-sm: 32px;
+      --text-display-md: 48px;
+      --text-display-lg: 72px;
+    }
+
+    html.dark {
+      --color-paper: #211b17;
+      --color-ink: #f5efe6;
+      --color-ink-soft: #d8cabe;
+      --color-mute: #aa9a8d;
+      --color-line: #3a302a;
+      --color-bg: #17120f;
+      --color-accent-brand-soft: #3a2620;
+      --shadow-card: 0 1px 2px rgb(0 0 0 / 0.18), 0 16px 38px -22px rgb(0 0 0 / 0.55);
+      --shadow-card-soft: 0 1px 2px rgb(0 0 0 / 0.14), 0 10px 28px -18px rgb(0 0 0 / 0.5);
+      --shadow-polaroid: 0 24px 55px -30px rgb(0 0 0 / 0.72);
+      --shadow-accent: 0 10px 24px -16px rgb(224 122 95 / 0.55);
+    }
+
+    /* ============================================================
+       Reset + base
+    ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-family: var(--font-sans); }
+    body {
+      background: var(--color-bg);
+      color: var(--color-ink);
+      line-height: 1.5;
+      transition: background 200ms, color 200ms;
+    }
+
+    /* ============================================================
+       v0.3 — Paper grain overlay (Phase A, NEW)
+    ============================================================ */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.05;
+      mix-blend-mode: multiply;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' seed='3'/><feColorMatrix values='0 0 0 0 0.1 0 0 0 0 0.1 0 0 0 0 0.1 0 0 0 0.5 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    }
+    html.dark body::before {
+      opacity: 0.08;
+      mix-blend-mode: screen;
+    }
+    body > * { position: relative; z-index: 1; }
+
+    /* ============================================================
+       Layout chrome
+    ============================================================ */
+    .preview-shell {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 48px 24px 96px;
+    }
+
+    .preview-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 64px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--color-line);
+    }
+    .preview-header h1 {
+      font-family: var(--font-serif);
+      font-size: var(--text-display-md);
+      font-weight: 600;
+      line-height: 1.05;
+    }
+    .preview-header .meta {
+      font-size: 12px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-mute);
+      margin-bottom: 12px;
+    }
+    .preview-header .sub {
+      font-family: var(--font-serif);
+      font-size: 18px;
+      color: var(--color-ink-soft);
+      margin-top: 8px;
+    }
+    .theme-toggle {
+      padding: 10px 16px;
+      border: 1px solid var(--color-line);
+      background: var(--color-paper);
+      border-radius: var(--radius-button);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-ink);
+      cursor: pointer;
+      transition: border 200ms, color 200ms;
+    }
+    .theme-toggle:hover {
+      border-color: var(--color-accent-brand);
+      color: var(--color-accent-brand);
+    }
+
+    section.phase {
+      margin-top: 96px;
+    }
+    section.phase h2 {
+      font-family: var(--font-serif);
+      font-size: var(--text-display-sm);
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    section.phase .phase-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-accent-brand);
+      background: var(--color-accent-brand-soft);
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      margin-bottom: 16px;
+    }
+    section.phase .phase-desc {
+      font-size: 15px;
+      color: var(--color-ink-soft);
+      max-width: 720px;
+      line-height: 1.65;
+      margin-bottom: 32px;
+    }
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 32px;
+    }
+    .demo-card {
+      background: var(--color-paper);
+      border-radius: var(--radius-card);
+      border: 1px solid var(--color-line);
+      padding: 28px;
+      box-shadow: var(--shadow-card-soft);
+      position: relative;
+    }
+    .demo-card .demo-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--color-mute);
+      margin-bottom: 16px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .demo-card .demo-label::before {
+      content: '';
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--color-accent-brand);
+    }
+    .demo-card .demo-stage {
+      background: var(--color-bg);
+      border-radius: var(--radius-input);
+      border: 1px solid var(--color-line);
+      padding: 24px;
+      min-height: 220px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* ============================================================
+       TOKENS section
+    ============================================================ */
+    .token-row { display: flex; flex-wrap: wrap; gap: 16px; }
+    .swatch {
+      width: 96px;
+      padding: 10px;
+      border-radius: var(--radius-input);
+      border: 1px solid var(--color-line);
+      background: var(--color-paper);
+    }
+    .swatch .chip {
+      width: 100%;
+      height: 56px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      border: 1px solid rgb(0 0 0 / 0.06);
+    }
+    .swatch .name { font-size: 11px; font-weight: 600; color: var(--color-ink); }
+    .swatch .val { font-size: 10px; color: var(--color-mute); font-family: ui-monospace, monospace; }
+
+    .display-ladder { display: flex; flex-direction: column; gap: 24px; }
+    .display-row {
+      display: grid;
+      grid-template-columns: 80px 80px 1fr;
+      align-items: baseline;
+      gap: 16px;
+      border-bottom: 1px dashed var(--color-line);
+      padding-bottom: 18px;
+    }
+    .display-row .label { font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--color-mute); }
+    .display-row .size { font-family: ui-monospace, monospace; font-size: 11px; color: var(--color-accent-brand); }
+    .display-row .sample { font-family: var(--font-serif); font-weight: 600; color: var(--color-ink); line-height: 1; }
+    .display-row.lg .sample { font-size: var(--text-display-lg); }
+    .display-row.md .sample { font-size: var(--text-display-md); }
+    .display-row.sm .sample { font-size: var(--text-display-sm); }
+
+    /* ============================================================
+       Polaroid base
+    ============================================================ */
+    .polaroid {
+      background: var(--color-paper);
+      box-shadow: var(--shadow-card);
+      border: 1px solid var(--color-line);
+      padding: 16px 16px 36px;
+      display: inline-block;
+      transform: rotate(-1.2deg);
+      transition: transform var(--duration-default) var(--ease-soft-out);
+    }
+    .polaroid:hover { transform: rotate(0deg) translateY(-3px); }
+    .polaroid .photo {
+      aspect-ratio: 4 / 5;
+      width: 220px;
+      background: linear-gradient(135deg, #c8b8a0 0%, #8a6650 100%);
+      border-radius: 0;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .polaroid .photo img { width: 100%; height: 100%; object-fit: cover; }
+    .polaroid .caption {
+      margin-top: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+    .polaroid .date { font-size: 11px; letter-spacing: 0.06em; color: var(--color-mute); text-transform: uppercase; }
+    .polaroid .pet-name { font-family: var(--font-serif); font-size: 14px; color: var(--color-ink); }
+
+    /* ============================================================
+       Phase A — Calendar mini-thumb mosaic
+    ============================================================ */
+    .calendar-stage {
+      max-width: 420px;
+      margin: 0 auto;
+    }
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+    .cal-weekday {
+      text-align: center;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--color-mute);
+      padding: 6px 0;
+    }
+    .cal-day {
+      aspect-ratio: 1 / 1;
+      border-radius: var(--radius-input);
+      border: 1px solid var(--color-line);
+      background: var(--color-bg);
+      position: relative;
+      overflow: hidden;
+      font-size: 13px;
+      color: var(--color-ink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: border 200ms;
+    }
+    .cal-day:hover { border-color: var(--color-accent-brand); }
+    .cal-day.outside { opacity: 0.25; }
+    .cal-day.today { box-shadow: 0 0 0 1px var(--color-accent-brand) inset; }
+    .cal-day.with-photo {
+      padding: 0;
+    }
+    .cal-day.with-photo img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .cal-day.with-photo .day-num {
+      position: absolute;
+      top: 3px;
+      left: 4px;
+      background: rgb(255 255 255 / 0.92);
+      color: #1a1a1a;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 1px 5px;
+      border-radius: 4px;
+      z-index: 2;
+    }
+    .cal-day.with-photo .mood-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      z-index: 2;
+    }
+
+    /* ============================================================
+       Phase A — EmptyState
+    ============================================================ */
+    .empty-state {
+      background: var(--color-paper);
+      border: 1px solid var(--color-line);
+      box-shadow: var(--shadow-card-soft);
+      padding: 40px 28px;
+      text-align: center;
+      transform: rotate(-0.6deg);
+      max-width: 380px;
+      margin: 0 auto;
+    }
+    .empty-state .illust { width: 140px; height: 110px; margin: 0 auto 20px; }
+    .empty-state h3 {
+      font-family: var(--font-serif);
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--color-ink);
+      margin-bottom: 8px;
+    }
+    .empty-state p {
+      font-size: 13px;
+      color: var(--color-ink-soft);
+      line-height: 1.65;
+      margin-bottom: 20px;
+    }
+    .btn-primary {
+      display: inline-block;
+      padding: 12px 22px;
+      border-radius: var(--radius-button);
+      background: var(--color-accent-brand);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: var(--shadow-accent);
+      cursor: pointer;
+      border: none;
+      text-decoration: none;
+      transition: opacity 200ms;
+    }
+    .btn-primary:hover { opacity: 0.92; }
+
+    /* ============================================================
+       Phase B — ShutterReveal sequence
+    ============================================================ */
+    @keyframes shutter-flash {
+      0% { opacity: 0; background: transparent; }
+      40% { opacity: 1; background: white; }
+      100% { opacity: 0; background: transparent; }
+    }
+    @keyframes polaroid-drop {
+      0% { opacity: 0; transform: translateY(-26px) rotate(-8deg) scale(0.94); }
+      55% { opacity: 1; transform: translateY(6px) rotate(-2deg) scale(1); }
+      100% { opacity: 1; transform: translateY(0) rotate(-2deg) scale(1); }
+    }
+    @keyframes soft-fade {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes name-rise {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .shutter-stage {
+      position: relative;
+      height: 460px;
+      background: var(--color-bg);
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-card);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .shutter-stage .flash {
+      position: absolute;
+      inset: 0;
+      background: white;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .shutter-stage .stage-polaroid {
+      opacity: 0;
+      transform: translateY(-26px) rotate(-8deg) scale(0.94);
+    }
+    .shutter-stage .stage-name {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      transform: translateY(60px) scale(0.96);
+      opacity: 0;
+      text-align: center;
+      font-family: var(--font-serif);
+      font-size: var(--text-display-md);
+      font-weight: 600;
+      color: var(--color-ink);
+    }
+    .shutter-stage.run .flash { animation: shutter-flash 500ms var(--ease-soft-out) forwards; }
+    .shutter-stage.run .stage-polaroid {
+      animation: polaroid-drop 1000ms var(--ease-soft-out) 400ms forwards;
+    }
+    .shutter-stage.run .stage-name {
+      animation: name-rise 400ms var(--ease-soft-out) 1600ms forwards;
+    }
+    .play-btn {
+      position: absolute;
+      bottom: 16px;
+      right: 16px;
+      padding: 8px 14px;
+      background: var(--color-ink);
+      color: var(--color-bg);
+      border: none;
+      border-radius: var(--radius-pill);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      z-index: 10;
+    }
+
+    /* ============================================================
+       Phase B — CountUp
+    ============================================================ */
+    .count-up-block {
+      text-align: center;
+      padding: 24px;
+    }
+    .count-up-block .num {
+      font-family: var(--font-serif);
+      font-size: var(--text-display-md);
+      font-weight: 600;
+      color: var(--color-accent-brand);
+      line-height: 1;
+    }
+    .count-up-block .label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-mute);
+      margin-top: 8px;
+    }
+
+    /* ============================================================
+       Phase C — Calendar Hero (3-row)
+    ============================================================ */
+    .home-hero {
+      padding: 28px;
+      background: var(--color-bg);
+    }
+    .home-hero .eyebrow {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-mute);
+    }
+    .home-hero .pet-hero {
+      font-family: var(--font-serif);
+      font-size: var(--text-display-md);
+      font-weight: 600;
+      color: var(--color-ink);
+      line-height: 1.05;
+      margin-top: 8px;
+    }
+    .home-hero .hero-meta {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .home-hero .day-counter {
+      font-family: var(--font-serif);
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--color-accent-brand);
+    }
+    .home-hero .mbti-chip {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: var(--radius-pill);
+      background: var(--color-accent-brand-soft);
+      color: var(--color-accent-brand);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+    }
+
+    /* ============================================================
+       Phase C — App Header
+    ============================================================ */
+    .app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+      border: 1px solid var(--color-line);
+      background: var(--color-bg);
+      border-radius: var(--radius-card);
+    }
+    .app-header .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--color-ink);
+      text-decoration: none;
+    }
+    .app-header .logo svg { width: 20px; height: 20px; }
+    .app-header .right { display: flex; align-items: center; gap: 12px; }
+    .pet-chip {
+      padding: 4px 12px;
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--color-line);
+      background: var(--color-paper);
+      font-family: var(--font-serif);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-ink);
+      text-decoration: none;
+      transition: border 200ms;
+    }
+    .pet-chip:hover { border-color: var(--color-accent-brand); }
+    .signout {
+      font-size: 12px;
+      color: var(--color-mute);
+      cursor: pointer;
+    }
+
+    /* ============================================================
+       Phase C — Passport Card
+    ============================================================ */
+    .passport {
+      max-width: 360px;
+      background: var(--color-paper);
+      box-shadow: var(--shadow-polaroid);
+      border: 1px solid var(--color-line);
+      padding: 24px 20px 36px;
+      transform: rotate(-1.2deg);
+      margin: 0 auto;
+    }
+    .passport .stamp-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .passport .stamp {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: var(--color-mute);
+    }
+    .passport .public-tag {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--color-success);
+      border: 1px solid var(--color-success);
+      padding: 2px 8px;
+      border-radius: var(--radius-pill);
+    }
+    .passport .pp-photo {
+      aspect-ratio: 1 / 1;
+      width: 100%;
+      background: linear-gradient(135deg, #c8b8a0 0%, #8a6650 100%);
+      margin-top: 16px;
+      overflow: hidden;
+    }
+    .passport .pp-photo img { width: 100%; height: 100%; object-fit: cover; }
+    .passport .pp-name {
+      font-family: var(--font-serif);
+      font-size: var(--text-display-md);
+      font-weight: 600;
+      color: var(--color-ink);
+      line-height: 1;
+      margin-top: 20px;
+    }
+    .passport .pp-mbti {
+      font-family: var(--font-serif);
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--color-accent-brand);
+      margin-top: 8px;
+    }
+    .passport .pp-mbti span { font-size: 13px; font-weight: 400; color: var(--color-ink-soft); }
+    .passport .pp-meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--color-line);
+    }
+    .passport .pp-meta dt {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--color-mute);
+    }
+    .passport .pp-meta dd {
+      font-family: var(--font-serif);
+      font-size: 21px;
+      font-weight: 600;
+      color: var(--color-ink);
+      margin-top: 4px;
+    }
+
+    /* ============================================================
+       Phase D — Onboarding mini-polaroid slots
+    ============================================================ */
+    .progress-slots {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      padding: 16px 0;
+    }
+    .slot {
+      width: 28px;
+      height: 36px;
+      background: var(--color-paper);
+      border: 1px solid var(--color-line);
+      box-shadow: var(--shadow-card-soft);
+      position: relative;
+      transition: transform 200ms, box-shadow 200ms;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--color-accent-brand);
+    }
+    .slot::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 8px;
+      background: var(--color-paper);
+      border-top: 1px solid var(--color-line);
+    }
+    .slot.tilt-1 { transform: rotate(-3deg); }
+    .slot.tilt-2 { transform: rotate(2deg); }
+    .slot.tilt-3 { transform: rotate(-2deg); }
+    .slot.tilt-4 { transform: rotate(4deg); }
+    .slot.empty { color: transparent; }
+    .slot.empty { border-style: dashed; opacity: 0.7; }
+    .slot.current {
+      transform: scale(1.12);
+      box-shadow: 0 0 0 2px var(--color-accent-brand);
+    }
+
+    /* Question card (-0.6deg) */
+    .question-card {
+      max-width: 380px;
+      background: var(--color-paper);
+      border: 1px solid var(--color-line);
+      box-shadow: var(--shadow-card-soft);
+      padding: 28px 24px;
+      transform: rotate(-0.6deg);
+      margin: 0 auto;
+    }
+    .question-card .qnum {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-mute);
+    }
+    .question-card .qhead {
+      font-size: 19px;
+      font-weight: 700;
+      line-height: 1.35;
+      color: var(--color-ink);
+      margin-top: 12px;
+    }
+    .question-card .qprompt {
+      font-size: 13px;
+      color: var(--color-ink-soft);
+      margin-top: 6px;
+    }
+    .options { display: flex; flex-direction: column; gap: 8px; margin-top: 20px; }
+    .option {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 2px solid transparent;
+      background: var(--color-bg);
+      cursor: pointer;
+      transition: border 200ms;
+    }
+    .option:hover { border-color: var(--color-line); }
+    .option.checked {
+      border-color: var(--color-accent-brand);
+      background: var(--color-accent-brand-soft);
+      box-shadow: var(--shadow-accent);
+    }
+    .option .key-dot {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid var(--color-line);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--color-mute);
+      flex-shrink: 0;
+    }
+    .option.checked .key-dot {
+      border-color: var(--color-accent-brand);
+      background: var(--color-accent-brand);
+      color: white;
+    }
+    .option .opt-label {
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--color-ink-soft);
+    }
+    .option.checked .opt-label { font-weight: 600; color: var(--color-ink); }
+    .kbd-hint {
+      margin-top: 14px;
+      font-size: 11px;
+      color: var(--color-mute);
+    }
+    kbd {
+      display: inline-block;
+      padding: 2px 6px;
+      font-family: ui-monospace, monospace;
+      font-size: 10px;
+      background: var(--color-paper);
+      border: 1px solid var(--color-line);
+      border-radius: 4px;
+      color: var(--color-ink);
+    }
+
+    /* Phase D — Persona Reveal */
+    .reveal-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 28px;
+      padding: 32px 0;
+      min-height: 420px;
+    }
+    .fan-wrap {
+      position: relative;
+      height: 200px;
+      width: 280px;
+    }
+    .fan-card {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 88px;
+      height: 116px;
+      background: var(--color-paper);
+      box-shadow: var(--shadow-polaroid);
+      border: 1px solid var(--color-line);
+      padding: 8px 8px 18px;
+    }
+    .fan-card .fan-photo {
+      width: 100%;
+      height: 100%;
+      background: var(--color-line);
+      opacity: 0.6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .fan-card .fan-key {
+      font-family: var(--font-serif);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--color-accent-brand);
+    }
+    .reveal-name {
+      font-family: var(--font-serif);
+      font-size: var(--text-display-md);
+      font-weight: 600;
+      color: var(--color-ink);
+      opacity: 0;
+    }
+    .reveal-mbti {
+      text-align: center;
+      opacity: 0;
+    }
+    .reveal-mbti .code {
+      font-family: var(--font-serif);
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--color-accent-brand);
+    }
+    .reveal-mbti .label {
+      font-size: 13px;
+      color: var(--color-ink-soft);
+      margin-top: 4px;
+    }
+
+    .reveal-stage.run .fan-card { animation: polaroid-drop 700ms var(--ease-soft-out) backwards; }
+    .reveal-stage.run .fan-card:nth-child(1) { animation-delay: 0ms; }
+    .reveal-stage.run .fan-card:nth-child(2) { animation-delay: 120ms; }
+    .reveal-stage.run .fan-card:nth-child(3) { animation-delay: 240ms; }
+    .reveal-stage.run .fan-card:nth-child(4) { animation-delay: 360ms; }
+    .reveal-stage.run .reveal-name {
+      animation: soft-fade 400ms var(--ease-soft-out) 1500ms forwards;
+    }
+    .reveal-stage.run .reveal-mbti {
+      animation: soft-fade 400ms var(--ease-soft-out) 2400ms forwards;
+    }
+
+    /* ============================================================
+       Phase F — Public profile mosaic
+    ============================================================ */
+    .public-hero {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      gap: 32px;
+      padding: 32px 8px;
+    }
+    @media (max-width: 720px) {
+      .public-hero { grid-template-columns: 1fr; }
+    }
+    .public-hero .left .eyebrow {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-mute);
+    }
+    .public-hero .left .name-hero {
+      font-family: var(--font-serif);
+      font-size: var(--text-display-md);
+      font-weight: 600;
+      color: var(--color-ink);
+      line-height: 1;
+      margin-top: 12px;
+    }
+    @media (min-width: 720px) {
+      .public-hero .left .name-hero { font-size: var(--text-display-lg); }
+    }
+    .public-hero .left .mbti-line {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-accent-brand);
+      margin-top: 14px;
+    }
+    .public-hero .left .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 24px;
+      max-width: 320px;
+    }
+    .public-stat {
+      padding: 12px 14px;
+      background: var(--color-paper);
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-button);
+    }
+    .public-stat .ps-label { font-size: 11px; color: var(--color-mute); }
+    .public-stat .ps-value {
+      font-family: var(--font-serif);
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--color-ink);
+      margin-top: 4px;
+    }
+    .public-hero .right { position: relative; height: 280px; }
+    .stack-polaroid {
+      position: absolute;
+      inset: 0;
+      width: 200px;
+      height: 250px;
+      background: var(--color-paper);
+      box-shadow: var(--shadow-polaroid);
+      border: 1px solid var(--color-line);
+      padding: 12px 12px 28px;
+      margin: 0 auto;
+      left: 0;
+      right: 0;
+    }
+    .stack-polaroid:nth-child(1) { z-index: 3; transform: rotate(-4deg); }
+    .stack-polaroid:nth-child(2) { z-index: 2; transform: translate(28px, 18px) rotate(5deg); }
+    .stack-polaroid:nth-child(3) { z-index: 1; transform: translate(-22px, 28px) rotate(-9deg); }
+    .stack-polaroid .photo-area {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #c8b8a0 0%, #8a6650 100%);
+      overflow: hidden;
+    }
+    .stack-polaroid .photo-area img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* Mosaic */
+    .mosaic {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 28px 24px;
+      margin-top: 56px;
+    }
+    @media (max-width: 720px) {
+      .mosaic { grid-template-columns: 1fr; gap: 32px; }
+    }
+    .mosaic > div { display: flex; justify-content: center; }
+    .mosaic > div.span-3 { grid-column: span 3; }
+    .mosaic > div.span-6 { grid-column: span 6; }
+    .mosaic > div.tilt-a { transform: rotate(1.5deg); }
+    .mosaic > div.tilt-b { transform: rotate(-1deg); }
+    @media (max-width: 720px) {
+      .mosaic > div { grid-column: span 1 !important; transform: none !important; }
+    }
+    .public-card {
+      background: var(--color-paper);
+      box-shadow: var(--shadow-card);
+      border: 1px solid var(--color-line);
+      padding: 16px 16px 28px;
+      max-width: 320px;
+      transform: rotate(-1.2deg);
+    }
+    .public-card.wide {
+      max-width: 540px;
+    }
+    .public-card .pc-photo {
+      width: 100%;
+      aspect-ratio: 4 / 5;
+      background: linear-gradient(135deg, #c8b8a0 0%, #8a6650 100%);
+      overflow: hidden;
+    }
+    .public-card.wide .pc-photo {
+      aspect-ratio: 5 / 4;
+    }
+    .public-card .pc-photo img { width: 100%; height: 100%; object-fit: cover; }
+    .public-card .pc-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--color-ink);
+      margin-top: 16px;
+      line-height: 1.35;
+    }
+    .public-card .pc-body {
+      font-family: var(--font-serif);
+      font-size: 14px;
+      line-height: 1.65;
+      color: var(--color-ink-soft);
+      margin-top: 8px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .public-card .pc-date {
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-mute);
+      margin-top: 12px;
+    }
+
+    .mosaic-footer {
+      margin-top: 80px;
+      padding-top: 32px;
+      border-top: 1px solid var(--color-line);
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+    .mosaic-footer .ff-title {
+      font-family: var(--font-serif);
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--color-ink-soft);
+    }
+    .share-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--color-line);
+      background: var(--color-paper);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-ink);
+      text-decoration: none;
+      transition: border 200ms, color 200ms;
+    }
+    .share-chip:hover {
+      border-color: var(--color-accent-brand);
+      color: var(--color-accent-brand);
+    }
+    .share-chip svg { width: 14px; height: 14px; }
+    .mosaic-footer .ff-microcopy {
+      font-size: 11px;
+      color: var(--color-mute);
+    }
+
+    /* ============================================================
+       Anonymous landing
+    ============================================================ */
+    .anon-landing {
+      max-width: 360px;
+      margin: 0 auto;
+      text-align: center;
+      padding: 40px 16px;
+    }
+    .anon-landing svg { width: 130px; height: 100px; }
+    .anon-landing .eyebrow {
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-mute);
+      margin-top: 28px;
+    }
+    .anon-landing h1 {
+      font-family: var(--font-serif);
+      font-size: var(--text-display-sm);
+      font-weight: 600;
+      line-height: 1.15;
+      color: var(--color-ink);
+      margin-top: 12px;
+    }
+    .anon-landing .hero-sub {
+      font-size: 14px;
+      line-height: 1.65;
+      color: var(--color-ink-soft);
+      margin-top: 12px;
+    }
+    .anon-landing .cta-row { display: flex; flex-direction: column; gap: 10px; margin-top: 24px; }
+    .btn-kakao {
+      display: block;
+      padding: 12px 22px;
+      background: #fee500;
+      color: #000;
+      border-radius: var(--radius-button);
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    /* ============================================================
+       Mood palette swatches
+    ============================================================ */
+    .mood-strip { display: flex; gap: 12px; flex-wrap: wrap; }
+    .mood-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px 8px 8px;
+      background: var(--color-paper);
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-pill);
+    }
+    .mood-pill .dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+    }
+    .mood-pill .name { font-size: 12px; font-weight: 600; color: var(--color-ink); }
+    .mood-pill .hex { font-family: ui-monospace, monospace; font-size: 10px; color: var(--color-mute); }
+
+    /* ============================================================
+       Footer
+    ============================================================ */
+    .preview-footer {
+      margin-top: 96px;
+      padding-top: 32px;
+      border-top: 1px solid var(--color-line);
+      font-size: 12px;
+      color: var(--color-mute);
+      text-align: center;
+    }
+    .preview-footer code {
+      font-family: ui-monospace, monospace;
+      background: var(--color-paper);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--color-ink-soft);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Hidden SVG defs (Buddy illustrations) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="buddy-happy" viewBox="0 0 180 140">
+        <ellipse cx="90" cy="78" rx="58" ry="46" fill="var(--color-paper)" stroke="var(--color-ink)" stroke-width="3"/>
+        <ellipse cx="55" cy="55" rx="14" ry="20" fill="var(--color-paper)" stroke="var(--color-ink)" stroke-width="3" transform="rotate(-18 55 55)"/>
+        <ellipse cx="125" cy="55" rx="14" ry="20" fill="var(--color-paper)" stroke="var(--color-ink)" stroke-width="3" transform="rotate(18 125 55)"/>
+        <path d="M68 76q4 -6 8 0" stroke="var(--color-ink)" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <path d="M104 76q4 -6 8 0" stroke="var(--color-ink)" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <ellipse cx="90" cy="86" rx="5" ry="3.5" fill="var(--color-ink)"/>
+        <path d="M82 96q8 6 16 0" stroke="var(--color-accent-brand)" stroke-width="3" fill="none" stroke-linecap="round"/>
+      </symbol>
+
+      <symbol id="buddy-resting" viewBox="0 0 180 140">
+        <ellipse cx="90" cy="92" rx="62" ry="32" fill="var(--color-paper)" stroke="var(--color-ink)" stroke-width="3"/>
+        <ellipse cx="48" cy="78" rx="14" ry="18" fill="var(--color-paper)" stroke="var(--color-ink)" stroke-width="3" transform="rotate(-22 48 78)"/>
+        <ellipse cx="132" cy="78" rx="14" ry="18" fill="var(--color-paper)" stroke="var(--color-ink)" stroke-width="3" transform="rotate(22 132 78)"/>
+        <path d="M70 92q3 -4 6 0" stroke="var(--color-ink)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <path d="M104 92q3 -4 6 0" stroke="var(--color-ink)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <ellipse cx="90" cy="100" rx="4.5" ry="3" fill="var(--color-ink)"/>
+        <path d="M84 108q6 4 12 0" stroke="var(--color-accent-brand)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      </symbol>
+
+      <symbol id="paw" viewBox="0 0 24 24">
+        <ellipse cx="12" cy="16" rx="5.5" ry="4.5" fill="currentColor"/>
+        <ellipse cx="6" cy="9" rx="2.5" ry="3.2" fill="currentColor"/>
+        <ellipse cx="18" cy="9" rx="2.5" ry="3.2" fill="currentColor"/>
+        <ellipse cx="9" cy="5" rx="2" ry="2.6" fill="currentColor"/>
+        <ellipse cx="15" cy="5" rx="2" ry="2.6" fill="currentColor"/>
+      </symbol>
+
+      <symbol id="share-icon" viewBox="0 0 24 24">
+        <circle cx="18" cy="5" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/>
+        <circle cx="6" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/>
+        <circle cx="18" cy="19" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/>
+        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <div class="preview-shell">
+    <!-- ============================================================
+         HEADER
+    ============================================================ -->
+    <header class="preview-header">
+      <div>
+        <p class="meta">design preview · v0.3</p>
+        <h1>Memory Album</h1>
+        <p class="sub">기록 앱이 아니라 <em>반려동물 캐릭터 엔진</em>. 살아있는 사진앨범 위에 강아지의 1년이 쌓인다.</p>
+      </div>
+      <button class="theme-toggle" id="themeToggle">🌙 어둡게</button>
+    </header>
+
+    <!-- ============================================================
+         PHASE E — Display Token Ladder
+    ============================================================ -->
+    <section class="phase">
+      <span class="phase-tag">Phase E · Typography</span>
+      <h2>Display tokens</h2>
+      <p class="phase-desc">강아지 이름, milestone 숫자, hero 라벨에 쓰이는 3단계 hero size. Pretendard sans는 H1까지, 이 슬롯부터는 항상 MaruBuri serif로 전환한다.</p>
+
+      <div class="display-ladder">
+        <div class="display-row lg">
+          <span class="label">Display Lg</span>
+          <span class="size">--text-display-lg<br>72 / 72</span>
+          <span class="sample">버디</span>
+        </div>
+        <div class="display-row md">
+          <span class="label">Display Md</span>
+          <span class="size">--text-display-md<br>48 / 52</span>
+          <span class="sample">함께한 시간</span>
+        </div>
+        <div class="display-row sm">
+          <span class="label">Display Sm</span>
+          <span class="size">--text-display-sm<br>32 / 36</span>
+          <span class="sample">내 강아지가 직접 남기는 하루</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         PHASE A — Memory Surface
+    ============================================================ -->
+    <section class="phase">
+      <span class="phase-tag">Phase A · Memory Surface</span>
+      <h2>Paper grain · Mini-thumb mosaic · Empty state</h2>
+      <p class="phase-desc">모든 페이지 배경에 SVG turbulence noise (light 5% · dark 8%)를 깔아 "사진앨범 페이지" 위에 있는 느낌을 만든다. 캘린더는 paw print 1개에서 mini-photo mosaic으로 격상돼 캘린더 = 기억의 모자이크가 된다. 일기 0개 빈 상태에는 BuddyResting hero를 노출한다.</p>
+
+      <div class="demo-grid">
+        <!-- Calendar mosaic -->
+        <div class="demo-card">
+          <div class="demo-label">캘린더 — mini-thumb + mood bar</div>
+          <div class="demo-stage">
+            <div class="calendar-stage">
+              <div class="home-hero" style="padding: 0 0 16px 0;">
+                <p class="eyebrow">monthly note</p>
+                <p class="pet-hero" style="font-size: 24px;">버디</p>
+                <div class="hero-meta">
+                  <span class="day-counter" style="font-size:14px;">372일째</span>
+                  <span class="mbti-chip">ENFP · 햇살 호기심</span>
+                </div>
+              </div>
+              <div class="calendar-grid">
+                <div class="cal-weekday">일</div><div class="cal-weekday">월</div><div class="cal-weekday">화</div><div class="cal-weekday">수</div><div class="cal-weekday">목</div><div class="cal-weekday">금</div><div class="cal-weekday">토</div>
+                <!-- Generate 35 days, sample data -->
+                <div class="cal-day outside">28</div><div class="cal-day outside">29</div><div class="cal-day outside">30</div>
+                <div class="cal-day">1</div>
+                <div class="cal-day with-photo"><img src="https://picsum.photos/seed/dog1/120/120" alt=""/><span class="day-num">2</span><span class="mood-bar" style="background: var(--color-mood-bright);"></span></div>
+                <div class="cal-day">3</div>
+                <div class="cal-day with-photo"><img src="https://picsum.photos/seed/dog2/120/120" alt=""/><span class="day-num">4</span><span class="mood-bar" style="background: var(--color-mood-calm);"></span></div>
+                <div class="cal-day">5</div><div class="cal-day">6</div>
+                <div class="cal-day with-photo"><img src="https://picsum.photos/seed/dog3/120/120" alt=""/><span class="day-num">7</span><span class="mood-bar" style="background: var(--color-mood-curious);"></span></div>
+                <div class="cal-day">8</div>
+                <div class="cal-day with-photo"><img src="https://picsum.photos/seed/dog4/120/120" alt=""/><span class="day-num">9</span><span class="mood-bar" style="background: var(--color-mood-tired);"></span></div>
+                <div class="cal-day">10</div><div class="cal-day">11</div>
+                <div class="cal-day with-photo"><img src="https://picsum.photos/seed/dog5/120/120" alt=""/><span class="day-num">12</span><span class="mood-bar" style="background: var(--color-mood-bright);"></span></div>
+                <div class="cal-day">13</div>
+                <div class="cal-day with-photo"><img src="https://picsum.photos/seed/dog6/120/120" alt=""/><span class="day-num">14</span><span class="mood-bar" style="background: var(--color-mood-grumpy);"></span></div>
+                <div class="cal-day with-photo"><img src="https://picsum.photos/seed/dog7/120/120" alt=""/><span class="day-num">15</span><span class="mood-bar" style="background: var(--color-mood-calm);"></span></div>
+                <div class="cal-day today">16</div><div class="cal-day">17</div><div class="cal-day">18</div>
+                <div class="cal-day with-photo"><img src="https://picsum.photos/seed/dog8/120/120" alt=""/><span class="day-num">19</span><span class="mood-bar" style="background: var(--color-mood-curious);"></span></div>
+                <div class="cal-day">20</div><div class="cal-day">21</div><div class="cal-day">22</div>
+                <div class="cal-day with-photo"><img src="https://picsum.photos/seed/dog9/120/120" alt=""/><span class="day-num">23</span><span class="mood-bar" style="background: var(--color-mood-lonely);"></span></div>
+                <div class="cal-day">24</div><div class="cal-day">25</div><div class="cal-day">26</div>
+                <div class="cal-day with-photo"><img src="https://picsum.photos/seed/dog10/120/120" alt=""/><span class="day-num">27</span><span class="mood-bar" style="background: var(--color-mood-bright);"></span></div>
+                <div class="cal-day">28</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty state -->
+        <div class="demo-card">
+          <div class="demo-label">홈 빈 상태 (일기 0개)</div>
+          <div class="demo-stage" style="display:flex; align-items:center; justify-content:center; min-height:340px;">
+            <div class="empty-state">
+              <svg class="illust" aria-hidden="true"><use href="#buddy-resting"/></svg>
+              <h3>버디의 첫 페이지를 채워볼까?</h3>
+              <p>사진 한 장이면 buddy가 오늘을<br>직접 적어줘요.</p>
+              <button class="btn-primary">첫 기록 남기기</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         PHASE B — Signature Ritual
+    ============================================================ -->
+    <section class="phase">
+      <span class="phase-tag">Phase B · Signature Ritual</span>
+      <h2>2.8s ShutterReveal · Sheet drop · Day N count-up</h2>
+      <p class="phase-desc">첫 일기 생성 모먼트를 1.4초 → 2.8초 의식으로 격상. 셔터 (0.5s) → 폴라로이드 떨어짐 (1.0s) → 강아지 이름 serif reveal (0.4s) → hold (0.5s) → 페이지 이동. 신규 keyframe 0개 — 기존 <code>shutter-flash</code>·<code>polaroid-drop</code>·<code>soft-fade</code>를 staggered delay로 재구성한다.</p>
+
+      <div class="demo-grid">
+        <!-- Shutter Reveal -->
+        <div class="demo-card">
+          <div class="demo-label">ShutterReveal — 첫 일기 생성 의식</div>
+          <div class="demo-stage shutter-stage" id="shutterStage">
+            <div class="flash"></div>
+            <div class="stage-polaroid polaroid">
+              <div class="photo">
+                <img src="https://picsum.photos/seed/shutter/240/300" alt=""/>
+              </div>
+              <div class="caption">
+                <span class="date">5/3 · 맑음</span>
+                <span class="pet-name">버디</span>
+              </div>
+            </div>
+            <div class="stage-name">버디</div>
+            <button class="play-btn" id="playShutter">▶ 시퀀스 재생</button>
+          </div>
+        </div>
+
+        <!-- Count-up -->
+        <div class="demo-card">
+          <div class="demo-label">Day N CountUp — 800ms ease-out</div>
+          <div class="demo-stage" style="display:flex; align-items:center; justify-content:center; flex-direction:column; gap:24px;">
+            <div class="count-up-block">
+              <div class="num"><span id="countUp">0</span>일째</div>
+              <div class="label">함께한 날</div>
+            </div>
+            <button class="btn-primary" id="playCount" style="padding:8px 16px; font-size:13px;">다시 카운트</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         PHASE C — Monumental Presence
+    ============================================================ -->
+    <section class="phase">
+      <span class="phase-tag">Phase C · Monumental Presence</span>
+      <h2>홈 hero · App header · 강아지 패스포트</h2>
+      <p class="phase-desc">강아지 이름·Day N·MBTI를 sub-line이 아닌 hero로 격상. 4곳 (홈 헤더, 앱 헤더, 공개 프로필, 패스포트)에서 강아지 정체성을 1초 안에 전달한다.</p>
+
+      <div class="demo-grid">
+        <!-- App header -->
+        <div class="demo-card">
+          <div class="demo-label">App header — BuddyHappy + paper chip</div>
+          <div class="demo-stage">
+            <div class="app-header">
+              <a href="#" class="logo">
+                <svg aria-hidden="true"><use href="#buddy-happy"/></svg>
+                <span>buddy-note</span>
+              </a>
+              <div class="right">
+                <a href="#" class="pet-chip">버디</a>
+                <span class="signout">로그아웃</span>
+              </div>
+            </div>
+            <p style="margin-top:24px; font-size:12px; color:var(--color-mute); line-height:1.65;">로고 자리에 BuddyHappy 16×16 + wordmark, pet name link는 paper pill chip + serif. 강아지가 항상 옆에 있는 느낌.</p>
+          </div>
+        </div>
+
+        <!-- Home hero -->
+        <div class="demo-card">
+          <div class="demo-label">홈 헤더 — 3-row hero</div>
+          <div class="demo-stage" style="padding:36px 28px;">
+            <div class="home-hero" style="padding:0;">
+              <p class="eyebrow">monthly note</p>
+              <h1 class="pet-hero">버디</h1>
+              <div class="hero-meta">
+                <span class="day-counter">372일째</span>
+                <span class="mbti-chip">ENFP · 햇살 호기심</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Passport card -->
+        <div class="demo-card" style="grid-column: span 2;">
+          <div class="demo-label">/pet — 강아지 패스포트</div>
+          <div class="demo-stage" style="padding:48px 24px; min-height:560px;">
+            <div class="passport">
+              <div class="stamp-row">
+                <span class="stamp">passport · buddy</span>
+                <span class="public-tag">public</span>
+              </div>
+              <div class="pp-photo">
+                <img src="https://picsum.photos/seed/passport/400/400" alt=""/>
+              </div>
+              <h2 class="pp-name">버디</h2>
+              <p class="pp-mbti">ENFP <span>· 햇살 호기심</span></p>
+              <dl class="pp-meta">
+                <div>
+                  <dt>함께한 날</dt>
+                  <dd>372일째</dd>
+                </div>
+                <div>
+                  <dt>호출명</dt>
+                  <dd>@buddy</dd>
+                </div>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         PHASE D — Onboarding Ritual
+    ============================================================ -->
+    <section class="phase">
+      <span class="phase-tag">Phase D · Onboarding Ritual</span>
+      <h2>4-slot polaroid deck · Persona reveal</h2>
+      <p class="phase-desc">progress bar → 4장 mini-polaroid가 채워지는 deck-builder 시퀀스. 답할수록 슬롯이 사진 (질문 번호 + B/A stamp)으로 채워진다. 마지막 confirm step에서 4장 fan-out + 강아지 이름 serif reveal — onboarding의 끝 = 첫 magic moment.</p>
+
+      <div class="demo-grid">
+        <!-- Question card with slots -->
+        <div class="demo-card">
+          <div class="demo-label">질문 카드 — 4-slot progress</div>
+          <div class="demo-stage" style="padding:32px 16px; min-height: 480px;">
+            <div class="progress-slots">
+              <div class="slot tilt-1">A</div>
+              <div class="slot tilt-2">B</div>
+              <div class="slot tilt-3 current"></div>
+              <div class="slot tilt-4 empty"></div>
+            </div>
+            <div class="question-card">
+              <p class="qnum">질문 3 / 4</p>
+              <h2 class="qhead">버디는 새로운 사람을 만났을 때 어떤가요?</h2>
+              <p class="qprompt">두 가지 중 더 가까운 쪽을 골라줘.</p>
+              <div class="options">
+                <div class="option checked">
+                  <span class="key-dot">A</span>
+                  <span class="opt-label">바로 다가가서 냄새 맡고 인사한다.</span>
+                </div>
+                <div class="option">
+                  <span class="key-dot">B</span>
+                  <span class="opt-label">먼저 거리를 두고 관찰부터 한다.</span>
+                </div>
+              </div>
+              <p class="kbd-hint">키보드 <kbd>A</kbd> 또는 <kbd>B</kbd>로 빠르게 선택.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Persona reveal -->
+        <div class="demo-card">
+          <div class="demo-label">PersonaReveal — 4장 fan + 이름 + MBTI</div>
+          <div class="demo-stage" style="min-height:480px; position:relative;">
+            <div class="reveal-stage" id="revealStage">
+              <div class="fan-wrap">
+                <div class="fan-card" style="transform: translate(calc(-50% - 36px), -50%) rotate(-10deg);">
+                  <div class="fan-photo"><span class="fan-key">A</span></div>
+                </div>
+                <div class="fan-card" style="transform: translate(calc(-50% - 12px), -50%) rotate(-4deg);">
+                  <div class="fan-photo"><span class="fan-key">B</span></div>
+                </div>
+                <div class="fan-card" style="transform: translate(calc(-50% + 12px), -50%) rotate(4deg);">
+                  <div class="fan-photo"><span class="fan-key">A</span></div>
+                </div>
+                <div class="fan-card" style="transform: translate(calc(-50% + 36px), -50%) rotate(10deg);">
+                  <div class="fan-photo"><span class="fan-key">A</span></div>
+                </div>
+              </div>
+              <div class="reveal-name">버디</div>
+              <div class="reveal-mbti">
+                <p class="code">ENFP</p>
+                <p class="label">햇살 호기심</p>
+              </div>
+            </div>
+            <button class="play-btn" id="playReveal">▶ 시퀀스 재생</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         PHASE F — Public Profile (Mosaic + Footer)
+    ============================================================ -->
+    <section class="phase">
+      <span class="phase-tag">Phase F · Public profile</span>
+      <h2>Hero · Mosaic · Emotion footer</h2>
+      <p class="phase-desc">바이럴 자산. ProfileHero의 stacked polaroid fan + display-lg serif 이름. 본문은 generic 2-col grid → 6-col mosaic으로 변모 (nth 3,7,11번째 wide span + 회전 변주). 페이지 하단에 감정 footer chip ("OOO를 더 보고 싶다면").</p>
+
+      <div class="demo-card" style="padding:32px;">
+        <div class="public-hero">
+          <div class="left">
+            <p class="eyebrow">buddy-note</p>
+            <h1 class="name-hero">버디</h1>
+            <p class="mbti-line">ENFP · 햇살 호기심</p>
+            <div class="stats">
+              <div class="public-stat">
+                <p class="ps-label">함께한 날</p>
+                <p class="ps-value">372일째</p>
+              </div>
+              <div class="public-stat">
+                <p class="ps-label">폴라로이드</p>
+                <p class="ps-value">68장</p>
+              </div>
+            </div>
+          </div>
+          <div class="right">
+            <div class="stack-polaroid"><div class="photo-area"><img src="https://picsum.photos/seed/hero1/300/300" alt=""/></div></div>
+            <div class="stack-polaroid"><div class="photo-area"><img src="https://picsum.photos/seed/hero2/300/300" alt=""/></div></div>
+            <div class="stack-polaroid"><div class="photo-area"><img src="https://picsum.photos/seed/hero3/300/300" alt=""/></div></div>
+          </div>
+        </div>
+
+        <div class="mosaic">
+          <!-- 12 cards: 0,1,2(wide),3,4,5,6(wide),7,8,9,10(wide),11 -->
+          <div class="span-3"><div class="public-card"><div class="pc-photo"><img src="https://picsum.photos/seed/m1/400/500" alt=""/></div><h3 class="pc-title">햇살이 좋아서 한참 누워 있었다</h3><p class="pc-body">오늘은 햇살이 너무 좋아서 30분이나 마당에 엎드려 있었어. 햇살에 등이 데워지는 게 진짜 좋더라.</p><p class="pc-date">5월 1일</p></div></div>
+          <div class="span-3 tilt-a"><div class="public-card"><div class="pc-photo"><img src="https://picsum.photos/seed/m2/400/500" alt=""/></div><h3 class="pc-title">새 친구를 만났다</h3><p class="pc-body">산책하다가 골든이 한 마리 만났는데 처음엔 좀 무서웠지만 곧 친해졌어. 또 만났으면 좋겠다.</p><p class="pc-date">4월 30일</p></div></div>
+          <div class="span-6"><div class="public-card wide"><div class="pc-photo"><img src="https://picsum.photos/seed/m3/600/480" alt=""/></div><h3 class="pc-title">바다를 처음 봤다 — 처음에는 무서웠는데</h3><p class="pc-body">파도 소리가 정말 컸어. 처음엔 뒤로 도망쳤는데, 엄마가 같이 있어줘서 결국 발끝까지 담갔어. 모래는 발에 묻으면 좀 가렵더라.</p><p class="pc-date">4월 28일</p></div></div>
+          <div class="span-3"><div class="public-card"><div class="pc-photo"><img src="https://picsum.photos/seed/m4/400/500" alt=""/></div><h3 class="pc-title">간식 시간을 까먹었다</h3><p class="pc-body">너무 졸려서 간식 시간을 그냥 흘려보냈어. 일어나니까 이미 저녁이었지 뭐야.</p><p class="pc-date">4월 27일</p></div></div>
+          <div class="span-3 tilt-b"><div class="public-card"><div class="pc-photo"><img src="https://picsum.photos/seed/m5/400/500" alt=""/></div><h3 class="pc-title">비 오는 날의 산책</h3><p class="pc-body">우비를 입고 나갔는데 의외로 비 맞는 게 시원했어. 발이 다 젖긴 했지만.</p><p class="pc-date">4월 26일</p></div></div>
+          <div class="span-3"><div class="public-card"><div class="pc-photo"><img src="https://picsum.photos/seed/m6/400/500" alt=""/></div><h3 class="pc-title">소파 위가 제일 좋아</h3><p class="pc-body">사실 침대보다 소파가 더 좋아. 햇볕이 잘 드는 자리거든.</p><p class="pc-date">4월 25일</p></div></div>
+          <div class="span-6"><div class="public-card wide"><div class="pc-photo"><img src="https://picsum.photos/seed/m7/600/480" alt=""/></div><h3 class="pc-title">공원에서 만난 친구들과 한참 뛰어다닌 날</h3><p class="pc-body">동네 공원에 친구들이 다 모여있어서 거의 한 시간을 뛰어다녔어. 너무 신나서 헐떡거렸는데 엄마가 물 챙겨줘서 살았다.</p><p class="pc-date">4월 23일</p></div></div>
+          <div class="span-3 tilt-a"><div class="public-card"><div class="pc-photo"><img src="https://picsum.photos/seed/m8/400/500" alt=""/></div><h3 class="pc-title">새 장난감</h3><p class="pc-body">엄마가 새 인형을 사줬어. 처음엔 의심했는데 이제는 떼어놓을 수가 없어.</p><p class="pc-date">4월 21일</p></div></div>
+          <div class="span-3"><div class="public-card"><div class="pc-photo"><img src="https://picsum.photos/seed/m9/400/500" alt=""/></div><h3 class="pc-title">오늘은 좀 외로웠다</h3><p class="pc-body">엄마가 늦게 들어와서 종일 혼자였어. 그래도 잘 기다렸으니까 칭찬해줘.</p><p class="pc-date">4월 19일</p></div></div>
+          <div class="span-3 tilt-b"><div class="public-card"><div class="pc-photo"><img src="https://picsum.photos/seed/m10/400/500" alt=""/></div><h3 class="pc-title">목욕한 날</h3><p class="pc-body">목욕은 사실 별로지만 끝나고 수건으로 닦아주는 시간은 좋아.</p><p class="pc-date">4월 18일</p></div></div>
+          <div class="span-6"><div class="public-card wide"><div class="pc-photo"><img src="https://picsum.photos/seed/m11/600/480" alt=""/></div><h3 class="pc-title">엄마가 늦게까지 야근한 어떤 화요일</h3><p class="pc-body">소파에 앉아서 한참 기다렸어. 자다 깨다 자다 깨다 했는데, 결국 엄마 발소리에 깨서 꼬리를 흔들었지.</p><p class="pc-date">4월 16일</p></div></div>
+          <div class="span-3"><div class="public-card"><div class="pc-photo"><img src="https://picsum.photos/seed/m12/400/500" alt=""/></div><h3 class="pc-title">간식을 두 번 먹었다</h3><p class="pc-body">오늘은 좀 운이 좋았다. 엄마가 깜빡하고 두 번 줬어. 비밀이야.</p><p class="pc-date">4월 14일</p></div></div>
+        </div>
+
+        <footer class="mosaic-footer">
+          <p class="ff-title">버디를 더 보고 싶다면</p>
+          <a href="#" class="share-chip">
+            <svg aria-hidden="true"><use href="#share-icon"/></svg>
+            공유하기
+          </a>
+          <p class="ff-microcopy">buddy-note에서 만들었어요</p>
+        </footer>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         Anonymous Landing
+    ============================================================ -->
+    <section class="phase">
+      <span class="phase-tag">Bonus · Anonymous Landing</span>
+      <h2>비로그인 hero</h2>
+      <p class="phase-desc">비로그인 진입 화면. BuddyHappy + display-sm serif hero + 권유형 카피. 카카오 시작하기는 브랜드 색 강제 (#FEE500/#000).</p>
+      <div class="demo-card">
+        <div class="demo-stage" style="padding:24px;">
+          <div class="anon-landing">
+            <svg aria-hidden="true"><use href="#buddy-happy"/></svg>
+            <p class="eyebrow">buddy-note</p>
+            <h1>내 강아지가<br>직접 남기는 하루</h1>
+            <p class="hero-sub">사진 한 장이 버디노트가 되고, 쌓인 기록은 버디의 성격으로 남아요.</p>
+            <div class="cta-row">
+              <a href="#" class="btn-kakao">카카오로 시작하기</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         Mood palette
+    ============================================================ -->
+    <section class="phase">
+      <span class="phase-tag">v0.2 carry-over · Mood palette</span>
+      <h2>6 moods (purple-free)</h2>
+      <p class="phase-desc">캘린더 mini-thumb 하단 4px bar에 사용. grumpy는 purple 회피하고 muted umber/brown으로 표현.</p>
+      <div class="mood-strip">
+        <div class="mood-pill"><span class="dot" style="background:var(--color-mood-bright);"></span><span class="name">bright</span><span class="hex">#e0a83f</span></div>
+        <div class="mood-pill"><span class="dot" style="background:var(--color-mood-calm);"></span><span class="name">calm</span><span class="hex">#6f9f86</span></div>
+        <div class="mood-pill"><span class="dot" style="background:var(--color-mood-tired);"></span><span class="name">tired</span><span class="hex">#9b9489</span></div>
+        <div class="mood-pill"><span class="dot" style="background:var(--color-mood-curious);"></span><span class="name">curious</span><span class="hex">#5f8aa8</span></div>
+        <div class="mood-pill"><span class="dot" style="background:var(--color-mood-grumpy);"></span><span class="name">grumpy</span><span class="hex">#8a6650</span></div>
+        <div class="mood-pill"><span class="dot" style="background:var(--color-mood-lonely);"></span><span class="name">lonely</span><span class="hex">#7f8f9f</span></div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         Color tokens
+    ============================================================ -->
+    <section class="phase">
+      <span class="phase-tag">Tokens · Color</span>
+      <h2>Neutrals + Accent</h2>
+      <p class="phase-desc">테라코타 단일 accent. purple 절대 금지. 모든 색은 <code>var(--color-*)</code> 토큰만 사용 — hardcoded hex 회귀 0건 (Next viewport themeColor 1건 제외).</p>
+      <div class="token-row">
+        <div class="swatch"><div class="chip" style="background:var(--color-paper);"></div><div class="name">paper</div><div class="val">#fafaf5</div></div>
+        <div class="swatch"><div class="chip" style="background:var(--color-bg); border:1px solid var(--color-line);"></div><div class="name">bg</div><div class="val">#ffffff</div></div>
+        <div class="swatch"><div class="chip" style="background:var(--color-ink);"></div><div class="name">ink</div><div class="val">#1a1a1a</div></div>
+        <div class="swatch"><div class="chip" style="background:var(--color-ink-soft);"></div><div class="name">ink-soft</div><div class="val">#3f3f3f</div></div>
+        <div class="swatch"><div class="chip" style="background:var(--color-mute);"></div><div class="name">mute</div><div class="val">#6b7280</div></div>
+        <div class="swatch"><div class="chip" style="background:var(--color-line);"></div><div class="name">line</div><div class="val">#e5e7eb</div></div>
+        <div class="swatch"><div class="chip" style="background:var(--color-accent-brand);"></div><div class="name">accent</div><div class="val">#e07a5f</div></div>
+        <div class="swatch"><div class="chip" style="background:var(--color-accent-brand-soft);"></div><div class="name">accent-soft</div><div class="val">#fde6e0</div></div>
+        <div class="swatch"><div class="chip" style="background:var(--color-success);"></div><div class="name">success</div><div class="val">#4a7c59</div></div>
+        <div class="swatch"><div class="chip" style="background:var(--color-error);"></div><div class="name">error</div><div class="val">#b04a4a</div></div>
+        <div class="swatch"><div class="chip" style="background:var(--color-warn);"></div><div class="name">warn</div><div class="val">#d4a256</div></div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         FOOTER
+    ============================================================ -->
+    <footer class="preview-footer">
+      <p>buddy-note · v0.3 Memory Album · 2026-05-03</p>
+      <p style="margin-top:8px;">코드 SSOT: <code>app/globals.css</code> · 디자인 SSOT: <code>DESIGN.md</code> · 플랜: <code>~/.claude/plans/generic-sparking-knuth.md</code></p>
+    </footer>
+  </div>
+
+  <script>
+    // Theme toggle
+    const toggle = document.getElementById('themeToggle');
+    toggle.addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark');
+      toggle.textContent = document.documentElement.classList.contains('dark') ? '☀ 밝게' : '🌙 어둡게';
+    });
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.documentElement.classList.add('dark');
+      toggle.textContent = '☀ 밝게';
+    }
+
+    // ShutterReveal sequence
+    const stage = document.getElementById('shutterStage');
+    document.getElementById('playShutter').addEventListener('click', () => {
+      stage.classList.remove('run');
+      void stage.offsetWidth; // reflow
+      stage.classList.add('run');
+    });
+
+    // PersonaReveal sequence
+    const reveal = document.getElementById('revealStage');
+    document.getElementById('playReveal').addEventListener('click', () => {
+      reveal.classList.remove('run');
+      void reveal.offsetWidth;
+      reveal.classList.add('run');
+    });
+
+    // Count-up
+    const countEl = document.getElementById('countUp');
+    function runCountUp(to, duration = 800) {
+      const start = performance.now();
+      function tick(now) {
+        const p = Math.min(1, (now - start) / duration);
+        const eased = 1 - Math.pow(1 - p, 3);
+        countEl.textContent = Math.round(eased * to);
+        if (p < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+    document.getElementById('playCount').addEventListener('click', () => runCountUp(372));
+    // Auto-run on load
+    setTimeout(() => runCountUp(372), 600);
+
+    // Auto-play shutter and reveal once on load (after a beat)
+    setTimeout(() => stage.classList.add('run'), 800);
+    setTimeout(() => reveal.classList.add('run'), 1200);
+  </script>
+</body>
+</html>

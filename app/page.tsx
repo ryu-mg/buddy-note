@@ -137,7 +137,7 @@ function AnonymousLanding() {
         <p className="text-[12px] font-medium uppercase tracking-[0.18em] text-[var(--color-mute)]">
           buddy-note
         </p>
-        <h1 className="font-serif text-[34px] font-semibold leading-[1.15] text-[var(--color-ink)]">
+        <h1 className="font-serif text-[var(--text-display-sm)] font-semibold leading-[1.15] text-[var(--color-ink)]">
           내 강아지가
           <br />
           직접 남기는 하루

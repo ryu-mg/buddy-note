@@ -67,7 +67,7 @@ export function WeeklyHome({
             <p className="text-[12px] font-medium uppercase tracking-[0.14em] text-[var(--color-mute)]">
               buddy card
             </p>
-            <h1 className="mt-1 truncate font-serif text-[42px] font-semibold leading-none text-[var(--color-ink)]">
+            <h1 className="mt-1 truncate font-serif text-[var(--text-display-md)] font-semibold leading-none text-[var(--color-ink)]">
               {pet.name}
             </h1>
             {pet.personalityCode && pet.personalityLabel ? (

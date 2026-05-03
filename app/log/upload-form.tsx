@@ -119,7 +119,7 @@ export function UploadForm({
         })
         window.setTimeout(() => {
           router.push(`/diary/${result.diaryId}?arrive=1`)
-        }, 1400)
+        }, 2800)
         return
       }
       setStartedAt(null)
@@ -330,6 +330,7 @@ export function UploadForm({
       {completedDiary ? (
         <ShutterReveal
           title={completedDiary.title}
+          petName={petName}
           imageUrl={completedDiary.imageUrl}
         />
       ) : null}

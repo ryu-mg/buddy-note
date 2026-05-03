@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 
+import { PassportCard } from '@/components/pet/passport-card'
 import { getSignedPhotoUrl } from '@/lib/storage'
 import { createClient } from '@/lib/supabase/server'
 
@@ -18,6 +19,7 @@ type PetOverview = {
   profile_photo_storage_path: string | null
   personality_code: string | null
   personality_label: string | null
+  created_at: string
 }
 
 type PageProps = {
@@ -47,6 +49,7 @@ export default async function PetOverviewPage({ searchParams }: PageProps) {
         'profile_photo_storage_path',
         'personality_code',
         'personality_label',
+        'created_at',
       ].join(', '),
     )
     .eq('user_id', user.id)
@@ -60,27 +63,10 @@ export default async function PetOverviewPage({ searchParams }: PageProps) {
   const photoUrl = pet.profile_photo_storage_path
     ? await getSignedProfilePhotoUrl(pet.profile_photo_storage_path)
     : null
-  const personalityLabel =
-    pet.personality_code && pet.personality_label
-      ? `${pet.personality_code} · ${pet.personality_label}`
-      : '성격 미정'
-  const detailLabel = [pet.breed, personalityLabel].filter(Boolean).join(' · ')
+  const daysSinceCreated = daysSince(pet.created_at)
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-md flex-col bg-[var(--color-bg)] pb-24">
-      <header className="relative flex min-h-16 items-center justify-center border-b border-[var(--color-line)] px-4">
-        <Link
-          href="/"
-          aria-label="홈으로 돌아가기"
-          className="absolute left-2 grid size-11 place-items-center rounded-full text-[26px] leading-none text-[var(--color-ink-soft)] transition-colors hover:text-[var(--color-accent-brand)]"
-        >
-          <ChevronLeft aria-hidden className="size-6" strokeWidth={1.8} />
-        </Link>
-        <h1 className="text-[18px] font-semibold text-[var(--color-ink)]">
-          내 정보
-        </h1>
-      </header>
-
       {photoFailed ? (
         <p
           role="status"
@@ -90,21 +76,16 @@ export default async function PetOverviewPage({ searchParams }: PageProps) {
         </p>
       ) : null}
 
-      <section aria-label="버디 프로필" className="px-4 py-6">
-        <div className="flex items-center gap-4">
-          <ProfileAvatar src={photoUrl} name={pet.name} />
-          <div className="min-w-0 flex-1">
-            <h2 className="truncate text-[20px] font-semibold leading-[1.25] text-[var(--color-ink)]">
-              {pet.name}
-            </h2>
-            <p className="mt-1 font-mono text-[13px] text-[var(--color-mute)]">
-              @{pet.slug}
-            </p>
-            <p className="mt-2 truncate text-[13px] leading-[1.45] text-[var(--color-ink-soft)]">
-              {detailLabel}
-            </p>
-          </div>
-        </div>
+      <section aria-label="버디 프로필" className="px-4 py-8">
+        <PassportCard
+          name={pet.name}
+          slug={pet.slug}
+          personalityCode={pet.personality_code}
+          personalityLabel={pet.personality_label}
+          daysSinceCreated={daysSinceCreated}
+          avatarUrl={photoUrl}
+          isPublic={pet.is_public}
+        />
       </section>
 
       <nav aria-label="마이페이지 메뉴" className="border-t border-[var(--color-line)]">
@@ -127,20 +108,11 @@ async function getSignedProfilePhotoUrl(path: string): Promise<string | null> {
   return 'url' in result ? result.url : null
 }
 
-function ProfileAvatar({ src, name }: { src: string | null; name: string }) {
-  return (
-    <div className="grid size-[74px] shrink-0 place-items-center overflow-hidden rounded-full bg-[var(--color-bg)] ring-1 ring-[var(--color-line)]">
-      {src ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={src} alt={`${name} 대표 사진`} className="size-full object-cover" />
-      ) : (
-        <span aria-hidden className="relative block size-12">
-          <span className="absolute left-1/2 top-0 block size-6 -translate-x-1/2 rounded-full bg-[var(--color-line)]" />
-          <span className="absolute bottom-0 left-1/2 block h-7 w-11 -translate-x-1/2 rounded-t-full bg-[var(--color-line)]" />
-        </span>
-      )}
-    </div>
-  )
+function daysSince(iso: string): number {
+  const start = new Date(iso).getTime()
+  if (Number.isNaN(start)) return 1
+  const diff = Date.now() - start
+  return Math.max(1, Math.floor(diff / 86_400_000) + 1)
 }
 
 function MenuRow({

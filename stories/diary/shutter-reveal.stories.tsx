@@ -9,6 +9,7 @@ const meta = {
   tags: ['autodocs'],
   args: {
     title: '하천길에서 오리랑 눈 마주쳤다',
+    petName: '코코',
     imageUrl: null,
   },
 } satisfies Meta<typeof ShutterReveal>

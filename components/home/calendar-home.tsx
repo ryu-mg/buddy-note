@@ -5,7 +5,9 @@ import Link from 'next/link'
 import { useMemo, useState } from 'react'
 
 import { UploadForm } from '@/app/log/upload-form'
+import { EmptyState } from '@/components/empty/empty-state'
 import { PawPrint } from '@/components/icons/paw-print'
+import { CountUp } from '@/lib/motion/count-up'
 import { MOOD_CSS_VAR } from '@/lib/mood'
 import type { DiaryMood } from '@/types/database'
 
@@ -135,6 +137,21 @@ export function CalendarHome({
   const selectedIsFuture = selectedKey ? selectedKey > todayKey : false
   const dayN = daysSince(pet.createdAt)
 
+  // A3 — 일기 0개 상태: EmptyState hero로 전환
+  if (diaries.length === 0) {
+    return (
+      <main className="mx-auto flex min-h-screen w-full max-w-md flex-col gap-8 px-4 py-12">
+        <EmptyState
+          illustration="resting"
+          tone="warm"
+          title={`${pet.name}의 첫 페이지를 채워볼까?`}
+          hint="사진 한 장이면 buddy가 오늘을 직접 적어줘."
+          cta={{ label: '첫 기록 남기기', href: '/log' }}
+        />
+      </main>
+    )
+  }
+
   function moveMonth(delta: number) {
     setActiveMonth((current) => {
       const next = new Date(current)
@@ -146,19 +163,28 @@ export function CalendarHome({
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col gap-6 px-4 pb-28 pt-8 sm:px-6 md:pt-10">
-      <header className="flex flex-col gap-3">
-        <p className="text-[12px] font-medium uppercase tracking-[0.14em] text-[var(--color-mute)]">
+      <header className="flex flex-col gap-2">
+        <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-mute)]">
           monthly note
         </p>
-        <div className="flex flex-col gap-1">
-          <h1 className="text-[24px] font-semibold leading-[1.25] text-[var(--color-ink)]">
-            {pet.name}의 한 달
-          </h1>
-          <p className="text-[13px] leading-[1.5] text-[var(--color-mute)]">
-            {pet.personalityCode && pet.personalityLabel
-              ? `${dayN}일째 · ${pet.personalityCode} · ${pet.personalityLabel}`
-              : '하루에 한 장씩, 기억을 차곡차곡 남겨요.'}
-          </p>
+        <h1 className="font-serif text-[var(--text-display-md)] font-semibold leading-[1.05] text-[var(--color-ink)]">
+          {pet.name}
+        </h1>
+        <div className="flex items-baseline gap-3">
+          <CountUp
+            to={dayN}
+            suffix="일째"
+            className="font-serif text-[20px] font-semibold text-[var(--color-accent-brand)]"
+          />
+          {pet.personalityCode && pet.personalityLabel ? (
+            <span className="rounded-[var(--radius-pill)] bg-[var(--color-accent-brand-soft)] px-2.5 py-0.5 text-[11px] font-semibold tracking-[0.06em] text-[var(--color-accent-brand)]">
+              {pet.personalityCode} · {pet.personalityLabel}
+            </span>
+          ) : (
+            <span className="text-[12px] text-[var(--color-mute)]">
+              하루에 한 장씩, 기억을 남겨요.
+            </span>
+          )}
         </div>
       </header>
 
@@ -197,6 +223,7 @@ export function CalendarHome({
           ))}
           {days.map((day) => {
             const selected = selectedKey === day.key
+            const hasThumb = Boolean(day.diary?.imageUrl)
             return (
               <button
                 key={day.key}
@@ -209,7 +236,7 @@ export function CalendarHome({
                 aria-pressed={selected}
                 aria-label={`${longDateLabel(day.key)}${day.diary ? ', 기록 있음' : ''}`}
                 className={[
-                  'relative flex aspect-square min-h-12 flex-col items-center justify-center rounded-[var(--radius-input)] border text-[14px] transition-colors',
+                  'relative flex aspect-square min-h-12 overflow-hidden flex-col items-center justify-center rounded-[var(--radius-input)] border text-[14px] transition-colors',
                   day.inMonth
                     ? 'border-[var(--color-line)] bg-[var(--color-bg)] text-[var(--color-ink)]'
                     : 'border-transparent bg-transparent text-[var(--color-line)]',
@@ -217,24 +244,63 @@ export function CalendarHome({
                     ? 'cursor-not-allowed opacity-35'
                     : 'hover:border-[var(--color-accent-brand)]',
                   selected
-                    ? 'border-[var(--color-accent-brand)] bg-[var(--color-accent-brand-soft)]'
+                    ? 'ring-2 ring-[var(--color-accent-brand)] ring-offset-1'
                     : '',
                   day.isToday && !selected
                     ? 'ring-1 ring-[var(--color-accent-brand)]'
                     : '',
                 ].join(' ')}
               >
-                <span>{day.day}</span>
-                {day.diary ? (
-                  <PawPrint
-                    className="mt-1 h-3.5 w-3.5"
-                    color={
-                      day.diary.mood
-                        ? MOOD_CSS_VAR[day.diary.mood]
-                        : 'var(--color-accent-brand)'
-                    }
-                  />
-                ) : null}
+                {/* A2 — mini-thumb: 일기 + 사진이 있으면 꽉 채운 이미지 */}
+                {hasThumb && day.diary?.imageUrl ? (
+                  <>
+                    <Image
+                      src={day.diary.imageUrl}
+                      alt=""
+                      fill
+                      sizes="(max-width: 640px) 14vw, 80px"
+                      className="absolute inset-0 object-cover"
+                    />
+                    {/* day number — 흰색 chip */}
+                    <span className="absolute left-1 top-1 z-10 rounded-[2px] bg-white/90 px-1 text-[10px] font-semibold leading-tight text-[var(--color-ink)]">
+                      {day.day}
+                    </span>
+                    {/* 하단 mood bar */}
+                    <span
+                      className="absolute bottom-0 left-0 right-0 z-10 h-1"
+                      style={{
+                        backgroundColor: day.diary.mood
+                          ? MOOD_CSS_VAR[day.diary.mood]
+                          : 'var(--color-accent-brand)',
+                      }}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <span>{day.day}</span>
+                    {day.diary ? (
+                      <>
+                        <PawPrint
+                          className="mt-1 h-3.5 w-3.5"
+                          color={
+                            day.diary.mood
+                              ? MOOD_CSS_VAR[day.diary.mood]
+                              : 'var(--color-accent-brand)'
+                          }
+                        />
+                        {/* 하단 mood bar (이미지 없는 일기도) */}
+                        <span
+                          className="absolute bottom-0 left-0 right-0 h-1"
+                          style={{
+                            backgroundColor: day.diary.mood
+                              ? MOOD_CSS_VAR[day.diary.mood]
+                              : 'var(--color-accent-brand)',
+                          }}
+                        />
+                      </>
+                    ) : null}
+                  </>
+                )}
               </button>
             )
           })}
@@ -272,11 +338,11 @@ function CalendarSheet({
       role="dialog"
       aria-modal="true"
       aria-labelledby="calendar-sheet-title"
-      className="fixed inset-0 z-50 flex items-end justify-center bg-[var(--color-ink)]/20 px-3 pb-3"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-[var(--color-ink)]/20 px-3 pb-3 motion-safe:animate-[soft-fade_200ms_var(--ease-soft-out)_forwards] motion-reduce:opacity-100"
       onClick={onClose}
     >
       <section
-        className="max-h-[86vh] w-full max-w-md overflow-y-auto rounded-t-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-bg)] px-4 pb-6 pt-4 shadow-[var(--shadow-polaroid)]"
+        className="max-h-[86vh] w-full max-w-md overflow-y-auto rounded-t-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-bg)] px-4 pb-6 pt-4 shadow-[var(--shadow-polaroid)] motion-safe:animate-[polaroid-drop_300ms_var(--ease-soft-out)_forwards] motion-reduce:animate-[soft-fade_200ms_forwards]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mx-auto mb-4 h-1 w-10 rounded-[var(--radius-pill)] bg-[var(--color-line)]" />

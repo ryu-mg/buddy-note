@@ -27,7 +27,7 @@ export function ProfileHero({
         <p className="text-[12px] font-medium uppercase tracking-[0.18em] text-[var(--color-mute)]">
           buddy-note
         </p>
-        <h1 className="mt-3 font-serif text-[58px] font-semibold leading-none text-[var(--color-ink)] sm:text-[72px]">
+        <h1 className="mt-3 font-serif text-[var(--text-display-md)] font-semibold leading-none text-[var(--color-ink)] sm:text-[var(--text-display-lg)]">
           {name}
         </h1>
         {personalityCode && personalityLabel ? (

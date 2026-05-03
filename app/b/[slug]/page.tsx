@@ -128,6 +128,36 @@ export async function generateMetadata({
   }
 }
 
+/** 한국어 목적격 조사 — 받침 있으면 '을', 없으면 '를' */
+function objectMarker(name: string): string {
+  if (!name) return ''
+  const code = name.charCodeAt(name.length - 1) - 0xac00
+  if (code < 0 || code > 11171) return '을(를)' // 한글 외
+  const hasJongseong = code % 28 !== 0
+  return hasJongseong ? '을' : '를'
+}
+
+function ShareIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden
+    >
+      <circle cx="18" cy="5" r="3" />
+      <circle cx="6" cy="12" r="3" />
+      <circle cx="18" cy="19" r="3" />
+      <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+      <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+    </svg>
+  )
+}
+
 function daysSince(iso: string): number {
   try {
     const start = new Date(iso).getTime()
@@ -151,6 +181,13 @@ export default async function PublicProfilePage({ params }: PageProps) {
   const diaries = await fetchPublicDiaries(pet.id)
   const days = daysSince(pet.created_at)
 
+  const shareUrl =
+    process.env.NEXT_PUBLIC_SITE_URL
+      ? `${process.env.NEXT_PUBLIC_SITE_URL}/b/${slug}`
+      : `/b/${slug}`
+
+  const marker = objectMarker(pet.name)
+
   return (
     <main className="public-profile-surface mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-12 px-4 pb-16 pt-10 sm:px-6">
       <ProfileHero
@@ -162,7 +199,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
         images={diaries.map((d) => d.image_url_45 ?? d.image_url_11)}
       />
 
-      {/* Feed */}
+      {/* Feed — mosaic grid */}
       {diaries.length === 0 ? (
         <EmptyState
           title={`${pet.name} 아직 첫 일기를 준비 중이에요`}
@@ -173,21 +210,59 @@ export default async function PublicProfilePage({ params }: PageProps) {
         />
       ) : (
         <section
-          aria-label={`${pet.name}의 일기 모음`}
-          className="grid grid-cols-1 gap-12 md:grid-cols-2 md:gap-x-10 md:gap-y-16"
+          aria-label={`${pet.name} 폴라로이드`}
+          className="grid grid-cols-1 gap-y-14 md:grid-cols-6 md:gap-x-8 md:gap-y-20"
         >
-          {diaries.map((d) => (
-            <PublicDiaryCard
-              key={d.id}
-              title={d.title}
-              body={d.body}
-              imageUrl={d.image_url_45 ?? d.image_url_11}
-              createdAt={d.created_at}
-              petName={pet.name}
-            />
-          ))}
+          {diaries.map((d, i) => {
+            // 0-indexed: 2, 6, 10 → wide (col-span-6)
+            const wide = i % 4 === 2
+            // 기울임 변주 (wrapper에만, 모바일 제외)
+            const tiltExtra =
+              i % 5 === 1
+                ? 'md:rotate-[1.5deg]'
+                : i % 5 === 4
+                  ? 'md:-rotate-[1deg]'
+                  : ''
+            return (
+              <div
+                key={d.id}
+                className={[
+                  'flex justify-center',
+                  wide ? 'md:col-span-6' : 'md:col-span-3',
+                  tiltExtra,
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+              >
+                <PublicDiaryCard
+                  title={d.title}
+                  body={d.body}
+                  imageUrl={d.image_url_45 ?? d.image_url_11}
+                  createdAt={d.created_at}
+                  petName={pet.name}
+                  wide={wide}
+                />
+              </div>
+            )
+          })}
         </section>
       )}
+
+      {/* 감정 footer chip */}
+      <footer className="mt-20 flex flex-col items-center gap-3 border-t border-[var(--color-line)] pt-10 text-center">
+        <p className="font-serif text-[20px] font-semibold text-[var(--color-ink-soft)]">
+          {pet.name}{marker} 더 보고 싶다면
+        </p>
+        <a
+          href={shareUrl}
+          className="inline-flex items-center gap-2 rounded-[var(--radius-pill)] border border-[var(--color-line)] bg-[var(--color-paper)] px-4 py-2 text-[13px] font-semibold text-[var(--color-ink)] transition-colors hover:border-[var(--color-accent-brand)] hover:text-[var(--color-accent-brand)]"
+          aria-label={`${pet.name} 프로필 공유하기`}
+        >
+          <ShareIcon className="h-4 w-4" />
+          공유하기
+        </a>
+        <p className="mt-2 text-[11px] text-[var(--color-mute)]">buddy-note에서 만들었어요</p>
+      </footer>
 
       {/* Soft CTA — showcase, not hard sell */}
       <section className="mx-auto flex flex-col items-center gap-3 pt-4 text-center">
@@ -202,7 +277,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
         </Link>
       </section>
 
-      {/* Footer */}
+      {/* Site footer */}
       <footer className="flex justify-center pt-6">
         <Link
           href="/"

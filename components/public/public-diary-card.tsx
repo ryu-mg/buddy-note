@@ -6,6 +6,7 @@ type PublicDiaryCardProps = {
   imageUrl: string | null
   createdAt: string
   petName: string
+  wide?: boolean
 }
 
 function formatDate(iso: string): string {
@@ -38,13 +39,17 @@ export function PublicDiaryCard({
   imageUrl,
   createdAt,
   petName,
+  wide = false,
 }: PublicDiaryCardProps) {
   const dateLabel = formatDate(createdAt)
 
   return (
     <article
       aria-labelledby={`pdc-title-${createdAt}`}
-      className="relative mx-auto w-full max-w-[420px] bg-[var(--color-paper)] px-6 pb-11 pt-6 shadow-[var(--shadow-card)] ring-1 ring-[var(--color-line)] motion-safe:-rotate-[1.2deg] motion-reduce:rotate-0"
+      className={[
+        'relative mx-auto w-full bg-[var(--color-paper)] px-6 pb-11 pt-6 shadow-[var(--shadow-card)] ring-1 ring-[var(--color-line)] motion-safe:-rotate-[1.2deg] motion-reduce:rotate-0',
+        wide ? 'max-w-[640px]' : 'max-w-[420px]',
+      ].join(' ')}
     >
       <div className="flex items-baseline justify-between gap-3">
         <p className="text-[12px] font-medium uppercase tracking-[0.12em] text-[var(--color-mute)]">
@@ -60,13 +65,13 @@ export function PublicDiaryCard({
 
       {imageUrl ? (
         <div className="mt-4 overflow-hidden bg-[var(--color-line)]">
-          {/* DESIGN §8 — 카드 내부 4:5 ratio */}
-          <div className="relative aspect-[4/5] w-full">
+          {/* wide: 5:4 가로 spread, 일반: 4:5 세로 */}
+          <div className={['relative w-full', wide ? 'aspect-[5/4]' : 'aspect-[4/5]'].join(' ')}>
             <Image
               src={imageUrl}
               alt={`${petName}의 일기 사진`}
               fill
-              sizes="(max-width: 640px) 100vw, 420px"
+              sizes={wide ? '(max-width: 640px) 100vw, 640px' : '(max-width: 640px) 100vw, 420px'}
               className="object-cover"
             />
           </div>

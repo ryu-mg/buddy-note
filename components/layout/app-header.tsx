@@ -1,5 +1,6 @@
 import Link from 'next/link'
 
+import { BuddyHappy } from '@/components/illustrations/buddy-happy'
 import { createClient } from '@/lib/supabase/server'
 
 import { SignoutButton } from './signout-button'
@@ -53,7 +54,7 @@ export async function AppHeader() {
           {pet?.name ? (
             <Link
               href="/pet"
-              className="text-[13px] text-[var(--color-ink-soft)] transition-colors hover:text-[var(--color-accent-brand)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent-brand)] focus-visible:ring-offset-2"
+              className="rounded-[var(--radius-pill)] border border-[var(--color-line)] bg-[var(--color-paper)] px-3 py-1 font-serif text-[13px] font-semibold text-[var(--color-ink)] transition-colors hover:border-[var(--color-accent-brand)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent-brand)] focus-visible:ring-offset-2"
               aria-label={`현재 반려동물: ${pet.name} — 프로필 설정`}
             >
               {pet.name}
@@ -72,9 +73,10 @@ function HeaderShell({ right }: { right: React.ReactNode }) {
       <div className="mx-auto flex h-14 w-full max-w-5xl items-center justify-between px-4 md:h-16 md:px-6">
         <Link
           href="/"
-          className="text-[15px] font-semibold tracking-[-0.01em] text-[var(--color-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent-brand)] focus-visible:ring-offset-2"
+          className="flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent-brand)] focus-visible:ring-offset-2"
         >
-          buddy-note
+          <BuddyHappy className="h-5 w-5 shrink-0" />
+          <span className="text-[15px] font-semibold tracking-[-0.01em] text-[var(--color-ink)]">buddy-note</span>
         </Link>
         {right}
       </div>
