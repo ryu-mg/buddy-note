@@ -131,38 +131,110 @@ function AnonymousLanding() {
   const devBypassEnabled = isDevAuthBypassEnabled()
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-md flex-col items-center justify-center gap-7 px-6 py-12 text-center">
-      <BuddyHappy className="h-32 w-44" />
-      <div className="flex flex-col gap-3">
-        <p className="text-[12px] font-medium uppercase tracking-[0.18em] text-[var(--color-mute)]">
-          buddy-note
-        </p>
-        <h1 className="font-serif text-[var(--text-display-sm)] font-semibold leading-[1.15] text-[var(--color-ink)]">
-          내 강아지가
-          <br />
-          직접 남기는 하루
-        </h1>
-        <p className="mt-1 text-[15px] leading-[1.65] text-[var(--color-ink-soft)]">
-          사진 한 장이 버디노트가 되고, 쌓인 기록은 버디의 성격으로 남아요.
-        </p>
-      </div>
+    <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col justify-center gap-10 px-5 py-10 md:grid md:grid-cols-[0.92fr_1.08fr] md:items-center md:gap-14 md:px-8">
+      <section className="flex flex-col gap-7 text-left">
+        <div className="flex items-center gap-3">
+          <BuddyHappy className="h-16 w-20" />
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-mute)]">
+              memory album
+            </p>
+            <p className="mt-1 font-serif text-[22px] font-semibold text-[var(--color-ink)]">
+              buddy-note
+            </p>
+          </div>
+        </div>
 
-      <div className="flex w-full max-w-[310px] flex-col gap-3">
-        <Link
-          href="/auth/login"
-          className="rounded-[var(--radius-button)] bg-[var(--color-accent-cta)] px-6 py-3 text-[15px] font-semibold text-[var(--primary-foreground)] shadow-[var(--shadow-accent)] transition-opacity duration-200 hover:opacity-90"
-        >
-          카카오로 시작하기
-        </Link>
-        {devBypassEnabled ? (
+        <div className="flex flex-col gap-4">
+          <h1 className="font-serif text-[var(--text-display-sm)] font-semibold leading-[1.12] text-[var(--color-ink)] md:text-[var(--text-display-md)]">
+            내 강아지가
+            <br />
+            자기답게 남기는 하루
+          </h1>
+          <p className="max-w-[29rem] text-[15px] leading-[1.75] text-[var(--color-ink-soft)]">
+            사진 한 장과 짧은 메모가 쌓이면, 버디의 말투와 습관을 기억하는
+            앨범이 돼요.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {['성격 기억', '사진 일기', '월간 앨범'].map((label) => (
+              <span
+                key={label}
+                className="rounded-[var(--radius-pill)] bg-[var(--color-accent-brand-soft)] px-3 py-1 text-[12px] font-semibold text-[var(--color-accent-brand)]"
+              >
+                {label}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex w-full max-w-[340px] flex-col gap-3">
           <Link
-            href="/auth/dev"
-            className="rounded-[var(--radius-button)] border border-[var(--color-line)] bg-[var(--color-bg)] px-6 py-3 text-[15px] font-semibold text-[var(--color-ink-soft)] transition-colors duration-200 hover:bg-[var(--color-paper)]"
+            href="/auth/login"
+            className="inline-flex min-h-12 items-center justify-center rounded-[var(--radius-button)] bg-[var(--color-accent-cta)] px-6 text-[15px] font-semibold text-[var(--primary-foreground)] shadow-[var(--shadow-accent)] transition-opacity duration-200 hover:opacity-90"
           >
-            로컬 개발 로그인
+            카카오로 시작하기
           </Link>
-        ) : null}
-      </div>
+          {devBypassEnabled ? (
+            <Link
+              href="/auth/dev"
+              className="inline-flex min-h-12 items-center justify-center rounded-[var(--radius-button)] border border-[var(--color-line)] bg-[var(--color-bg)] px-6 text-[15px] font-semibold text-[var(--color-ink-soft)] transition-colors duration-200 hover:bg-[var(--color-paper)]"
+            >
+              로컬 개발 로그인
+            </Link>
+          ) : null}
+        </div>
+      </section>
+
+      <section
+        aria-label="buddy-note 미리보기"
+        className="relative mx-auto w-full max-w-[430px] pt-6"
+      >
+        <div className="absolute right-2 top-0 z-10 rounded-[var(--radius-pill)] border border-[var(--color-line)] bg-[var(--color-bg)] px-3 py-1 font-serif text-[14px] font-semibold text-[var(--color-ink)] shadow-[var(--shadow-card-soft)]">
+          259일째
+        </div>
+        <div className="relative bg-[var(--color-paper)] p-5 pb-10 shadow-[var(--shadow-polaroid)] ring-1 ring-[var(--color-line)] motion-safe:-rotate-[1.2deg]">
+          <div className="grid aspect-square grid-cols-3 grid-rows-3 gap-1 bg-[var(--color-bg)] p-1">
+            {[
+              'bg-[var(--color-mood-bright)]',
+              'bg-[var(--color-line)]',
+              'bg-[var(--color-mood-calm)]',
+              'bg-[var(--color-paper)]',
+              'bg-[var(--color-accent-brand-soft)]',
+              'bg-[var(--color-mood-curious)]',
+              'bg-[var(--color-mood-tired)]',
+              'bg-[var(--color-bg)]',
+              'bg-[var(--color-mood-lonely)]',
+            ].map((className, index) => (
+              <div
+                key={index}
+                className={`${className} relative overflow-hidden`}
+              >
+                {index === 4 ? (
+                  <BuddyHappy className="absolute inset-0 m-auto h-16 w-20 opacity-80" />
+                ) : null}
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-5 flex items-start justify-between gap-5">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-mute)]">
+                오늘의 기억
+              </p>
+              <h2 className="mt-2 font-serif text-[30px] font-semibold leading-none text-[var(--color-ink)]">
+                마루
+              </h2>
+              <p className="mt-3 max-w-[16rem] font-serif text-[15px] leading-[1.7] text-[var(--color-ink-soft)]">
+                오늘은 창가 냄새를 오래 맡았다. 내가 지키는 오후가 꽤
+                근사했다.
+              </p>
+            </div>
+            <span className="shrink-0 rounded-[var(--radius-pill)] bg-[var(--color-accent-brand-soft)] px-2.5 py-1 text-[11px] font-semibold text-[var(--color-accent-brand)]">
+              NF · 다정한 관찰자
+            </span>
+          </div>
+        </div>
+      </section>
     </main>
   )
 }

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Camera } from 'lucide-react'
 
 export type NameFormValues = {
   name: string
@@ -57,39 +58,45 @@ export function NameForm({
       aria-labelledby="step0-title"
       className="mx-auto w-full max-w-md"
     >
-      <article className="rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-paper)] px-6 py-7 shadow-[var(--shadow-card-soft)] motion-safe:[transform:rotate(-0.6deg)] motion-reduce:rotate-0">
+      <article className="rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-paper)] px-5 py-6 shadow-[var(--shadow-card-soft)] motion-safe:[transform:rotate(-0.6deg)] motion-reduce:rotate-0 sm:px-6 sm:py-7">
         <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-[var(--color-mute)]">
           시작하기
         </p>
         <h1
           id="step0-title"
-          className="mt-3 text-[20px] font-bold leading-[1.35] text-[var(--color-ink)]"
+          className="mt-3 font-serif text-[var(--text-display-sm)] font-semibold leading-[1.12] text-[var(--color-ink)]"
         >
-          버디를 소개해주세요
+          버디의 첫 장을 골라주세요
         </h1>
 
         <div className="mt-6 flex flex-col gap-5">
-          <div className="flex flex-col items-center gap-3">
+          <div className="mx-auto w-full max-w-[260px]">
             <div
               aria-label="대표 사진 미리보기"
-              className="relative grid size-28 place-items-center overflow-hidden rounded-full border border-[var(--color-line)] bg-[var(--color-bg)]"
+              className="relative aspect-square w-full overflow-hidden bg-[var(--color-bg)] p-3 pb-10 shadow-[var(--shadow-polaroid)] ring-1 ring-[var(--color-line)]"
             >
-              {profilePhotoDataUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={profilePhotoDataUrl}
-                  alt=""
-                  className="size-full object-cover"
-                />
-              ) : (
-                <RetrieverPlaceholder />
-              )}
+              <div className="grid h-full w-full place-items-center overflow-hidden bg-[var(--color-paper)]">
+                {profilePhotoDataUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={profilePhotoDataUrl}
+                    alt=""
+                    className="size-full object-cover"
+                  />
+                ) : (
+                  <RetrieverPlaceholder />
+                )}
+              </div>
+              <p className="absolute bottom-3 left-3 right-3 truncate text-center font-serif text-[15px] font-semibold text-[var(--color-ink-soft)]">
+                {value.name.trim() || '첫 사진'}
+              </p>
             </div>
             <label
               htmlFor="pet-profile-photo"
-              className="inline-flex min-h-10 cursor-pointer items-center justify-center rounded-[var(--radius-button)] border border-[var(--color-line)] bg-[var(--color-bg)] px-4 text-[13px] font-medium text-[var(--color-ink)] transition-colors hover:bg-[var(--color-paper)]"
+              className="mt-3 inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-[var(--radius-button)] border border-[var(--color-line)] bg-[var(--color-bg)] px-4 text-[13px] font-semibold text-[var(--color-ink)] transition-colors hover:bg-[var(--color-paper)]"
             >
-              버디 사진 선택하기
+              <Camera className="h-4 w-4" aria-hidden />
+              사진 선택하기
             </label>
             <input
               id="pet-profile-photo"
@@ -101,7 +108,7 @@ export function NameForm({
             {photoError ? (
               <p
                 role="alert"
-                className="text-center text-[12px] text-[var(--color-error)]"
+                className="mt-2 text-center text-[12px] text-[var(--color-error)]"
               >
                 {photoError}
               </p>

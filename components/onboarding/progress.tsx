@@ -19,14 +19,20 @@ type ProgressProps = {
   }
 }
 
-const TILTS = ['-rotate-[3deg]', 'rotate-[2deg]', '-rotate-[2deg]', 'rotate-[4deg]', '-rotate-[1deg]']
+const TILTS = [
+  '-rotate-[3deg]',
+  'rotate-[2deg]',
+  '-rotate-[2deg]',
+  'rotate-[4deg]',
+  '-rotate-[1deg]',
+]
 
 export function Progress({ current, total, mbtiSlots }: ProgressProps) {
   // MBTI 슬롯 모드
   if (mbtiSlots) {
     return (
       <div
-        className="flex items-center justify-center gap-3 py-4"
+        className="flex items-center justify-center gap-3 py-5"
         role="progressbar"
         aria-valuenow={mbtiSlots.current}
         aria-valuemin={1}
@@ -41,24 +47,36 @@ export function Progress({ current, total, mbtiSlots }: ProgressProps) {
             <div
               key={i}
               className={[
-                'relative h-9 w-7 bg-[var(--color-paper)] shadow-[var(--shadow-card-soft)] ring-1 transition-all duration-200',
+                'relative h-14 w-11 bg-[var(--color-paper)] p-1 pb-4 shadow-[var(--shadow-card-soft)] ring-1 transition-all duration-200',
                 ans
-                  ? 'ring-[var(--color-line)]'
+                  ? 'ring-[var(--color-accent-brand)]'
                   : 'ring-[var(--color-line)]/60',
                 isCurrent
-                  ? 'scale-110 ring-2 ring-[var(--color-accent-brand)]'
+                  ? 'scale-110 shadow-[var(--shadow-polaroid)] ring-2 ring-[var(--color-accent-brand)]'
                   : '',
                 `motion-safe:${tilt} motion-reduce:rotate-0`,
               ].join(' ')}
               aria-current={isCurrent ? 'step' : undefined}
             >
+              <span
+                className={[
+                  'flex h-full w-full items-center justify-center text-[11px] font-bold',
+                  ans
+                    ? 'bg-[var(--color-accent-brand-soft)] text-[var(--color-accent-brand)]'
+                    : 'bg-[var(--color-bg)] text-[var(--color-line)]',
+                ].join(' ')}
+              >
+                {ans ? ans.key : idx}
+              </span>
               {ans ? (
-                <span className="absolute inset-0 flex items-center justify-center pb-2 text-[10px] font-bold text-[var(--color-accent-brand)]">
-                  {ans.key}
+                <span className="absolute bottom-1 left-0 right-0 text-center text-[8px] font-semibold uppercase tracking-[0.08em] text-[var(--color-accent-brand)]">
+                  done
                 </span>
-              ) : null}
-              {/* 폴라로이드 하단 caption strip */}
-              <span className="absolute bottom-0 left-0 right-0 h-2 bg-[var(--color-paper)] border-t border-[var(--color-line)]" />
+              ) : (
+                <span className="absolute bottom-1 left-0 right-0 text-center text-[8px] font-semibold uppercase tracking-[0.08em] text-[var(--color-mute)]">
+                  {idx}
+                </span>
+              )}
             </div>
           )
         })}

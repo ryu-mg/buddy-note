@@ -418,29 +418,44 @@ function StepNav({
   draft: Draft
 }) {
   const isLast = step === total - 1
+  const blockedHint =
+    step === 0
+      ? '이름과 견종을 채우면 다음 장으로 넘어가요.'
+      : step === 1
+        ? '반려인 호칭을 적으면 다음 장으로 넘어가요.'
+        : step >= 2 && step <= 5
+          ? '답을 하나 고르면 다음 장으로 넘어가요.'
+          : null
 
   if (isLast) {
     return <SubmitRow onPrev={onPrev} draft={draft} />
   }
 
   return (
-    <div className="flex items-center justify-between gap-3">
-      <button
-        type="button"
-        onClick={onPrev}
-        disabled={step === 0}
-        className="rounded-[10px] px-4 py-2.5 text-sm font-medium text-[var(--color-ink-soft)] transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-30"
-      >
-        이전
-      </button>
-      <button
-        type="button"
-        onClick={onNext}
-        disabled={!canAdvance}
-        className="rounded-[var(--radius-button)] bg-[var(--color-accent-cta)] px-5 py-2.5 text-sm font-semibold text-[var(--primary-foreground)] shadow-[var(--shadow-accent)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:bg-[var(--color-line)] disabled:text-[var(--color-mute)] disabled:shadow-none"
-      >
-        다음
-      </button>
+    <div className="flex flex-col gap-2">
+      {!canAdvance && blockedHint ? (
+        <p className="text-right text-[12px] text-[var(--color-mute)]">
+          {blockedHint}
+        </p>
+      ) : null}
+      <div className="flex items-center justify-between gap-3">
+        <button
+          type="button"
+          onClick={onPrev}
+          disabled={step === 0}
+          className="min-h-12 rounded-[var(--radius-button)] px-4 text-sm font-medium text-[var(--color-ink-soft)] transition-colors hover:bg-[var(--color-paper)] disabled:cursor-not-allowed disabled:opacity-30"
+        >
+          이전
+        </button>
+        <button
+          type="button"
+          onClick={onNext}
+          disabled={!canAdvance}
+          className="min-h-12 min-w-[128px] rounded-[var(--radius-button)] bg-[var(--color-accent-cta)] px-6 text-sm font-semibold text-[var(--primary-foreground)] shadow-[var(--shadow-accent)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:bg-[var(--color-line)] disabled:text-[var(--color-mute)] disabled:shadow-none"
+        >
+          다음
+        </button>
+      </div>
     </div>
   )
 }
@@ -507,7 +522,7 @@ function SubmitRow({
           type="button"
           onClick={onPrev}
           disabled={pending}
-          className="rounded-[10px] px-4 py-2.5 text-sm font-medium text-[var(--color-ink-soft)] transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-30"
+          className="min-h-12 rounded-[var(--radius-button)] px-4 text-sm font-medium text-[var(--color-ink-soft)] transition-colors hover:bg-[var(--color-paper)] disabled:cursor-not-allowed disabled:opacity-30"
         >
           다시 답할래요
         </button>
@@ -515,7 +530,7 @@ function SubmitRow({
           type="submit"
           disabled={!ready || pending}
           aria-busy={pending}
-          className="rounded-[var(--radius-button)] bg-[var(--color-accent-cta)] px-5 py-2.5 text-sm font-semibold text-[var(--primary-foreground)] shadow-[var(--shadow-accent)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:bg-[var(--color-line)] disabled:text-[var(--color-mute)] disabled:shadow-none"
+          className="min-h-12 min-w-[132px] rounded-[var(--radius-button)] bg-[var(--color-accent-cta)] px-6 text-sm font-semibold text-[var(--primary-foreground)] shadow-[var(--shadow-accent)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:bg-[var(--color-line)] disabled:text-[var(--color-mute)] disabled:shadow-none"
         >
           {pending ? '저장하는 중…' : '저장할게요'}
         </button>

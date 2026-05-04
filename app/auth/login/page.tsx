@@ -2,7 +2,12 @@ import { isDevAuthBypassEnabled } from '@/lib/auth/dev-bypass'
 
 import { KakaoButton } from './kakao-button'
 
-export default function LoginPage() {
+type LoginPageProps = {
+  searchParams: Promise<{ error?: string }>
+}
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
+  const { error } = await searchParams
   const supabaseConfigured = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL)
   const devBypassEnabled = isDevAuthBypassEnabled()
 
@@ -21,7 +26,25 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
+      <div className="space-y-1 text-center">
+        <p className="text-[14px] font-medium text-[var(--color-ink)]">
+          오늘의 기록을 이어갈게요
+        </p>
+        <p className="text-[13px] leading-[1.55] text-[var(--color-mute)]">
+          로그인하면 버디의 사진, 성격, 지난 일기가 이어져요.
+        </p>
+      </div>
+
+      {error ? (
+        <p
+          role="alert"
+          className="rounded-[var(--radius-input)] border border-[var(--color-error)]/25 bg-[var(--color-accent-brand-soft)] px-3 py-2 text-[13px] leading-[1.55] text-[var(--color-error)]"
+        >
+          {error}
+        </p>
+      ) : null}
+
       <KakaoButton />
       {devBypassEnabled ? (
         <a
