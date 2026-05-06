@@ -13,6 +13,8 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 
+import { ensureDiaryShareImages } from './actions'
+
 type Format = '9:16' | '4:5' | '1:1'
 
 const FORMATS: Format[] = ['9:16', '4:5', '1:1']
@@ -38,12 +40,14 @@ type Status = {
 } | null
 
 export type ShareModalProps = {
+  diaryId?: string
   title: string
   petName: string
   images: Record<Format, string | null>
 }
 
 export function ShareModal({
+  diaryId,
   petName,
   images,
 }: ShareModalProps) {
@@ -51,10 +55,35 @@ export function ShareModal({
   const [format, setFormat] = useState<Format>('4:5')
   const [status, setStatus] = useState<Status>(null)
   const [busy, setBusy] = useState(false)
+  const [shareImages, setShareImages] = useState(images)
 
-  const currentUrl = images[format]
+  const currentUrl = shareImages[format]
 
   const clearStatus = useCallback(() => setStatus(null), [])
+  const hasAnyImage = FORMATS.some((f) => Boolean(shareImages[f]))
+
+  const handleEnsureImages = useCallback(async () => {
+    if (!diaryId || hasAnyImage) return
+    setBusy(true)
+    setStatus({ kind: 'info', text: '공유 이미지를 준비하고 있어요.' })
+    try {
+      const result = await ensureDiaryShareImages(diaryId)
+      if (!result.ok) {
+        setStatus({ kind: 'error', text: result.error })
+        return
+      }
+      setShareImages(result.images)
+      setStatus(null)
+    } catch (err) {
+      console.error('[share-modal.ensure]', err)
+      setStatus({
+        kind: 'error',
+        text: '공유 이미지를 준비하지 못했어요. 잠시 후 다시 시도해주세요.',
+      })
+    } finally {
+      setBusy(false)
+    }
+  }, [diaryId, hasAnyImage])
 
   const handleDownload = useCallback(async () => {
     if (!currentUrl) return
@@ -128,6 +157,8 @@ export function ShareModal({
         if (!next) {
           clearStatus()
           setBusy(false)
+        } else {
+          void handleEnsureImages()
         }
       }}
     >
@@ -154,7 +185,7 @@ export function ShareModal({
         >
           {FORMATS.map((f) => {
             const active = f === format
-            const disabled = images[f] === null
+            const disabled = shareImages[f] === null
             return (
               <button
                 key={f}
@@ -203,7 +234,9 @@ export function ShareModal({
               />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center px-4 text-center text-[12px] leading-[1.5] text-[var(--color-mute)]">
-                이 비율의 이미지가 아직 준비되지 않았어요.
+                {busy
+                  ? '공유 이미지를 준비하고 있어요.'
+                  : '이 비율의 이미지가 아직 준비되지 않았어요.'}
               </div>
             )}
           </div>

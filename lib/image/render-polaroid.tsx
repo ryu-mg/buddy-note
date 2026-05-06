@@ -36,7 +36,7 @@ const COLOR_INK_SOFT = '#3f3f3f' // diary 본문 subtle
 type Format = '9:16' | '4:5' | '1:1'
 
 type RenderArgs = {
-  photoUrl: string
+  photoUrl?: string | null
   petName: string
   diaryTitle: string
   diaryBody: string
@@ -61,6 +61,7 @@ export async function renderPolaroid(args: RenderArgs): Promise<Buffer> {
   const cardWidth = Math.round(width * 0.78)
   const photoEdge = cardWidth - 48 // 24px border on both sides
   const captionH = Math.round(photoEdge * 0.45)
+  const hasPhoto = Boolean(args.photoUrl)
 
   const svg = await satori(
     <div
@@ -94,14 +95,40 @@ export async function renderPolaroid(args: RenderArgs): Promise<Buffer> {
         <div
           style={{
             display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
             width: `${photoEdge}px`,
             height: `${photoEdge}px`,
-            backgroundColor: '#eeeae3',
-            backgroundImage: `url(${args.photoUrl})`,
+            backgroundColor: hasPhoto ? '#eeeae3' : theme.colors.accentSoft,
+            backgroundImage: hasPhoto ? `url(${args.photoUrl})` : undefined,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}
-        />
+        >
+          {hasPhoto ? null : (
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '22px',
+                color: theme.colors.accent,
+              }}
+            >
+              <PawMark color={theme.colors.accent} />
+              <div
+                style={{
+                  fontFamily: 'MaruBuri',
+                  fontSize: '30px',
+                  color: theme.colors.moodHint,
+                }}
+              >
+                사진 없이 남긴 오늘
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* Caption area */}
         <div
@@ -202,6 +229,75 @@ export async function renderPolaroid(args: RenderArgs): Promise<Buffer> {
     },
   })
   return resvg.render().asPng()
+}
+
+function PawMark({ color }: { color: string }) {
+  return (
+    <div
+      aria-hidden="true"
+      style={{
+        position: 'relative',
+        width: '118px',
+        height: '104px',
+      }}
+    >
+      <div
+        style={{
+          position: 'absolute',
+          left: '38px',
+          bottom: '0px',
+          width: '44px',
+          height: '50px',
+          borderRadius: '50% 50% 45% 45%',
+          backgroundColor: color,
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          left: '0px',
+          top: '34px',
+          width: '28px',
+          height: '34px',
+          borderRadius: '9999px',
+          backgroundColor: color,
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          left: '28px',
+          top: '2px',
+          width: '28px',
+          height: '38px',
+          borderRadius: '9999px',
+          backgroundColor: color,
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          right: '28px',
+          top: '2px',
+          width: '28px',
+          height: '38px',
+          borderRadius: '9999px',
+          backgroundColor: color,
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          right: '0px',
+          top: '34px',
+          width: '28px',
+          height: '34px',
+          borderRadius: '9999px',
+          backgroundColor: color,
+        }}
+      />
+    </div>
+  )
 }
 
 function truncate(input: string, max: number): string {

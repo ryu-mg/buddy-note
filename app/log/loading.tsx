@@ -5,7 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton'
  *
  * `UploadForm` (client)의 layout을 그대로 echo 하여 렌더 직후 layout shift 없음:
  *  - 헤더 (상단 eyebrow + h1 + subline)
- *  - 폴라로이드 드롭존 (4:5, `-1.2deg`)
+ *  - 폴라로이드 드롭존 (4:5)
  *  - 태그 칩 6개 (pill)
  *  - 메모 textarea (3줄)
  *  - 제출 버튼
@@ -31,7 +31,7 @@ export default function LogLoading() {
         <div className="flex flex-col gap-2">
           <Skeleton className="h-3 w-20" />
           <div
-            className="relative block bg-[var(--color-paper)] p-6 pb-11 ring-1 ring-[var(--color-line)] motion-safe:-rotate-[1.2deg] motion-reduce:rotate-0"
+            className="relative block bg-[var(--color-paper)] p-6 pb-11 ring-1 ring-[var(--color-line)]"
             style={{ borderRadius: 'var(--radius-card)' }}
           >
             <div className="relative aspect-[4/5] w-full overflow-hidden bg-[var(--color-bg)]">

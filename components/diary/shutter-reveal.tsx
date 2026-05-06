@@ -87,11 +87,11 @@ export function ShutterReveal({
         <div
           className={[
             phase === 'drop' || phase === 'name' || phase === 'hold' || phase === 'exit'
-              ? 'motion-safe:animate-[polaroid-drop_1000ms_cubic-bezier(0.2,0.9,0.25,1)_both] motion-reduce:animate-[soft-fade_600ms_ease-out_both]'
+              ? 'motion-safe:animate-[diary-straight-drop_1000ms_cubic-bezier(0.2,0.9,0.25,1)_both] motion-reduce:animate-[soft-fade_600ms_ease-out_both]'
               : 'opacity-0',
           ].join(' ')}
         >
-          <div className="-rotate-2 border-[14px] border-[var(--color-bg)] border-b-[38px] bg-[var(--color-paper)] shadow-[var(--shadow-polaroid)]">
+          <div className="border-[14px] border-[var(--color-bg)] border-b-[38px] bg-[var(--color-paper)] shadow-[var(--shadow-polaroid)]">
             {imageUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={imageUrl} alt="" className="aspect-[4/5] w-full object-cover" />

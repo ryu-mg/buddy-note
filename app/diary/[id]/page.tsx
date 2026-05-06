@@ -134,7 +134,7 @@ export default async function DiaryPage({ params }: PageProps) {
 
       <article
         aria-labelledby="diary-title"
-        className="relative mx-auto w-full max-w-[420px] bg-[var(--color-paper)] px-6 pb-11 pt-6 shadow-[var(--shadow-card)] ring-1 ring-[var(--color-line)] motion-safe:-rotate-[1.2deg] motion-reduce:rotate-0"
+        className="relative mx-auto w-full max-w-[420px] bg-[var(--color-paper)] px-6 pb-11 pt-6 shadow-[var(--shadow-card)] ring-1 ring-[var(--color-line)]"
       >
         <div className="flex items-baseline justify-between gap-3">
           <p className="text-[12px] font-medium uppercase tracking-[0.12em] text-[var(--color-mute)]">
@@ -190,6 +190,7 @@ export default async function DiaryPage({ params }: PageProps) {
 
       <section className="mx-auto flex w-full max-w-[420px] flex-col gap-3">
         <ShareModal
+          diaryId={diary.id}
           title={diary.title}
           petName={diary.pet.name}
           images={{

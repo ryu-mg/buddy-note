@@ -8,7 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton'
  *  - 폴라로이드 hero: 날짜 + 이름 → 4:5 사진 → 제목 → 본문(명조체, 4줄)
  *  - 공유 버튼 row
  *
- * 기울임 `-1.2deg` (DESIGN §12).
+ * 일기 상세 카드는 화면 정렬을 위해 기울임 없이 렌더한다.
  */
 export default function DiaryLoading() {
   return (
@@ -28,7 +28,7 @@ export default function DiaryLoading() {
       {/* Hero 폴라로이드 */}
       <article
         aria-hidden="true"
-        className="relative mx-auto w-full max-w-[420px] bg-[var(--color-paper)] px-6 pb-11 pt-6 shadow-[var(--shadow-card)] ring-1 ring-[var(--color-line)] motion-safe:-rotate-[1.2deg] motion-reduce:rotate-0"
+        className="relative mx-auto w-full max-w-[420px] bg-[var(--color-paper)] px-6 pb-11 pt-6 shadow-[var(--shadow-card)] ring-1 ring-[var(--color-line)]"
       >
         {/* 상단 메타 — 좌 날짜, 우 이름 */}
         <div className="flex items-baseline justify-between gap-3">

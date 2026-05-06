@@ -329,6 +329,20 @@
       transform: translateY(0) rotate(-2deg) scale(1);
     }
   }
+  @keyframes diary-straight-drop {
+    0% {
+      opacity: 0;
+      transform: translateY(-26px) scale(0.94);
+    }
+    45% {
+      opacity: 1;
+      transform: translateY(6px) scale(1);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
   @keyframes soft-fade {
     from {
       opacity: 0;

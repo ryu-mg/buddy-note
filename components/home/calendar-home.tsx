@@ -1,10 +1,10 @@
 'use client'
 
 import Image from 'next/image'
-import Link from 'next/link'
 import type { CSSProperties } from 'react'
 import { useMemo, useState } from 'react'
 
+import { ShareModal } from '@/app/diary/[id]/share-modal'
 import { UploadForm } from '@/app/log/upload-form'
 import { EmptyState } from '@/components/empty/empty-state'
 import { PawPrint } from '@/components/icons/paw-print'
@@ -28,6 +28,11 @@ export type CalendarDiary = {
   id: string
   title: string
   body: string
+  shareImages: {
+    '9:16': string | null
+    '4:5': string | null
+    '1:1': string | null
+  }
   imageUrl: string | null
   mood: DiaryMood | null
   logDate: string
@@ -455,18 +460,20 @@ function DiaryPreview({
           {diary.title}
         </h3>
         <p
-          className="max-h-[6.8em] overflow-hidden whitespace-pre-wrap text-[15px] leading-[1.7] text-[var(--color-ink-soft)]"
+          className="whitespace-pre-wrap text-[15px] leading-[1.7] text-[var(--color-ink-soft)]"
           style={{ fontFamily: 'var(--font-serif)' }}
         >
           {diary.body}
         </p>
       </div>
-      <Link
-        href={`/diary/${diary.id}`}
-        className="inline-flex min-h-11 items-center justify-center rounded-[var(--radius-button)] bg-[var(--color-accent-cta)] px-4 text-[14px] font-semibold text-[var(--primary-foreground)] shadow-[var(--shadow-accent)] transition-opacity hover:opacity-90"
-      >
-        자세히 보기
-      </Link>
+      <div className="pt-1">
+        <ShareModal
+          diaryId={diary.id}
+          title={diary.title}
+          petName={petName}
+          images={diary.shareImages}
+        />
+      </div>
     </article>
   )
 }

@@ -1,20 +1,176 @@
 'use server'
 
+import { randomUUID } from 'node:crypto'
+
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
+import { renderAllFormats } from '@/lib/image/render-3-formats'
 import { createLogger } from '@/lib/logger'
-import { deletePhoto } from '@/lib/storage'
+import { deletePhoto, getSignedPhotoUrl, uploadDiaryImage } from '@/lib/storage'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
+import { getPetThemeKey } from '@/lib/themes/server'
 
 const log = createLogger('diary:action')
+
+type UntypedSupabase = SupabaseClient
+
+type ShareImages = {
+  '9:16': string | null
+  '4:5': string | null
+  '1:1': string | null
+}
 
 export type DeleteDiaryResult =
   | { ok: true }
   | { ok: false; error: string; code?: 'auth' | 'not_found' | 'db' }
 
+export type EnsureDiaryShareImagesResult =
+  | { ok: true; images: ShareImages }
+  | { ok: false; error: string; code?: 'auth' | 'not_found' | 'render' | 'db' }
+
 const DiaryIdSchema = z.string().uuid('잘못된 요청이에요.')
+
+function hasAllShareImages(images: ShareImages): boolean {
+  return Boolean(images['9:16'] && images['4:5'] && images['1:1'])
+}
+
+async function uploadRenderedImages(
+  renderedImages: Awaited<ReturnType<typeof renderAllFormats>>,
+): Promise<ShareImages> {
+  const base = randomUUID()
+  const uploads = await Promise.all([
+    uploadDiaryImage({
+      filename: `${base}-916.png`,
+      buffer: renderedImages['9:16'],
+      contentType: 'image/png',
+    }),
+    uploadDiaryImage({
+      filename: `${base}-45.png`,
+      buffer: renderedImages['4:5'],
+      contentType: 'image/png',
+    }),
+    uploadDiaryImage({
+      filename: `${base}-11.png`,
+      buffer: renderedImages['1:1'],
+      contentType: 'image/png',
+    }),
+  ])
+
+  return {
+    '9:16': 'publicUrl' in uploads[0] ? uploads[0].publicUrl : null,
+    '4:5': 'publicUrl' in uploads[1] ? uploads[1].publicUrl : null,
+    '1:1': 'publicUrl' in uploads[2] ? uploads[2].publicUrl : null,
+  }
+}
+
+export async function ensureDiaryShareImages(
+  diaryId: string,
+): Promise<EnsureDiaryShareImagesResult> {
+  const parsed = DiaryIdSchema.safeParse(diaryId)
+  if (!parsed.success) {
+    return { ok: false, error: '잘못된 요청이에요.', code: 'not_found' }
+  }
+
+  const supabase = await createClient()
+  if (!supabase) {
+    return { ok: false, error: 'Supabase 설정이 필요해요.', code: 'db' }
+  }
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) {
+    return { ok: false, error: '로그인이 필요해요.', code: 'auth' }
+  }
+
+  const { data: diary, error: fetchError } = await supabase
+    .from('diaries')
+    .select(
+      'id, log_id, title, body, image_url_916, image_url_45, image_url_11, pet:pets(id, name, user_id), log:logs(photo_url, photo_storage_path)',
+    )
+    .eq('id', parsed.data)
+    .maybeSingle<{
+      id: string
+      log_id: string
+      title: string
+      body: string
+      image_url_916: string | null
+      image_url_45: string | null
+      image_url_11: string | null
+      pet: { id: string; name: string; user_id: string } | null
+      log: { photo_url: string | null; photo_storage_path: string | null } | null
+    }>()
+
+  if (fetchError || !diary || !diary.pet || diary.pet.user_id !== user.id) {
+    return { ok: false, error: '기록을 찾지 못했어요.', code: 'not_found' }
+  }
+
+  const existing: ShareImages = {
+    '9:16': diary.image_url_916,
+    '4:5': diary.image_url_45,
+    '1:1': diary.image_url_11,
+  }
+  if (hasAllShareImages(existing)) {
+    return { ok: true, images: existing }
+  }
+
+  const admin = createAdminClient()
+  if (!admin) {
+    return { ok: false, error: 'Supabase 설정이 필요해요.', code: 'db' }
+  }
+
+  let photoUrl: string | null = diary.log?.photo_url ?? null
+  if (diary.log?.photo_storage_path) {
+    const signed = await getSignedPhotoUrl(diary.log.photo_storage_path)
+    if ('url' in signed) {
+      photoUrl = signed.url
+    }
+  }
+
+  try {
+    const themeKey = await getPetThemeKey(admin, diary.pet.id)
+    const renderedImages = await renderAllFormats({
+      photoUrl,
+      petName: diary.pet.name,
+      diaryTitle: diary.title,
+      diaryBody: diary.body,
+      themeKey,
+    })
+    const images = await uploadRenderedImages(renderedImages)
+
+    const { error: updateError } = await (admin as UntypedSupabase)
+      .from('diaries')
+      .update({
+        image_url_916: images['9:16'],
+        image_url_45: images['4:5'],
+        image_url_11: images['1:1'],
+      })
+      .eq('id', diary.id)
+
+    if (updateError) {
+      log.error('diary share image update failed', { err: updateError })
+      return {
+        ok: false,
+        error: '공유 이미지를 저장하지 못했어요. 잠시 후 다시 시도해주세요.',
+        code: 'db',
+      }
+    }
+
+    revalidatePath('/')
+    revalidatePath(`/diary/${diary.id}`)
+    return { ok: true, images }
+  } catch (err) {
+    log.warn('diary share image render failed', { err })
+    return {
+      ok: false,
+      error: '공유 이미지를 만드는 중에 문제가 생겼어요. 잠시 후 다시 시도해주세요.',
+      code: 'render',
+    }
+  }
+}
 
 /**
  * Extract Supabase Storage object name from a `diary-images` public URL.

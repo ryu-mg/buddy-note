@@ -87,7 +87,7 @@ export function PhaseCopy({ petName, onCancel, startedAt }: Props) {
         className={cn(
           'relative px-6 pb-8 pt-6',
           'bg-[var(--color-paper)] ring-1 ring-[var(--color-line)]',
-          'motion-safe:-rotate-[0.6deg] motion-safe:transition-transform',
+          'motion-safe:transition-transform',
           'motion-safe:duration-[var(--duration-default)] motion-safe:ease-[var(--ease-soft-out)]',
         )}
         style={{ borderRadius: 'var(--radius-card)' }}

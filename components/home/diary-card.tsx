@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 
+import { PawPrint } from '@/components/icons/paw-print'
 import { cn } from '@/lib/utils'
 
 type DiaryCardProps = {
@@ -56,8 +57,13 @@ export function DiaryCard({
             />
           </div>
         ) : (
-          <div className="flex aspect-[4/5] w-full items-center justify-center bg-[var(--color-line)] text-[12px] text-[var(--color-mute)]">
-            사진을 불러오지 못했어요.
+          <div className="flex aspect-[4/5] w-full flex-col items-center justify-center gap-3 bg-[var(--color-accent-brand-soft)] px-4 text-center text-[13px] leading-[1.5] text-[var(--color-ink-soft)]">
+            <PawPrint
+              className="h-9 w-9 opacity-80"
+              color="var(--color-accent-brand)"
+              title="사진 없이 남긴 기록"
+            />
+            <span>사진 대신 마음을 꾹 남긴 날이에요.</span>
           </div>
         )}
 

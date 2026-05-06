@@ -14,7 +14,7 @@ import { renderPolaroid } from '@/lib/image/render-polaroid'
  */
 
 type RenderInput = {
-  photoUrl: string
+  photoUrl?: string | null
   petName: string
   diaryTitle: string
   diaryBody: string

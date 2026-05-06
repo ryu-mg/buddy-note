@@ -31,6 +31,7 @@ type DiaryCalendarRow = {
   id: string
   title: string
   body: string
+  image_url_916: string | null
   image_url_45: string | null
   image_url_11: string | null
   mood: DiaryMood | null
@@ -101,7 +102,7 @@ export default async function Home() {
   const { data: rowsRaw } = await supabase
     .from('diaries')
     .select(
-      'id, title, body, image_url_45, image_url_11, mood, created_at, log:logs(log_date, photo_url, photo_storage_path)',
+      'id, title, body, image_url_916, image_url_45, image_url_11, mood, created_at, log:logs(log_date, photo_url, photo_storage_path)',
     )
     .eq('pet_id', pet.id)
     .order('created_at', { ascending: false })
@@ -123,6 +124,11 @@ export default async function Home() {
         id: diary.id,
         title: diary.title,
         body: diary.body,
+        shareImages: {
+          '9:16': diary.image_url_916,
+          '4:5': diary.image_url_45,
+          '1:1': diary.image_url_11,
+        },
         imageUrl,
         mood: diary.mood,
         logDate: diary.log?.log_date ?? diary.created_at.slice(0, 10),
