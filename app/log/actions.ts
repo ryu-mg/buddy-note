@@ -75,7 +75,7 @@ const ALLOWED_MIME = new Set([
 ])
 
 /**
- * FormData 파싱 스키마. `photo`만 File instanceof로 별도 검증한다
+ * FormData 파싱 스키마. `photo`는 선택 입력이라 File instanceof로 별도 검증한다
  * (zod에서 File 인스턴스 검사는 런타임 환경이 갈려서 수동 체크가 안전).
  */
 const InputSchema = z.object({
@@ -155,17 +155,20 @@ export async function createLog(formData: FormData): Promise<CreateLogResult> {
 
   // 2) Parse FormData
   const photoEntry = formData.get('photo')
-  if (!(photoEntry instanceof File) || photoEntry.size === 0) {
-    return { ok: false, error: '사진 한 장을 먼저 올려주세요.', code: 'pet' }
+  if (photoEntry !== null && !(photoEntry instanceof File)) {
+    return { ok: false, error: '사진 정보를 다시 확인해주세요.', code: 'pet' }
   }
-  if (photoEntry.size > MAX_PHOTO_BYTES) {
+  const photoFile =
+    photoEntry instanceof File && photoEntry.size > 0 ? photoEntry : null
+
+  if (photoFile && photoFile.size > MAX_PHOTO_BYTES) {
     return {
       ok: false,
       error: '사진이 너무 커요. 8MB 이하로 올려주세요.',
       code: 'pet',
     }
   }
-  const mime = (photoEntry.type || '').toLowerCase()
+  const mime = (photoFile?.type || '').toLowerCase()
   if (mime && !ALLOWED_MIME.has(mime)) {
     return {
       ok: false,
@@ -250,17 +253,20 @@ export async function createLog(formData: FormData): Promise<CreateLogResult> {
     }
   }
 
-  // 4) EXIF strip (server-side sharp — second line of defense)
-  const arrayBuffer = await photoEntry.arrayBuffer()
-  let cleanBuffer: Buffer
-  try {
-    cleanBuffer = await stripExifServer(Buffer.from(arrayBuffer))
-  } catch (err) {
-    log.error('EXIF strip failed', { err })
-    return {
-      ok: false,
-      error: '사진을 읽는 중에 문제가 생겼어요. 다른 사진으로 해볼까요?',
-      code: 'upload',
+  // 4) EXIF strip (server-side sharp — second line of defense). 사진 없는
+  // 기록은 LLM text-only 경로로 진행한다.
+  let cleanBuffer: Buffer | null = null
+  if (photoFile) {
+    const arrayBuffer = await photoFile.arrayBuffer()
+    try {
+      cleanBuffer = await stripExifServer(Buffer.from(arrayBuffer))
+    } catch (err) {
+      log.error('EXIF strip failed', { err })
+      return {
+        ok: false,
+        error: '사진을 읽는 중에 문제가 생겼어요. 다른 사진으로 해볼까요?',
+        code: 'upload',
+      }
     }
   }
 
@@ -282,8 +288,8 @@ export async function createLog(formData: FormData): Promise<CreateLogResult> {
     .from('logs')
     .insert({
       pet_id: petId,
-      photo_url: '',
-      photo_storage_path: '',
+      photo_url: null,
+      photo_storage_path: null,
       tags: validTags,
       memo: validMemo.length > 0 ? validMemo : null,
       log_date: logDate,
@@ -301,52 +307,56 @@ export async function createLog(formData: FormData): Promise<CreateLogResult> {
   }
   const logId = logRow.id
 
-  // 6) Upload photo to `photos` bucket.
-  //    Node Buffer → 독립 ArrayBuffer slice 로 복사해서
-  //    BlobPart 타입 제약 (ArrayBuffer only, SharedArrayBuffer 거부) 을 맞춘다.
-  const cleanArrayBuffer = cleanBuffer.buffer.slice(
-    cleanBuffer.byteOffset,
-    cleanBuffer.byteOffset + cleanBuffer.byteLength,
-  ) as ArrayBuffer
-  const cleanBlob = new Blob([cleanArrayBuffer], { type: 'image/jpeg' })
-  const uploadRes = await uploadPhoto({
-    userId: user.id,
-    logId,
-    file: cleanBlob,
-    ext: 'jpg',
-  })
-  if ('error' in uploadRes) {
-    // cleanup — orphan 방지
-    await admin.from('logs').delete().eq('id', logId)
-    return { ok: false, error: uploadRes.error, code: 'upload' }
-  }
-  const storagePath = uploadRes.path
+  let signedPhotoUrl: string | null = null
 
-  // 7) Signed URL 스냅샷 — satori 렌더와 DB 저장에 동일값 사용
-  const signedRes = await getSignedPhotoUrl(storagePath)
-  if ('error' in signedRes) {
-    await admin.from('logs').delete().eq('id', logId)
-    return { ok: false, error: signedRes.error, code: 'upload' }
-  }
-  const signedPhotoUrl = signedRes.url
-
-  // logs row에 storage_path + signed URL 스냅샷 업데이트
-  const { error: updateLogError } = await admin
-    .from('logs')
-    .update({
-      photo_url: signedPhotoUrl,
-      photo_storage_path: storagePath,
+  if (cleanBuffer) {
+    // 6) Upload photo to `photos` bucket.
+    //    Node Buffer → 독립 ArrayBuffer slice 로 복사해서
+    //    BlobPart 타입 제약 (ArrayBuffer only, SharedArrayBuffer 거부) 을 맞춘다.
+    const cleanArrayBuffer = cleanBuffer.buffer.slice(
+      cleanBuffer.byteOffset,
+      cleanBuffer.byteOffset + cleanBuffer.byteLength,
+    ) as ArrayBuffer
+    const cleanBlob = new Blob([cleanArrayBuffer], { type: 'image/jpeg' })
+    const uploadRes = await uploadPhoto({
+      userId: user.id,
+      logId,
+      file: cleanBlob,
+      ext: 'jpg',
     })
-    .eq('id', logId)
+    if ('error' in uploadRes) {
+      // cleanup — orphan 방지
+      await admin.from('logs').delete().eq('id', logId)
+      return { ok: false, error: uploadRes.error, code: 'upload' }
+    }
+    const storagePath = uploadRes.path
 
-  if (updateLogError) {
-    log.error('log update failed', { err: updateLogError })
-    // 경로/URL 업데이트 실패는 치명적 — 롤백
-    await admin.from('logs').delete().eq('id', logId)
-    return {
-      ok: false,
-      error: '사진 저장 중에 문제가 생겼어요. 잠시 후 다시 시도해주세요.',
-      code: 'db',
+    // 7) Signed URL 스냅샷 — satori 렌더와 DB 저장에 동일값 사용
+    const signedRes = await getSignedPhotoUrl(storagePath)
+    if ('error' in signedRes) {
+      await admin.from('logs').delete().eq('id', logId)
+      return { ok: false, error: signedRes.error, code: 'upload' }
+    }
+    signedPhotoUrl = signedRes.url
+
+    // logs row에 storage_path + signed URL 스냅샷 업데이트
+    const { error: updateLogError } = await admin
+      .from('logs')
+      .update({
+        photo_url: signedPhotoUrl,
+        photo_storage_path: storagePath,
+      })
+      .eq('id', logId)
+
+    if (updateLogError) {
+      log.error('log update failed', { err: updateLogError })
+      // 경로/URL 업데이트 실패는 치명적 — 롤백
+      await admin.from('logs').delete().eq('id', logId)
+      return {
+        ok: false,
+        error: '사진 저장 중에 문제가 생겼어요. 잠시 후 다시 시도해주세요.',
+        code: 'db',
+      }
     }
   }
 
@@ -368,8 +378,8 @@ export async function createLog(formData: FormData): Promise<CreateLogResult> {
 
   // 9) LLM 일기 생성 — fallback 내장 (항상 ok=true)
   const diaryResult = await generateDiary({
-    photoBase64: cleanBuffer.toString('base64'),
-    photoMediaType: 'image/jpeg',
+    photoBase64: cleanBuffer?.toString('base64'),
+    photoMediaType: cleanBuffer ? 'image/jpeg' : undefined,
     petName: pet.name,
     personaFragment: pet.persona_prompt_fragment,
     memo: validMemo,
@@ -380,14 +390,16 @@ export async function createLog(formData: FormData): Promise<CreateLogResult> {
   //     share images is still valuable, per 작업 지시).
   let renderedImages: Awaited<ReturnType<typeof renderAllFormats>> | null = null
   try {
-    const themeKey = await getPetThemeKey(admin, petId)
-    renderedImages = await renderAllFormats({
-      photoUrl: signedPhotoUrl,
-      petName: pet.name,
-      diaryTitle: diaryResult.data.title,
-      diaryBody: diaryResult.data.body,
-      themeKey,
-    })
+    if (signedPhotoUrl) {
+      const themeKey = await getPetThemeKey(admin, petId)
+      renderedImages = await renderAllFormats({
+        photoUrl: signedPhotoUrl,
+        petName: pet.name,
+        diaryTitle: diaryResult.data.title,
+        diaryBody: diaryResult.data.body,
+        themeKey,
+      })
+    }
   } catch (err) {
     log.warn('satori render failed — continuing without images', { err })
     renderedImages = null

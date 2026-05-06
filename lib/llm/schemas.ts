@@ -51,16 +51,16 @@ export type RecentCallbackInput = RecentCallback
 /**
  * Diary 생성 호출 입력.
  *
- * - `photoBase64`: strip-EXIF 를 마친 이미지 바이너리의 base64 인코딩 (data URL prefix 없음).
- * - `photoMediaType`: `image/jpeg` | `image/png` | `image/gif` | `image/webp`.
+ * - `photoBase64`: strip-EXIF 를 마친 이미지 바이너리의 base64 인코딩 (data URL prefix 없음). 사진 없는 기록이면 생략.
+ * - `photoMediaType`: `image/jpeg` | `image/png` | `image/gif` | `image/webp`. 사진 없는 기록이면 생략.
  * - `petName`: pets.name (공백 trim 된 상태로 전달).
  * - `personaFragment`: `buildPersonaPromptFragment(...)` 결과. null 이면 fallback 경로.
  * - `memo`: 사용자 메모. 200자 cap (CHECK constraint + zod 여기서도 재검증).
  * - `recentCallbacks`: 최근 10건 이내.
  */
 export const diaryInputSchema = z.object({
-  photoBase64: z.string().min(1),
-  photoMediaType: z.enum(['image/jpeg', 'image/png', 'image/gif', 'image/webp']),
+  photoBase64: z.string().min(1).optional(),
+  photoMediaType: z.enum(['image/jpeg', 'image/png', 'image/gif', 'image/webp']).optional(),
   petName: z.string().trim().min(1).max(24),
   // personaFragment 는 `buildPersonaPromptFragment` (lib/pet-mbti.ts) 가
   // 4개 고정 option fragment + optional additional_info 를 이어 만든다.

@@ -2,9 +2,10 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 
+import { DeleteDiaryButton } from '@/components/diary/delete-diary-button'
+import { PawPrint } from '@/components/icons/paw-print'
 import { createClient } from '@/lib/supabase/server'
 import { getSignedPhotoUrl } from '@/lib/storage'
-import { DeleteDiaryButton } from '@/components/diary/delete-diary-button'
 
 import { ShareModal } from './share-modal'
 
@@ -162,8 +163,13 @@ export default async function DiaryPage({ params }: PageProps) {
             </div>
           </div>
         ) : (
-          <div className="mt-4 flex aspect-[4/5] w-full items-center justify-center bg-[var(--color-line)] text-[13px] text-[var(--color-mute)]">
-            사진을 불러오지 못했어요.
+          <div className="mt-4 flex aspect-[4/5] w-full flex-col items-center justify-center gap-3 bg-[var(--color-line)] text-[13px] text-[var(--color-mute)]">
+            <PawPrint
+              className="h-10 w-10 opacity-75"
+              color="var(--color-accent-brand)"
+              title="사진 없이 남긴 기록"
+            />
+            <span>사진 없이 남긴 기록이에요.</span>
           </div>
         )}
 

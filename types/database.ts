@@ -149,8 +149,8 @@ export type PetUpdate = Partial<PetInsert>;
 export interface LogRow {
   id: string;
   pet_id: string;
-  photo_url: string;
-  photo_storage_path: string;
+  photo_url: string | null;
+  photo_storage_path: string | null;
   tags: LogTag[];
   memo: string | null;
   log_date: string;

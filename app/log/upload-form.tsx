@@ -95,16 +95,13 @@ export function UploadForm({
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    if (!file) {
-      toast.error('사진 한 장을 먼저 골라주세요.')
-      return
-    }
-
-    // Client EXIF strip — server sharp 가드가 또 있지만 여기서 먼저 털어낸다.
-    const cleaned = await stripExifClient(file)
 
     const fd = new FormData()
-    fd.set('photo', cleaned, 'photo.jpg')
+    if (file) {
+      // Client EXIF strip — server sharp 가드가 또 있지만 여기서 먼저 털어낸다.
+      const cleaned = await stripExifClient(file)
+      fd.set('photo', cleaned, 'photo.jpg')
+    }
     fd.set('petId', petId)
     fd.set('logDate', logDate ?? todayInSeoul())
     fd.set('tags', JSON.stringify(selectedTags))
@@ -171,7 +168,7 @@ export function UploadForm({
         <section className="flex flex-col gap-2">
           <div>
             <h3 className="text-[18px] font-semibold text-[var(--color-ink)]">
-              사진 한 장 골라줄래?
+              사진도 남겨둘래?
             </h3>
           </div>
           <Label
@@ -185,7 +182,6 @@ export function UploadForm({
             ref={fileInputRef}
             type="file"
             accept="image/jpeg,image/png,image/webp"
-            aria-required="true"
             aria-describedby="photo-input-hint"
             className="sr-only"
             onChange={onFileChange}
@@ -227,7 +223,7 @@ export function UploadForm({
                   className="text-[15px]"
                   style={{ fontFamily: 'var(--font-sans)' }}
                 >
-                  사진 한 장을 올려주세요
+                  사진이 있으면 올려주세요
                 </span>
                 <span
                   className="text-[12px]"
@@ -294,7 +290,7 @@ export function UploadForm({
         <Button
           type="submit"
           size="lg"
-          disabled={isPending || !file}
+          disabled={isPending}
           aria-busy={isPending}
           className="h-12 w-full text-[15px]"
         >
