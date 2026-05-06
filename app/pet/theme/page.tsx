@@ -40,9 +40,6 @@ export default async function PetThemePage() {
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-md flex-col gap-6 px-4 pb-24 pt-8">
       <header className="flex flex-col gap-1">
-        <p className="text-[12px] font-medium uppercase tracking-[0.14em] text-[var(--color-mute)]">
-          theme
-        </p>
         <h1 className="text-[24px] font-semibold leading-[1.25] text-[var(--color-ink)]">
           {pet.name}의 앨범 색을 고를게요
         </h1>

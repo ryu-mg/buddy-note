@@ -1,10 +1,12 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import type { ReactNode } from 'react'
 
 import { BuddyAvatar } from '@/components/home/buddy-avatar'
 import { EmptyState } from '@/components/empty/empty-state'
 import { PawPrint } from '@/components/icons/paw-print'
 import { buildBuddyGreeting } from '@/lib/greeting'
+import { CountUp } from '@/lib/motion/count-up'
 import { MOOD_CSS_VAR, MOOD_LABELS } from '@/lib/mood'
 import type { DiaryMood, RecentCallback } from '@/types/database'
 
@@ -80,7 +82,7 @@ export function WeeklyHome({
           </div>
         </div>
         <div className="mt-6 grid grid-cols-2 gap-3">
-          <Stat label="함께한 날" value={`${dayN}일째`} />
+          <Stat label="함께한 날" value={<CountUp to={dayN} suffix="일째" />} />
           <Stat label="버디노트" value={`${diaryCount}장`} />
         </div>
       </section>
@@ -142,7 +144,7 @@ export function WeeklyHome({
   )
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="rounded-[var(--radius-button)] bg-[var(--color-bg)]/70 px-4 py-3">
       <p className="text-[12px] text-[var(--color-mute)]">{label}</p>

@@ -15,10 +15,7 @@ function MonthCalendarPreview() {
   return (
     <main className="mx-auto flex w-full max-w-md flex-col gap-5 bg-[var(--color-bg)] p-6">
       <header>
-        <p className="text-[12px] font-medium uppercase tracking-[0.14em] text-[var(--color-mute)]">
-          monthly note
-        </p>
-        <h1 className="mt-1 text-[24px] font-semibold text-[var(--color-ink)]">
+        <h1 className="text-[24px] font-semibold text-[var(--color-ink)]">
           마루의 한 달
         </h1>
       </header>

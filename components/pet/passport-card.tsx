@@ -19,7 +19,7 @@ export function PassportCard({
   avatarUrl,
 }: PassportCardProps) {
   return (
-    <article className="relative mx-auto w-full max-w-md bg-[var(--color-paper)] p-6 pb-10 shadow-[var(--shadow-polaroid)] ring-1 ring-[var(--color-line)] motion-safe:-rotate-[1.2deg]">
+    <article className="relative mx-auto w-full max-w-md bg-[var(--color-paper)] p-6 pb-10 shadow-[var(--shadow-polaroid)] ring-1 ring-[var(--color-line)]">
       {/* PASSPORT 헤더 stamp */}
       <div className="flex items-center justify-between">
         <p className="text-[10px] font-bold uppercase tracking-[0.32em] text-[var(--color-mute)]">

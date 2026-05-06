@@ -74,7 +74,7 @@ export function ThemePicker({ initialThemeKey, canSave }: ThemePickerProps) {
           </span>
         </div>
 
-        <div className="bg-[var(--color-bg)] p-4 pb-8 shadow-[var(--shadow-polaroid)] ring-1 ring-[var(--color-line)] motion-safe:-rotate-[1.2deg]">
+        <div className="bg-[var(--color-bg)] p-4 pb-8 shadow-[var(--shadow-polaroid)] ring-1 ring-[var(--color-line)]">
           <div
             className="aspect-square"
             style={{ backgroundColor: selectedPreset.colors.accentSoft }}
@@ -143,7 +143,7 @@ export function ThemePicker({ initialThemeKey, canSave }: ThemePickerProps) {
         disabled={pending}
         className="min-h-12 rounded-[var(--radius-button)] bg-[var(--color-accent-cta)] px-5 text-[15px] font-semibold text-[var(--primary-foreground)] shadow-[var(--shadow-accent)] transition-opacity hover:opacity-90 disabled:opacity-60"
       >
-        {pending ? '저장 중...' : canSave ? '테마 저장하기' : '저장 조건 확인하기'}
+        {pending ? '저장 중...' : '저장하기'}
       </button>
     </div>
   )

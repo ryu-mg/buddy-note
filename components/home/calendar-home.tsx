@@ -182,9 +182,6 @@ export function CalendarHome({
       style={themeStyle}
     >
       <header className="flex flex-col gap-2">
-        <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-mute)]">
-          monthly note
-        </p>
         <h1 className="font-serif text-[var(--text-display-md)] font-semibold leading-[1.05] text-[var(--color-ink)]">
           {pet.name}
         </h1>
@@ -272,12 +269,9 @@ export function CalendarHome({
                 {/* A2 — mini-thumb: 일기 + 사진이 있으면 꽉 채운 이미지 */}
                 {hasThumb && day.diary?.imageUrl ? (
                   <>
-                    <Image
-                      src={day.diary.imageUrl}
-                      alt=""
-                      fill
-                      sizes="(max-width: 640px) 14vw, 80px"
-                      className="absolute inset-0 object-cover"
+                    <CalendarThumbnail
+                      imageUrl={day.diary.imageUrl}
+                      mood={day.diary.mood}
                     />
                     {/* day number — 흰색 chip */}
                     <span className="absolute left-1 top-1 z-10 rounded-[2px] bg-white/90 px-1 text-[10px] font-semibold leading-tight text-[var(--color-ink)]">
@@ -336,6 +330,36 @@ export function CalendarHome({
       ) : null}
       {showFirstEntryTutorial ? <FirstEntryTutorialSheet /> : null}
     </main>
+  )
+}
+
+function CalendarThumbnail({
+  imageUrl,
+  mood,
+}: {
+  imageUrl: string
+  mood: DiaryMood | null
+}) {
+  const [loaded, setLoaded] = useState(false)
+  const color = mood ? MOOD_CSS_VAR[mood] : 'var(--color-accent-brand)'
+
+  return (
+    <>
+      <span className="absolute inset-0 flex items-center justify-center bg-[var(--color-paper)]">
+        <PawPrint className="h-5 w-5 opacity-75" color={color} />
+      </span>
+      <Image
+        src={imageUrl}
+        alt=""
+        fill
+        sizes="(max-width: 640px) 14vw, 80px"
+        onLoad={() => setLoaded(true)}
+        className={[
+          'absolute inset-0 object-cover transition-opacity duration-200',
+          loaded ? 'opacity-100' : 'opacity-0',
+        ].join(' ')}
+      />
+    </>
   )
 }
 

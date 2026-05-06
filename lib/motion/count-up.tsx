@@ -4,18 +4,19 @@ import { useEffect, useRef, useState } from 'react'
 
 type CountUpProps = {
   to: number
-  duration?: number // ms (default 800)
+  duration?: number // ms (default 1000)
   className?: string
   suffix?: string // 예: "일째"
 }
 
-export function CountUp({ to, duration = 800, className, suffix }: CountUpProps) {
+export function CountUp({ to, duration = 1000, className, suffix }: CountUpProps) {
   const [value, setValue] = useState(0)
   const startRef = useRef<number | null>(null)
   const rafRef = useRef<number | null>(null)
   const reduced = useRef(false)
 
   useEffect(() => {
+    startRef.current = null
     reduced.current = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (reduced.current) {
       setValue(to)
