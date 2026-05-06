@@ -1,7 +1,13 @@
 'use client'
 
 import { useEffect } from 'react'
-import type { Option, OptionKey, Question } from '@/lib/pet-mbti'
+
+import {
+  formatPetQuestionText,
+  type Option,
+  type OptionKey,
+  type Question,
+} from '@/lib/pet-mbti'
 
 type QuestionCardProps = {
   question: Question
@@ -25,8 +31,8 @@ export function QuestionCard({
   keyboardEnabled = true,
 }: QuestionCardProps) {
   const displayName = petName.trim() || '반려동물'
-  const headline = question.headline.replaceAll('버디', displayName)
-  const prompt = question.prompt.replaceAll('버디', displayName)
+  const headline = formatPetQuestionText(question.headline, displayName)
+  const prompt = formatPetQuestionText(question.prompt, displayName)
 
   // A/B 단축 키 — 입력 필드 안에서만 비활성 (여기선 radio 뿐이라 항상 허용).
   useEffect(() => {

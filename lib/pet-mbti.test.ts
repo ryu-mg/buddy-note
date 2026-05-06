@@ -6,6 +6,7 @@ import {
   CHARACTER_TRAITS,
   buildPersonaPromptFragment,
   calculatePersonality,
+  formatPetQuestionText,
   getQuestion,
   isCompleteAnswers,
   type Answers,
@@ -109,6 +110,29 @@ describe('CHARACTER_TRAITS', () => {
       expect(traits.length).toBeGreaterThanOrEqual(3)
       expect(traits.every((trait) => trait.length > 0)).toBeTruthy()
     }
+  })
+})
+
+describe('formatPetQuestionText', () => {
+  it('버디 뒤 조사를 반려동물 이름 받침에 맞춘다', () => {
+    expect(formatPetQuestionText('버디는 보통 어떻게 반응해요?', '마루')).toBe(
+      '마루는 보통 어떻게 반응해요?',
+    )
+    expect(formatPetQuestionText('버디는 보통 어떻게 반응해요?', '콩')).toBe(
+      '콩은 보통 어떻게 반응해요?',
+    )
+    expect(formatPetQuestionText('버디가 좋아하는 장면', '마루')).toBe(
+      '마루가 좋아하는 장면',
+    )
+    expect(formatPetQuestionText('버디가 좋아하는 장면', '콩')).toBe(
+      '콩이 좋아하는 장면',
+    )
+  })
+
+  it('버디에게처럼 조사 선택이 필요 없는 표현은 이름만 바꾼다', () => {
+    expect(formatPetQuestionText('버디에게 더 가까운 모습은요?', '콩')).toBe(
+      '콩에게 더 가까운 모습은요?',
+    )
   })
 })
 

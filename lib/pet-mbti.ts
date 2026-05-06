@@ -145,6 +145,24 @@ export const QUESTIONS: Question[] = [
 
 export const QUESTION_IDS: QuestionId[] = ['q1', 'q2', 'q3', 'q4']
 
+const PET_NAME_JOSA_PATTERNS: ReadonlyArray<readonly [RegExp, '은/는' | '이/가' | '을/를' | '와/과' | '이야/야']> = [
+  [/버디[은는]/g, '은/는'],
+  [/버디[이가]/g, '이/가'],
+  [/버디[을를]/g, '을/를'],
+  [/버디[와과]/g, '와/과'],
+  [/버디(?:이야|야)/g, '이야/야'],
+]
+
+export function formatPetQuestionText(text: string, petName: string): string {
+  const name = petName.trim() || '반려동물'
+
+  return PET_NAME_JOSA_PATTERNS.reduce(
+    (formatted, [pattern, pair]) =>
+      formatted.replace(pattern, () => withJosa(name, pair)),
+    text,
+  ).replaceAll('버디', name)
+}
+
 export const PERSONALITY_LABELS: Record<PersonalityCode, string> = {
   ISTJ: '차분한 루틴 수호자',
   ISFJ: '다정한 집 지킴이',
