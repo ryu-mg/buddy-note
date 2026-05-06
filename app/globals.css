@@ -53,6 +53,12 @@
   --ease-soft-out: cubic-bezier(0.2, 0.9, 0.3, 1);
   --duration-default: 200ms;
 
+  /* Fixed bottom navigation metrics. Screens above the nav must offset from
+   * this token instead of hard-coded padding values. */
+  --bottom-nav-height: calc(4rem + env(safe-area-inset-bottom));
+  --bottom-nav-content-height: 4rem;
+  --bottom-nav-offset-gap: 1.5rem;
+
   /* DESIGN §2 — Typography tokens (font-face loaded in app/layout.tsx) */
   --font-sans:
     "Pretendard Variable", "Pretendard", -apple-system, BlinkMacSystemFont,

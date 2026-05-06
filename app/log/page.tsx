@@ -41,7 +41,7 @@ export default async function LogPage() {
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-md flex-col gap-6 px-4 py-10">
+    <main className="mx-auto flex min-h-screen w-full max-w-md flex-col gap-6 px-4 pb-[calc(var(--bottom-nav-height)+var(--bottom-nav-offset-gap))] pt-10">
       <header className="flex flex-col gap-1">
         <p
           className="text-[12px] tracking-[0.08em] text-[var(--color-mute)] uppercase"

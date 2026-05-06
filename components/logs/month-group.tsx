@@ -30,7 +30,7 @@ export function MonthGroup({ label, count, diaries }: MonthGroupProps) {
       </header>
 
       <div className="grid grid-cols-1 gap-8 sm:gap-10 md:grid-cols-2">
-        {diaries.map((diary, idx) => (
+        {diaries.map((diary) => (
           <DiaryCard
             key={diary.id}
             id={diary.id}
@@ -38,7 +38,6 @@ export function MonthGroup({ label, count, diaries }: MonthGroupProps) {
             body={diary.body}
             imageUrl={diary.imageUrl}
             createdAt={diary.createdAt}
-            tilt={idx % 2 === 0 ? 'left' : 'right'}
           />
         ))}
       </div>

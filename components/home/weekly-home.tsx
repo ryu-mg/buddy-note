@@ -124,8 +124,8 @@ export function WeeklyHome({
 
         {diaries.length > 0 ? (
           <div className="flex snap-x gap-4 overflow-x-auto pb-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {diaries.map((diary, index) => (
-              <TimelineCard key={diary.id} diary={diary} tilt={index % 2 === 0 ? 'left' : 'right'} />
+            {diaries.map((diary) => (
+              <TimelineCard key={diary.id} diary={diary} />
             ))}
           </div>
         ) : (
@@ -172,10 +172,8 @@ function CallbackStrip({ callbacks }: { callbacks: RecentCallback[] }) {
 
 function TimelineCard({
   diary,
-  tilt,
 }: {
   diary: WeeklyDiary
-  tilt: 'left' | 'right'
 }) {
   const accent = diary.mood ? MOOD_CSS_VAR[diary.mood] : 'var(--color-accent-brand)'
 
@@ -187,8 +185,7 @@ function TimelineCard({
       <article
         className={[
           'bg-[var(--color-paper)] p-4 pb-8 ring-1 ring-[var(--color-line)] shadow-[var(--shadow-card)]',
-          'motion-safe:transition-transform motion-safe:duration-200 motion-safe:group-hover/card:[transform:rotate(0deg)_translateY(-3px)]',
-          tilt === 'left' ? 'motion-safe:-rotate-[1deg]' : 'motion-safe:rotate-[0.8deg]',
+          'motion-safe:transition-transform motion-safe:duration-200 motion-safe:group-hover/card:-translate-y-0.5',
         ].join(' ')}
       >
         <div className="relative aspect-[4/5] overflow-hidden bg-[var(--color-line)]">

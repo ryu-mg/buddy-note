@@ -134,11 +134,8 @@ export function UploadForm({
       <form onSubmit={onSubmit} className="flex flex-col gap-6">
         <section className="flex flex-col gap-3">
           <div>
-            <p className="text-[12px] font-medium uppercase tracking-[0.14em] text-[var(--color-mute)]">
-              1
-            </p>
             <h3 className="text-[18px] font-semibold text-[var(--color-ink)]">
-              오늘 뭐 했어?
+              오늘은 어떤 하루였어?
             </h3>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -173,11 +170,8 @@ export function UploadForm({
         {/* 사진 업로드 — 폴라로이드 드롭존 */}
         <section className="flex flex-col gap-2">
           <div>
-            <p className="text-[12px] font-medium uppercase tracking-[0.14em] text-[var(--color-mute)]">
-              2
-            </p>
             <h3 className="text-[18px] font-semibold text-[var(--color-ink)]">
-              사진 찍어둔 거 있어?
+              사진 한 장 골라줄래?
             </h3>
           </div>
           <Label
@@ -256,11 +250,8 @@ export function UploadForm({
         {/* Memo — native textarea, 토큰 스타일 */}
         <section className="flex flex-col gap-2">
           <div>
-            <p className="text-[12px] font-medium uppercase tracking-[0.14em] text-[var(--color-mute)]">
-              3
-            </p>
             <h3 className="text-[18px] font-semibold text-[var(--color-ink)]">
-              {withJosa(companion, '이/가')} 뭐 말해줄 거 있어?
+              {withJosa(companion, '이/가')} 기억할 이야기가 있어?
             </h3>
           </div>
           <Label

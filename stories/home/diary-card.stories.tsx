@@ -15,7 +15,6 @@ const meta = {
     body: '오늘은 창가 자리를 먼저 차지했어. 따뜻해서 눈이 자꾸 감겼고, 네가 부르면 꼬리만 살짝 흔들었지.',
     imageUrl: null,
     createdAt: '2026-04-21T09:30:00.000Z',
-    tilt: 'left',
   },
   decorators: [
     (Story) => (
@@ -31,8 +30,4 @@ type Story = StoryObj<typeof meta>
 
 export const EmptyPhoto: Story = {}
 
-export const RightTilt: Story = {
-  args: {
-    tilt: 'right',
-  },
-}
+export const Default: Story = {}

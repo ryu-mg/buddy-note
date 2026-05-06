@@ -1,9 +1,6 @@
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
-
 type DiaryCardSkeletonProps = {
-  /** 좌/우 기울임 변주 (DESIGN §12). */
-  tilt?: 'left' | 'right'
   /**
    * 레이아웃 변형:
    *  - `feed`: 홈 피드 `DiaryCard` — 본문 하단에 날짜 메타.
@@ -22,22 +19,12 @@ type DiaryCardSkeletonProps = {
  * 텍스트는 전혀 없음 — shimmer + shape으로 "불러오는 중" 의미 전달.
  */
 export function DiaryCardSkeleton({
-  tilt = 'left',
   variant = 'feed',
 }: DiaryCardSkeletonProps) {
   return (
     <div
       aria-hidden="true"
-      className={cn(
-        'relative mx-auto w-full max-w-[420px]',
-        'bg-[var(--color-paper)] p-6 pb-11',
-        'shadow-[var(--shadow-card)]',
-        'ring-1 ring-[var(--color-line)]',
-        'motion-reduce:rotate-0',
-        tilt === 'left'
-          ? 'motion-safe:-rotate-[1.2deg]'
-          : 'motion-safe:rotate-[0.8deg]',
-      )}
+      className="relative mx-auto w-full max-w-[420px] bg-[var(--color-paper)] p-6 pb-11 shadow-[var(--shadow-card)] ring-1 ring-[var(--color-line)]"
     >
       {variant === 'public' ? (
         // 상단 메타 라인 — 좌측 날짜, 우측 이름

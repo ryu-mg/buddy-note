@@ -21,9 +21,9 @@ export function BottomNav() {
   return (
     <nav
       aria-label="주요 메뉴"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--color-line)] bg-[var(--color-bg)]"
+      className="fixed inset-x-0 bottom-0 z-40 h-[var(--bottom-nav-height)] border-t border-[var(--color-line)] bg-[var(--color-bg)]"
     >
-      <div className="mx-auto grid h-16 max-w-md grid-cols-3 px-4 pb-[env(safe-area-inset-bottom)]">
+      <div className="mx-auto grid h-full max-w-md grid-cols-3 px-4 pb-[env(safe-area-inset-bottom)]">
         {items.map((item) => {
           const active =
             item.href === '/'
@@ -36,7 +36,7 @@ export function BottomNav() {
               href={item.href}
               aria-current={active ? 'page' : undefined}
               className={[
-                'flex min-h-14 flex-col items-center justify-center gap-1 text-[12px] font-medium transition-colors',
+                'flex min-h-[var(--bottom-nav-content-height)] flex-col items-center justify-center gap-1 text-[12px] font-medium transition-colors',
                 active
                   ? 'text-[var(--color-accent-brand)]'
                   : 'text-[var(--color-mute)] hover:text-[var(--color-ink-soft)]',
