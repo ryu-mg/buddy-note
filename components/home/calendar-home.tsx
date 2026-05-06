@@ -2,13 +2,17 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
+import type { CSSProperties } from 'react'
 import { useMemo, useState } from 'react'
 
 import { UploadForm } from '@/app/log/upload-form'
 import { EmptyState } from '@/components/empty/empty-state'
 import { PawPrint } from '@/components/icons/paw-print'
+import { FirstEntryTutorialSheet } from '@/components/tutorial/first-entry-tutorial-sheet'
 import { CountUp } from '@/lib/motion/count-up'
 import { MOOD_CSS_VAR } from '@/lib/mood'
+import type { ThemePresetKey } from '@/lib/themes/presets'
+import { buildThemeStyle } from '@/lib/themes/style'
 import type { DiaryMood } from '@/types/database'
 
 export type CalendarPet = {
@@ -109,9 +113,13 @@ function buildMonthDays(
 export function CalendarHome({
   pet,
   diaries,
+  showFirstEntryTutorial = false,
+  themeKey = null,
 }: {
   pet: CalendarPet
   diaries: CalendarDiary[]
+  showFirstEntryTutorial?: boolean
+  themeKey?: ThemePresetKey | null
 }) {
   const todayKey = todayInSeoul()
   const [activeMonth, setActiveMonth] = useState(() => {
@@ -136,19 +144,26 @@ export function CalendarHome({
     : null
   const selectedIsFuture = selectedKey ? selectedKey > todayKey : false
   const dayN = daysSince(pet.createdAt)
+  const themeStyle = buildThemeStyle(themeKey) as CSSProperties
 
   // A3 — 일기 0개 상태: EmptyState hero로 전환
   if (diaries.length === 0) {
     return (
-      <main className="mx-auto flex min-h-screen w-full max-w-md flex-col gap-8 px-4 py-12">
-        <EmptyState
-          illustration="resting"
-          tone="warm"
-          title={`${pet.name}의 첫 페이지를 채워볼까?`}
-          hint="사진 한 장이면 buddy가 오늘을 직접 적어줘."
-          cta={{ label: '첫 기록 남기기', href: '/log' }}
-        />
-      </main>
+      <>
+        <main
+          className="mx-auto flex min-h-screen w-full max-w-md flex-col gap-8 px-4 py-12"
+          style={themeStyle}
+        >
+          <EmptyState
+            illustration="resting"
+            tone="warm"
+            title={`${pet.name}의 첫 페이지를 채워볼까?`}
+            hint="사진 한 장이면 buddy가 오늘을 직접 적어줘."
+            cta={{ label: '첫 기록 남기기', href: '/log' }}
+          />
+        </main>
+        {showFirstEntryTutorial ? <FirstEntryTutorialSheet /> : null}
+      </>
     )
   }
 
@@ -162,7 +177,10 @@ export function CalendarHome({
   }
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col gap-6 px-4 pb-28 pt-8 sm:px-6 md:pt-10">
+    <main
+      className="mx-auto flex min-h-screen w-full max-w-3xl flex-col gap-6 px-4 pb-28 pt-8 sm:px-6 md:pt-10"
+      style={themeStyle}
+    >
       <header className="flex flex-col gap-2">
         <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-mute)]">
           monthly note
@@ -174,10 +192,10 @@ export function CalendarHome({
           <CountUp
             to={dayN}
             suffix="일째"
-            className="font-serif text-[20px] font-semibold text-[var(--color-accent-brand)]"
+            className="font-serif text-[20px] font-semibold text-[var(--theme-accent,var(--color-accent-brand))]"
           />
           {pet.personalityCode && pet.personalityLabel ? (
-            <span className="rounded-[var(--radius-pill)] bg-[var(--color-accent-brand-soft)] px-2.5 py-0.5 text-[11px] font-semibold tracking-[0.06em] text-[var(--color-accent-brand)]">
+            <span className="rounded-[var(--radius-pill)] bg-[var(--theme-accent-soft,var(--color-accent-brand-soft))] px-2.5 py-0.5 text-[11px] font-semibold tracking-[0.06em] text-[var(--theme-accent,var(--color-accent-brand))]">
               {pet.personalityCode} · {pet.personalityLabel}
             </span>
           ) : (
@@ -316,6 +334,7 @@ export function CalendarHome({
           onClose={() => setSelectedKey(null)}
         />
       ) : null}
+      {showFirstEntryTutorial ? <FirstEntryTutorialSheet /> : null}
     </main>
   )
 }

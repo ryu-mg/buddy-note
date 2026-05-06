@@ -19,6 +19,7 @@ import {
 } from '@/lib/storage'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
+import { getPetThemeKey } from '@/lib/themes/server'
 import type { LogTag, RecentCallback } from '@/types/database'
 
 /**
@@ -379,11 +380,13 @@ export async function createLog(formData: FormData): Promise<CreateLogResult> {
   //     share images is still valuable, per 작업 지시).
   let renderedImages: Awaited<ReturnType<typeof renderAllFormats>> | null = null
   try {
+    const themeKey = await getPetThemeKey(admin, petId)
     renderedImages = await renderAllFormats({
       photoUrl: signedPhotoUrl,
       petName: pet.name,
       diaryTitle: diaryResult.data.title,
       diaryBody: diaryResult.data.body,
+      themeKey,
     })
   } catch (err) {
     log.warn('satori render failed — continuing without images', { err })

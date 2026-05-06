@@ -10,6 +10,9 @@ import { BuddyHappy } from '@/components/illustrations/buddy-happy'
 import { isDevAuthBypassEnabled } from '@/lib/auth/dev-bypass'
 import { createClient } from '@/lib/supabase/server'
 import { getSignedPhotoUrl } from '@/lib/storage'
+import { FIRST_ENTRY_TUTORIAL_VERSION } from '@/lib/tutorial/first-entry-tutorial'
+import { shouldShowFirstEntryTutorial } from '@/lib/tutorial/visibility'
+import { getPetThemeKey } from '@/lib/themes/server'
 import type { DiaryMood } from '@/types/database'
 
 export const dynamic = 'force-dynamic'
@@ -37,6 +40,11 @@ type DiaryCalendarRow = {
     photo_url: string | null
     photo_storage_path: string | null
   } | null
+}
+
+type TutorialStateRow = {
+  completed_at: string | null
+  dismissed_at: string | null
 }
 
 export default async function Home() {
@@ -81,6 +89,15 @@ export default async function Home() {
     redirect('/onboarding')
   }
 
+  const { data: tutorialState } = await supabase
+    .from('user_tutorial_state')
+    .select('completed_at, dismissed_at')
+    .eq('user_id', user.id)
+    .eq('tutorial_version', FIRST_ENTRY_TUTORIAL_VERSION)
+    .maybeSingle<TutorialStateRow>()
+
+  const themeKey = await getPetThemeKey(supabase, pet.id)
+
   const { data: rowsRaw } = await supabase
     .from('diaries')
     .select(
@@ -124,7 +141,22 @@ export default async function Home() {
       pet.companion_relationship ?? pet.guardian_relationship ?? null,
   }
 
-  return <CalendarHome pet={calendarPet} diaries={diaries} />
+  const showFirstEntryTutorial = shouldShowFirstEntryTutorial({
+    hasUser: true,
+    hasPet: true,
+    pathname: '/',
+    completedAt: tutorialState?.completed_at ?? null,
+    dismissedAt: tutorialState?.dismissed_at ?? null,
+  })
+
+  return (
+    <CalendarHome
+      pet={calendarPet}
+      diaries={diaries}
+      showFirstEntryTutorial={showFirstEntryTutorial}
+      themeKey={themeKey}
+    />
+  )
 }
 
 function AnonymousLanding() {

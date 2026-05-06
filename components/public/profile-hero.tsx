@@ -31,7 +31,7 @@ export function ProfileHero({
           {name}
         </h1>
         {personalityCode && personalityLabel ? (
-          <p className="mt-4 text-[16px] font-medium text-[var(--color-accent-brand)]">
+          <p className="mt-4 text-[16px] font-medium text-[var(--theme-accent,var(--color-accent-brand))]">
             {personalityCode} · {personalityLabel}
           </p>
         ) : null}
@@ -81,7 +81,7 @@ export function ProfileHero({
 
 function PublicStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-[var(--radius-button)] bg-[var(--color-paper)] px-4 py-3 ring-1 ring-[var(--color-line)]">
+    <div className="rounded-[var(--radius-button)] bg-[var(--theme-paper,var(--color-paper))] px-4 py-3 ring-1 ring-[var(--color-line)]">
       <p className="text-[12px] text-[var(--color-mute)]">{label}</p>
       <p className="mt-1 font-serif text-[25px] font-semibold leading-none text-[var(--color-ink)]">
         {value}

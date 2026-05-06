@@ -90,6 +90,7 @@ export default async function PetOverviewPage({ searchParams }: PageProps) {
 
       <nav aria-label="마이페이지 메뉴" className="border-t border-[var(--color-line)]">
         <MenuRow href="/pet/edit" label="버디 정보 수정" />
+        <MenuRow href="/pet/theme" label="앨범 테마 설정" />
         <MenuRow href="/pet/edit#personality" label="성격 다시 답하기" />
         <MenuRow
           href="/pet/edit#public"

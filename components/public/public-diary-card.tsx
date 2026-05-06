@@ -47,7 +47,7 @@ export function PublicDiaryCard({
     <article
       aria-labelledby={`pdc-title-${createdAt}`}
       className={[
-        'relative mx-auto w-full bg-[var(--color-paper)] px-6 pb-11 pt-6 shadow-[var(--shadow-card)] ring-1 ring-[var(--color-line)] motion-safe:-rotate-[1.2deg] motion-reduce:rotate-0',
+        'relative mx-auto w-full bg-[var(--theme-paper,var(--color-paper))] px-6 pb-11 pt-6 shadow-[var(--shadow-card)] ring-1 ring-[var(--color-line)] motion-safe:-rotate-[1.2deg] motion-reduce:rotate-0',
         wide ? 'max-w-[640px]' : 'max-w-[420px]',
       ].join(' ')}
     >

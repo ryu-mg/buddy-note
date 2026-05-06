@@ -5,6 +5,86 @@ Format: Priority (P1/P2/P3) + Effort (S/M/L/XL, 인간 teams / CC+gstack compres
 
 ---
 
+## 테마 기능 출시 전 당신이 해야 할 일
+
+이번 구현은 `memberships`와 `pet_theme_settings` migration을 포함한다. 결제 provider는 아직 붙지 않았기 때문에, 실제 유료/체험 사용자를 열어주는 작업은 아래를 처리해야 한다.
+
+### [THEME-1] Supabase migration 적용
+
+아래 명령으로 새 테이블을 원격 Supabase에 적용한다.
+
+```bash
+cd /Users/bao/dev/new-project
+supabase db push
+```
+
+적용 후 Supabase Dashboard → Table Editor에서 아래 테이블이 보여야 한다.
+
+- `memberships`
+- `pet_theme_settings`
+- `user_tutorial_state`
+
+### [THEME-2] 로컬 Docker 공간 확보 후 RLS 테스트 실행
+
+이전 검증에서 Docker Desktop 저장공간 부족으로 Supabase local stack이 실패했다. Docker Desktop에서 불필요한 images/containers/volumes를 정리한 뒤 아래를 실행한다.
+
+```bash
+cd /Users/bao/dev/new-project
+supabase start
+supabase db reset
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f tests/rls/pet_theme_settings.sql
+```
+
+기대 결과는 에러 없이 종료되는 것이다.
+
+### [THEME-3] 테스트용 멤버십 row 생성
+
+결제 연동 전에는 테마 저장 권한을 수동으로 열어야 한다. Supabase SQL Editor에서 테스트 계정의 `auth.users.id`를 확인한 뒤 아래 SQL을 실행한다.
+
+```sql
+insert into public.memberships (
+  user_id,
+  status,
+  plan_key,
+  trial_started_at,
+  trial_ends_at,
+  current_period_starts_at,
+  current_period_ends_at
+)
+values (
+  '<테스트 auth.users.id>',
+  'trialing',
+  'manual_trial',
+  now(),
+  now() + interval '7 days',
+  now(),
+  now() + interval '7 days'
+)
+on conflict (user_id) do update
+set
+  status = excluded.status,
+  plan_key = excluded.plan_key,
+  trial_started_at = excluded.trial_started_at,
+  trial_ends_at = excluded.trial_ends_at,
+  current_period_starts_at = excluded.current_period_starts_at,
+  current_period_ends_at = excluded.current_period_ends_at,
+  updated_at = now();
+```
+
+이 row가 없으면 `/pet/theme`에서 미리보기만 가능하고 저장은 막힌다.
+
+### [THEME-4] 실제 출시 전 결제/무료체험 시작 로직 연결
+
+현재 테마 기능은 `memberships.status`를 서버 기준으로 읽는다. 실제 출시 전에는 `specs/payments/tasks.md`의 trial start policy와 Toss Payments webhook이 이 테이블을 자동으로 갱신해야 한다.
+
+필수 연결 지점:
+
+- 첫 pet 생성 후 7일 체험 시작 row 생성
+- 결제 성공 시 `status='active'`
+- 결제 실패 grace period 시 `status='past_due'`, `grace_ends_at` 설정
+- 해지 예약 시 `status='canceling'`
+- 종료/환불 시 `status='ended'` 또는 `status='refunded'`
+
 ## 지금 TODO
 
 - [ ] 글씨 폰트 설정

@@ -54,6 +54,22 @@ export type DiaryMood =
   | 'grumpy'
   | 'lonely';
 
+export type MembershipStatus =
+  | 'free'
+  | 'trialing'
+  | 'active'
+  | 'past_due'
+  | 'canceling'
+  | 'ended'
+  | 'refunded';
+
+export type ThemePresetKey =
+  | 'classic_terracotta'
+  | 'field_green'
+  | 'morning_gold'
+  | 'quiet_umber'
+  | 'mist_blue';
+
 /**
  * Entry in pet_memory_summary.recent_callbacks (jsonb).
  * referenceDate is ISO 8601 date (YYYY-MM-DD).
@@ -260,6 +276,81 @@ export type MilestoneCardInsert = Omit<
 
 export type MilestoneCardUpdate = Partial<MilestoneCardInsert>;
 
+export interface MembershipRow {
+  id: string;
+  user_id: string;
+  status: MembershipStatus;
+  plan_key: string;
+  trial_started_at: string | null;
+  trial_ends_at: string | null;
+  current_period_starts_at: string | null;
+  current_period_ends_at: string | null;
+  cancel_at_period_end: boolean;
+  grace_ends_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type MembershipInsert = Omit<
+  MembershipRow,
+  | 'id'
+  | 'created_at'
+  | 'updated_at'
+  | 'status'
+  | 'plan_key'
+  | 'cancel_at_period_end'
+> & {
+  id?: string;
+  created_at?: string;
+  updated_at?: string;
+  status?: MembershipStatus;
+  plan_key?: string;
+  cancel_at_period_end?: boolean;
+};
+
+export type MembershipUpdate = Partial<MembershipInsert>;
+
+export interface PetThemeSettingRow {
+  id: string;
+  pet_id: string;
+  theme_key: ThemePresetKey;
+  created_at: string;
+  updated_at: string;
+}
+
+export type PetThemeSettingInsert = Omit<
+  PetThemeSettingRow,
+  'id' | 'created_at' | 'updated_at' | 'theme_key'
+> & {
+  id?: string;
+  created_at?: string;
+  updated_at?: string;
+  theme_key?: ThemePresetKey;
+};
+
+export type PetThemeSettingUpdate = Partial<PetThemeSettingInsert>;
+
+export interface UserTutorialStateRow {
+  id: string;
+  user_id: string;
+  tutorial_version: string;
+  completed_at: string | null;
+  dismissed_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type UserTutorialStateInsert = Omit<
+  UserTutorialStateRow,
+  'id' | 'created_at' | 'updated_at'
+> & {
+  id?: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type UserTutorialStateUpdate = Partial<UserTutorialStateInsert>;
+
 // -----------------------------------------------------------------------------
 // Aggregate Database shape — compatible with @supabase/supabase-js createClient<Database>()
 // -----------------------------------------------------------------------------
@@ -301,6 +392,21 @@ export interface Database {
         Row: MilestoneCardRow;
         Insert: MilestoneCardInsert;
         Update: MilestoneCardUpdate;
+      };
+      memberships: {
+        Row: MembershipRow;
+        Insert: MembershipInsert;
+        Update: MembershipUpdate;
+      };
+      pet_theme_settings: {
+        Row: PetThemeSettingRow;
+        Insert: PetThemeSettingInsert;
+        Update: PetThemeSettingUpdate;
+      };
+      user_tutorial_state: {
+        Row: UserTutorialStateRow;
+        Insert: UserTutorialStateInsert;
+        Update: UserTutorialStateUpdate;
       };
     };
     Views: Record<string, never>;

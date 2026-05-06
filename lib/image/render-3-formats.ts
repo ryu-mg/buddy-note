@@ -18,6 +18,7 @@ type RenderInput = {
   petName: string
   diaryTitle: string
   diaryBody: string
+  themeKey?: string | null
 }
 
 export type ThreeFormatResult = {

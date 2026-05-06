@@ -3,10 +3,12 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 import { createClient } from '@/lib/supabase/server'
+import { getPetThemeKey } from '@/lib/themes/server'
 
 import { EmptyState } from '@/components/empty/empty-state'
 import { ProfileHero } from '@/components/public/profile-hero'
 import { PublicDiaryCard } from '@/components/public/public-diary-card'
+import { ThemeScope } from '@/components/themes/theme-scope'
 
 type PageProps = {
   params: Promise<{ slug: string }>
@@ -179,6 +181,8 @@ export default async function PublicProfilePage({ params }: PageProps) {
   }
 
   const diaries = await fetchPublicDiaries(pet.id)
+  const supabase = await createClient()
+  const themeKey = supabase ? await getPetThemeKey(supabase, pet.id) : null
   const days = daysSince(pet.created_at)
 
   const shareUrl =
@@ -189,7 +193,11 @@ export default async function PublicProfilePage({ params }: PageProps) {
   const marker = objectMarker(pet.name)
 
   return (
-    <main className="public-profile-surface mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-12 px-4 pb-16 pt-10 sm:px-6">
+    <ThemeScope
+      as="main"
+      themeKey={themeKey}
+      className="public-profile-surface mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-12 px-4 pb-16 pt-10 sm:px-6"
+    >
       <ProfileHero
         name={pet.name}
         days={days}
@@ -255,7 +263,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
         </p>
         <a
           href={shareUrl}
-          className="inline-flex items-center gap-2 rounded-[var(--radius-pill)] border border-[var(--color-line)] bg-[var(--color-paper)] px-4 py-2 text-[13px] font-semibold text-[var(--color-ink)] transition-colors hover:border-[var(--color-accent-brand)] hover:text-[var(--color-accent-brand)]"
+          className="inline-flex items-center gap-2 rounded-[var(--radius-pill)] border border-[var(--color-line)] bg-[var(--theme-paper,var(--color-paper))] px-4 py-2 text-[13px] font-semibold text-[var(--color-ink)] transition-colors hover:border-[var(--theme-accent,var(--color-accent-brand))] hover:text-[var(--theme-accent,var(--color-accent-brand))]"
           aria-label={`${pet.name} 프로필 공유하기`}
         >
           <ShareIcon className="h-4 w-4" />
@@ -286,6 +294,6 @@ export default async function PublicProfilePage({ params }: PageProps) {
           buddy-note
         </Link>
       </footer>
-    </main>
+    </ThemeScope>
   )
 }

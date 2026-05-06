@@ -4,6 +4,7 @@ import { Resvg } from '@resvg/resvg-js'
 import satori from 'satori'
 
 import { loadFonts } from '@/lib/image/fonts'
+import { resolveThemePreset } from '@/lib/themes/presets'
 
 /**
  * Polaroid composite renderer.
@@ -28,12 +29,9 @@ import { loadFonts } from '@/lib/image/fonts'
  *   1:1   →  1080 x 1080  (square)
  */
 
-const COLOR_BG = '#fafaf5' // DESIGN §3 --color-paper (폴라로이드 크림 배경)
 const COLOR_PAPER = '#ffffff' // 폴라로이드 카드 흰 테두리
 const COLOR_INK = '#1a1a1a' // 본문
 const COLOR_INK_SOFT = '#3f3f3f' // diary 본문 subtle
-const COLOR_MUTE = '#6b7280' // meta
-const COLOR_ACCENT = '#e07a5f' // 테라코타 (small accent dot only)
 
 type Format = '9:16' | '4:5' | '1:1'
 
@@ -43,6 +41,7 @@ type RenderArgs = {
   diaryTitle: string
   diaryBody: string
   format: Format
+  themeKey?: string | null
 }
 
 const FORMATS: Record<Format, { width: number; height: number }> = {
@@ -54,6 +53,7 @@ const FORMATS: Record<Format, { width: number; height: number }> = {
 export async function renderPolaroid(args: RenderArgs): Promise<Buffer> {
   const { width, height } = FORMATS[args.format]
   const fonts = await loadFonts()
+  const theme = resolveThemePreset(args.themeKey)
 
   // Card sizing: keep a consistent polaroid feel across all 3 formats by
   // sizing the card to ~80% of the narrower edge, with the caption panel
@@ -70,7 +70,7 @@ export async function renderPolaroid(args: RenderArgs): Promise<Buffer> {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: COLOR_BG,
+        backgroundColor: theme.colors.paper,
         fontFamily: 'Pretendard, MaruBuri, sans-serif',
         position: 'relative',
       }}
@@ -127,7 +127,7 @@ export async function renderPolaroid(args: RenderArgs): Promise<Buffer> {
                 width: '8px',
                 height: '8px',
                 borderRadius: '9999px',
-                backgroundColor: COLOR_ACCENT,
+                backgroundColor: theme.colors.accent,
               }}
             />
             <div
@@ -168,7 +168,7 @@ export async function renderPolaroid(args: RenderArgs): Promise<Buffer> {
               paddingTop: '12px',
               fontFamily: 'MaruBuri',
               fontSize: '18px',
-              color: COLOR_MUTE,
+              color: theme.colors.moodHint,
             }}
           >
             {args.petName}
@@ -196,7 +196,7 @@ export async function renderPolaroid(args: RenderArgs): Promise<Buffer> {
 
   const resvg = new Resvg(svg, {
     fitTo: { mode: 'width', value: width },
-    background: COLOR_BG,
+    background: theme.colors.paper,
     font: {
       loadSystemFonts: false,
     },
