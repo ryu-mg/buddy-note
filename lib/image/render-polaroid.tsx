@@ -11,7 +11,7 @@ import { resolveThemePreset } from '@/lib/themes/presets'
  *
  * Per AGENTS.md / DESIGN §12:
  *   - 24px white border around photo (bottom 44px caption area)
- *   - -1.2deg tilt
+ *   - no tilt in generated share images; exported cards must align straight
  *   - MaruBuri for diary body, Pretendard SemiBold for title
  *   - Terracotta accent (var(--color-accent-brand) = #e07a5f) used ONLY
  *     as a small decorative dot beside the title — never dominant.
@@ -87,7 +87,6 @@ export async function renderPolaroid(args: RenderArgs): Promise<Buffer> {
           paddingLeft: '24px',
           paddingRight: '24px',
           paddingBottom: '44px',
-          transform: 'rotate(-1.2deg)',
           boxShadow: '0 18px 42px rgba(26, 26, 26, 0.14)',
         }}
       >
@@ -317,6 +316,6 @@ function truncate(input: string, max: number): string {
  *      the asset would need to ship with the bundle and blow up cold
  *      start. Deferred.
  *   3. Skip for now — polaroid identity is carried by the 24px border,
- *      -1.2deg tilt, typography, and serif body. Grain is nice-to-have.
+ *      typography, and serif body. Grain is nice-to-have.
  * Current implementation: SKIPPED. Tracked as follow-up.
  */
