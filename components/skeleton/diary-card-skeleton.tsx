@@ -7,7 +7,7 @@ type DiaryCardSkeletonProps = {
   /**
    * 레이아웃 변형:
    *  - `feed`: 홈 피드 `DiaryCard` — 본문 하단에 날짜 메타.
-   *  - `public`: 공개 프로필 `PublicDiaryCard` — 상단에 날짜/이름 라인.
+   *  - `public`: legacy 상단 메타 라인 변형.
    */
   variant?: 'feed' | 'public'
 }
@@ -15,8 +15,8 @@ type DiaryCardSkeletonProps = {
 /**
  * 폴라로이드 스타일 diary card skeleton.
  *
- * 홈(`app/loading.tsx`)과 공개 프로필(`app/b/[slug]/loading.tsx`)에서 공유.
- * 실제 `DiaryCard` / `PublicDiaryCard`의 4:5 사진 영역 + title + body 2줄
+ * 홈(`app/loading.tsx`)에서 사용.
+ * 실제 `DiaryCard`의 4:5 사진 영역 + title + body 2줄
  * 레이아웃을 그대로 echo 하여 렌더 완료 시 layout shift를 최소화한다.
  *
  * 텍스트는 전혀 없음 — shimmer + shape으로 "불러오는 중" 의미 전달.

@@ -28,8 +28,6 @@ type DiaryWithPet = {
     id: string
     name: string
     user_id: string
-    slug: string
-    is_public: boolean
   } | null
 }
 
@@ -78,7 +76,7 @@ export default async function DiaryPage({ params }: PageProps) {
   const { data: diaryData, error: diaryError } = await supabase
     .from('diaries')
     .select(
-      'id, log_id, pet_id, title, body, image_url_916, image_url_45, image_url_11, is_fallback, created_at, pet:pets(id, name, user_id, slug, is_public)',
+      'id, log_id, pet_id, title, body, image_url_916, image_url_45, image_url_11, is_fallback, created_at, pet:pets(id, name, user_id)',
     )
     .eq('id', id)
     .single<DiaryWithPet>()
@@ -106,10 +104,6 @@ export default async function DiaryPage({ params }: PageProps) {
       photoUrl = signed.url
     }
   }
-
-  const publicUrl = diary.pet.is_public
-    ? `/b/${diary.pet.slug}`
-    : null
 
   const dateLabel = formatDate(diary.created_at)
 
@@ -197,7 +191,6 @@ export default async function DiaryPage({ params }: PageProps) {
             '4:5': diary.image_url_45,
             '1:1': diary.image_url_11,
           }}
-          publicUrl={publicUrl}
         />
 
         {diary.is_fallback ? (

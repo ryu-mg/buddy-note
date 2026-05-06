@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 
 import { createLogger } from '@/lib/logger'
+import { buildDeleteConfirmationText } from '@/lib/pet/delete-confirmation'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 
@@ -60,7 +61,7 @@ export async function deleteAccount(
     return { ok: false, error: '로그인이 필요해요.', code: 'auth' }
   }
 
-  // 2) pet 조회 (이름 매칭 근거). pet 이 여럿이면 전부 로드해서 이름 매칭.
+  // 2) pet 조회 (확인 문구 매칭 근거). pet 이 여럿이면 전부 로드.
   const { data: pets, error: petsError } = await supabase
     .from('pets')
     .select('id, name')
@@ -87,12 +88,13 @@ export async function deleteAccount(
       }
     }
   } else {
-    // pet 이 있으면 primary pet 이름과 일치해야 한다.
+    // pet 이 있으면 primary pet 이름을 넣은 문구와 일치해야 한다.
     const primary = pets[0]
-    if (!primary || primary.name.trim() !== confirmName) {
+    const expected = primary ? buildDeleteConfirmationText(primary.name) : ''
+    if (!primary || expected !== confirmName) {
       return {
         ok: false,
-        error: '이름이 일치하지 않아요.',
+        error: '확인 문구가 일치하지 않아요.',
         code: 'name_mismatch',
       }
     }

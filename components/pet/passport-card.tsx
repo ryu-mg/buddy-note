@@ -5,22 +5,18 @@ import { CountUp } from '@/lib/motion/count-up'
 
 type PassportCardProps = {
   name: string
-  slug: string | null
   personalityCode: string | null
   personalityLabel: string | null
   daysSinceCreated: number
   avatarUrl: string | null
-  isPublic: boolean
 }
 
 export function PassportCard({
   name,
-  slug,
   personalityCode,
   personalityLabel,
   daysSinceCreated,
   avatarUrl,
-  isPublic,
 }: PassportCardProps) {
   return (
     <article className="relative mx-auto w-full max-w-md bg-[var(--color-paper)] p-6 pb-10 shadow-[var(--shadow-polaroid)] ring-1 ring-[var(--color-line)] motion-safe:-rotate-[1.2deg]">
@@ -29,15 +25,6 @@ export function PassportCard({
         <p className="text-[10px] font-bold uppercase tracking-[0.32em] text-[var(--color-mute)]">
           passport · buddy
         </p>
-        {isPublic ? (
-          <span className="rounded-[var(--radius-pill)] border border-[var(--color-success)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--color-success)]">
-            public
-          </span>
-        ) : (
-          <span className="rounded-[var(--radius-pill)] border border-[var(--color-line)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--color-mute)]">
-            private
-          </span>
-        )}
       </div>
 
       {/* 사진 1:1 */}
@@ -73,7 +60,7 @@ export function PassportCard({
       ) : null}
 
       {/* meta 2열 */}
-      <dl className="mt-5 grid grid-cols-2 gap-3 border-t border-[var(--color-line)] pt-4">
+      <dl className="mt-5 grid gap-3 border-t border-[var(--color-line)] pt-4">
         <div>
           <dt className="text-[11px] uppercase tracking-[0.16em] text-[var(--color-mute)]">
             함께한 날
@@ -86,16 +73,6 @@ export function PassportCard({
             />
           </dd>
         </div>
-        {slug ? (
-          <div>
-            <dt className="text-[11px] uppercase tracking-[0.16em] text-[var(--color-mute)]">
-              호출명
-            </dt>
-            <dd className="mt-1 font-serif text-[18px] font-semibold text-[var(--color-ink)]">
-              @{slug}
-            </dd>
-          </div>
-        ) : null}
       </dl>
     </article>
   )

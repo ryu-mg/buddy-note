@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -41,14 +41,11 @@ export type ShareModalProps = {
   title: string
   petName: string
   images: Record<Format, string | null>
-  publicUrl?: string | null
 }
 
 export function ShareModal({
-  title,
   petName,
   images,
-  publicUrl,
 }: ShareModalProps) {
   const [open, setOpen] = useState(false)
   const [format, setFormat] = useState<Format>('4:5')
@@ -56,11 +53,6 @@ export function ShareModal({
   const [busy, setBusy] = useState(false)
 
   const currentUrl = images[format]
-
-  const shareTitle = useMemo(
-    () => `${petName}의 기록 — ${title}`,
-    [petName, title],
-  )
 
   const clearStatus = useCallback(() => setStatus(null), [])
 
@@ -127,48 +119,6 @@ export function ShareModal({
       setBusy(false)
     }
   }, [currentUrl])
-
-  const handleShareLink = useCallback(async () => {
-    if (!publicUrl) return
-    setBusy(true)
-    setStatus(null)
-    try {
-      const absolute =
-        typeof window !== 'undefined'
-          ? new URL(publicUrl, window.location.origin).toString()
-          : publicUrl
-
-      const nav = typeof navigator !== 'undefined' ? navigator : null
-      if (nav && typeof nav.share === 'function') {
-        await nav.share({ url: absolute, title: shareTitle })
-        setStatus({ kind: 'success', text: '공유창을 열었어요.' })
-        return
-      }
-      if (nav && nav.clipboard && typeof nav.clipboard.writeText === 'function') {
-        await nav.clipboard.writeText(absolute)
-        setStatus({ kind: 'success', text: '링크를 복사했어요.' })
-        return
-      }
-      setStatus({
-        kind: 'info',
-        text: '이 브라우저에서는 링크 공유가 안 돼요.',
-      })
-    } catch (err) {
-      // user aborted the share sheet — don't surface as an error
-      const name = (err as { name?: string } | null)?.name
-      if (name === 'AbortError') {
-        setBusy(false)
-        return
-      }
-      console.error('[share-modal.share-link]', err)
-      setStatus({
-        kind: 'error',
-        text: '링크 공유에 실패했어요.',
-      })
-    } finally {
-      setBusy(false)
-    }
-  }, [publicUrl, shareTitle])
 
   return (
     <Dialog
@@ -285,20 +235,6 @@ export function ShareModal({
             aria-busy={busy}
           >
             복사
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleShareLink}
-            disabled={!publicUrl || busy}
-            aria-busy={busy}
-            title={
-              publicUrl
-                ? undefined
-                : '공개 프로필을 켜야 링크를 공유할 수 있어요.'
-            }
-          >
-            링크 공유
           </Button>
           <Button
             type="button"

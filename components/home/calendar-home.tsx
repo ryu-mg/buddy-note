@@ -361,7 +361,7 @@ function CalendarSheet({
       onClick={onClose}
     >
       <section
-        className="max-h-[86vh] w-full max-w-md overflow-y-auto rounded-t-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-bg)] px-4 pb-6 pt-4 shadow-[var(--shadow-polaroid)] motion-safe:animate-[polaroid-drop_300ms_var(--ease-soft-out)_forwards] motion-reduce:animate-[soft-fade_200ms_forwards]"
+        className="max-h-[86vh] w-full max-w-md overflow-y-auto rounded-t-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-bg)] px-4 pb-6 pt-4 shadow-[var(--shadow-polaroid)] motion-safe:animate-[soft-fade_200ms_var(--ease-soft-out)_forwards] motion-reduce:animate-[soft-fade_200ms_forwards]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mx-auto mb-4 h-1 w-10 rounded-[var(--radius-pill)] bg-[var(--color-line)]" />
@@ -398,6 +398,7 @@ function CalendarSheet({
             petName={pet.name}
             logDate={dateKeyValue}
             companionRelationship={pet.companionRelationship}
+            compact
           />
         )}
       </section>

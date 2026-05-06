@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation'
 
 import { createClient } from '@/lib/supabase/server'
-import { PublicToggle } from '@/components/home/public-toggle'
 import { PetEditForm } from '@/components/pet/pet-edit-form'
 import type { PersonaAnswers } from '@/types/database'
 
@@ -14,8 +13,6 @@ type PetForEdit = {
   guardian_relationship: string | null
   companion_relationship: string | null
   additional_info: string | null
-  slug: string
-  is_public: boolean
   persona_answers: PersonaAnswers | null
 }
 
@@ -37,7 +34,7 @@ export default async function PetEditPage() {
   const { data: pet } = await supabase
     .from('pets')
     .select(
-      'id, name, breed, guardian_relationship, companion_relationship, additional_info, slug, is_public, persona_answers',
+      'id, name, breed, guardian_relationship, companion_relationship, additional_info, persona_answers',
     )
     .eq('user_id', user.id)
     .limit(1)
@@ -70,29 +67,6 @@ export default async function PetEditPage() {
           persona_answers: pet.persona_answers ?? {},
         }}
       />
-
-      <section
-        id="public"
-        aria-labelledby="edit-public-title"
-        className="flex flex-col gap-4 rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-bg)] px-5 py-5"
-      >
-        <div className="flex flex-col gap-0.5">
-          <h2
-            id="edit-public-title"
-            className="text-[15px] font-semibold text-[var(--color-ink)]"
-          >
-            공개 프로필 설정
-          </h2>
-          <p className="text-[12px] text-[var(--color-mute)]">
-            공개로 바꾸면 /b/{pet.slug} 주소를 공유할 수 있어요.
-          </p>
-        </div>
-        <PublicToggle
-          petId={pet.id}
-          initialPublic={pet.is_public}
-          slug={pet.slug}
-        />
-      </section>
     </main>
   )
 }

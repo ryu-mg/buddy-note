@@ -12,8 +12,6 @@ type PetOverview = {
   id: string
   name: string
   breed: string | null
-  slug: string
-  is_public: boolean
   companion_relationship: string | null
   guardian_relationship: string | null
   profile_photo_storage_path: string | null
@@ -42,8 +40,6 @@ export default async function PetOverviewPage({ searchParams }: PageProps) {
         'id',
         'name',
         'breed',
-        'slug',
-        'is_public',
         'companion_relationship',
         'guardian_relationship',
         'profile_photo_storage_path',
@@ -79,12 +75,10 @@ export default async function PetOverviewPage({ searchParams }: PageProps) {
       <section aria-label="버디 프로필" className="px-4 py-8">
         <PassportCard
           name={pet.name}
-          slug={pet.slug}
           personalityCode={pet.personality_code}
           personalityLabel={pet.personality_label}
           daysSinceCreated={daysSinceCreated}
           avatarUrl={photoUrl}
-          isPublic={pet.is_public}
         />
       </section>
 
@@ -92,11 +86,6 @@ export default async function PetOverviewPage({ searchParams }: PageProps) {
         <MenuRow href="/pet/edit" label="버디 정보 수정" />
         <MenuRow href="/pet/theme" label="앨범 테마 설정" />
         <MenuRow href="/pet/edit#personality" label="성격 다시 답하기" />
-        <MenuRow
-          href="/pet/edit#public"
-          label="공개 프로필 설정"
-          value={pet.is_public ? '공개중' : '비공개'}
-        />
         <MenuRow href="/pet/edit#companion" label="반려인 호칭 수정" />
         <MenuRow href="/pet/delete" label="계정 탈퇴" tone="danger" />
       </nav>

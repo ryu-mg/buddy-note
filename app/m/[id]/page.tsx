@@ -1,5 +1,4 @@
 import Image from 'next/image'
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 import { BuddyHappy } from '@/components/illustrations/buddy-happy'
@@ -21,7 +20,6 @@ type MilestonePublicRow = {
   created_at: string
   pet: {
     name: string
-    slug: string
   } | null
 }
 
@@ -32,7 +30,7 @@ export default async function MilestonePage({ params }: PageProps) {
 
   const { data: card } = await supabase
     .from('milestone_cards')
-    .select('id, milestone_day, title, caption, image_url_916, image_url_45, image_url_11, is_public, created_at, pet:pets(name, slug)')
+    .select('id, milestone_day, title, caption, image_url_916, image_url_45, image_url_11, is_public, created_at, pet:pets(name)')
     .eq('id', id)
     .eq('is_public', true)
     .maybeSingle<MilestonePublicRow>()
@@ -72,12 +70,9 @@ export default async function MilestonePage({ params }: PageProps) {
       </section>
 
       {card.pet ? (
-        <Link
-          href={`/b/${card.pet.slug}`}
-          className="text-[14px] text-[var(--color-mute)] underline-offset-4 hover:underline"
-        >
-          {card.pet.name}의 공개 프로필 보기
-        </Link>
+        <p className="text-[14px] text-[var(--color-mute)]">
+          {card.pet.name}의 기념 카드
+        </p>
       ) : null}
     </main>
   )

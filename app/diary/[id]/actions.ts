@@ -49,7 +49,7 @@ function extractDiaryImageName(url: string | null): string | null {
  *  3) diary-images bucket — image_url_{916,45,11} 파일 제거 (best-effort)
  *  4) diaries row delete (service role)
  *  5) logs row delete (service role)
- *  6) revalidate 홈 / diary 상세 / 공개 프로필
+ *  6) revalidate 홈 / diary 상세
  *
  * memory_update_queue 는 건드리지 않음 — pet 단위 집계라 이 log 하나 빠져도
  * 다른 row 처리에 영향 없음. 이미 처리된 요약은 rollback하지 않는다 (v1 정책).
@@ -76,7 +76,7 @@ export async function deleteDiary(diaryId: string): Promise<DeleteDiaryResult> {
   const { data: diary, error: fetchError } = await supabase
     .from('diaries')
     .select(
-      'id, log_id, image_url_916, image_url_45, image_url_11, pet:pets(id, slug, user_id)',
+      'id, log_id, image_url_916, image_url_45, image_url_11, pet:pets(id, user_id)',
     )
     .eq('id', parsed.data)
     .maybeSingle<{
@@ -85,7 +85,7 @@ export async function deleteDiary(diaryId: string): Promise<DeleteDiaryResult> {
       image_url_916: string | null
       image_url_45: string | null
       image_url_11: string | null
-      pet: { id: string; slug: string; user_id: string } | null
+      pet: { id: string; user_id: string } | null
     }>()
 
   if (fetchError || !diary || !diary.pet || diary.pet.user_id !== user.id) {
@@ -154,11 +154,10 @@ export async function deleteDiary(diaryId: string): Promise<DeleteDiaryResult> {
     log.warn('logs delete 실패 (diary는 이미 삭제됨)', { err: logDeleteError })
   }
 
-  // 6) cache 무효화 — 홈, 상세, 공개 프로필
+  // 6) cache 무효화 — 홈, 상세
   try {
     revalidatePath('/')
     revalidatePath(`/diary/${diary.id}`)
-    revalidatePath(`/b/${diary.pet.slug}`)
   } catch {
     // revalidate 실패는 critical 아님
   }

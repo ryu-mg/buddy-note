@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { CalendarDays, Home, UserRound } from 'lucide-react'
 
-const HIDDEN_PREFIXES = ['/auth', '/onboarding', '/b/', '/m/']
+const HIDDEN_PREFIXES = ['/auth', '/onboarding', '/m/']
 
 export function BottomNav() {
   const pathname = usePathname()

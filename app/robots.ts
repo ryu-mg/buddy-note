@@ -7,9 +7,8 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: '*',
-        allow: ['/', '/b/', '/auth/login'],
+        allow: ['/', '/auth/login'],
         // 비공개/인증/내부 API 는 색인 금지.
-        // `/diary/*` 는 소유자 전용 상세 페이지 — 공개 프로필은 `/b/[slug]` 가 전담.
         disallow: [
           '/onboarding',
           '/onboarding/',

@@ -11,7 +11,6 @@ import type { DiaryMood, RecentCallback } from '@/types/database'
 type WeeklyPet = {
   id: string
   name: string
-  slug: string
   createdAt: string
   avatarUrl: string | null
   personalityCode: string | null

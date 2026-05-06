@@ -38,7 +38,7 @@ export const Variants: Story = {
       <Button variant="secondary">다음에 할게요</Button>
       <Button variant="outline">다시 보기</Button>
       <Button variant="ghost">건너뛰기</Button>
-      <Button variant="link">공개 프로필 보기</Button>
+      <Button variant="link">자세히 보기</Button>
     </div>
   ),
 }

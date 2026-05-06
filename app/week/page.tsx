@@ -10,7 +10,6 @@ export const dynamic = 'force-dynamic'
 type PetSummary = {
   id: string
   name: string
-  slug: string
   created_at: string
   profile_photo_storage_path: string | null
   personality_code: string | null
@@ -49,7 +48,7 @@ export default async function WeekPage() {
   const { data: pet } = await supabase
     .from('pets')
     .select(
-      'id, name, slug, created_at, profile_photo_storage_path, personality_code, personality_label',
+      'id, name, created_at, profile_photo_storage_path, personality_code, personality_label',
     )
     .eq('user_id', user.id)
     .limit(1)
@@ -116,7 +115,6 @@ export default async function WeekPage() {
       pet={{
         id: pet.id,
         name: pet.name,
-        slug: pet.slug,
         createdAt: pet.created_at,
         avatarUrl,
         personalityCode: pet.personality_code,

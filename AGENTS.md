@@ -52,7 +52,7 @@
 **페르소나 기억 + 누적**. 5문항 펫 MBTI onboarding으로 입력한 성격이 이후 모든 일기에 녹아든다. 로그가 쌓일수록 `pet_memory_summary` 테이블이 "말투 / 반복 습관 / 좋아하는 것 / 최근 callback 포인트"를 압축 저장 — 매 기록이 과거를 참조하는 구조.
 
 ### 타겟 사용자
-**SNS에서 반려동물 콘텐츠 올리는 모르는 반려인** (취미 공유 아님, 상용 제품 시각). 공개 강아지 프로필 URL (`/b/[slug]`)이 바이럴 루프의 코어 자산.
+**SNS에서 반려동물 콘텐츠 올리는 모르는 반려인** (취미 공유 아님, 상용 제품 시각). v1의 공유 자산은 공개 프로필 URL이 아니라 **satori로 만든 일기 공유 이미지**다.
 
 ### 10x 비전
 1년치 diary + 사진 + `pet_memory_summary`로 **"OOO와 나의 1년" 다큐멘터리 자동 편집** (유료 tier). 현재 v1에서는 월별 하이라이트 카드까지만.
@@ -81,14 +81,14 @@
 ```
   ┌─────────────────────────────────────────────────────────────────┐
   │                       BROWSER / PWA                             │
-  │   [Next.js App Router: /home, /log, /b/[slug], /auth, /onboarding]
+  │   [Next.js App Router: /, /log, /diary/[id], /auth, /onboarding]
   └──────────┬────────────────────────────────────┬─────────────────┘
              │                                    │
              ▼                                    ▼
   ┌──────────────────────┐          ┌─────────────────────────────┐
   │   Vercel Edge/RSC    │          │  Supabase Seoul region       │
   │   - OG meta (SSR)    │          │  - Auth (email magic link +  │
-  │   - ISR /b/[slug]    │◀────────▶│    kakao v1.5)               │
+  │   - RSC + actions    │◀────────▶│    kakao v1.5)               │
   │   - server actions   │   RLS    │  - Postgres (6 tables)       │
   │   - satori render    │          │  - Storage (photos/diary)    │
   └──────────┬───────────┘          │  - Edge Functions (async)    │
@@ -113,7 +113,7 @@
 - `/onboarding` — 진입 (auth check + pet 존재 check → 리다이렉트)
 - `/onboarding/steps/[step]` — stepper 0~6 (0=info, 1~5=MBTI, 6=confirm)
 - `/log` — (v1 Week 3) 사진 업로드 + 태그 + diary 생성
-- `/b/[slug]` — (v1 Week 4) 공개 강아지 프로필 (ISR, 바이럴 루프 코어)
+- `/diary/[id]` — owner-scoped 일기 상세 + 이미지 공유
 
 ### Data Model (Supabase Postgres)
 ```
@@ -131,7 +131,7 @@ memory_update_queue (id, pet_id, log_id, status, attempts,
 slug_reserved (slug PK)
 ```
 
-RLS 전수. `pets.is_public=true`일 때만 anon이 `diaries` 읽기 가능 (`logs`, `pet_memory_summary`는 영원히 owner only).
+RLS 전수. 공개 프로필 기능 제거 후 `pets`, `logs`, `diaries`, `pet_memory_summary`는 owner only다. `slug`, `is_public`, `slug_reserved`는 legacy/forward-only 호환을 위해 남겨두지만 신규 UX에서 사용하지 않는다.
 
 ### Supabase Storage buckets (Week 2+)
 - `photos` — **private**, signed URL 7d 만료. 경로: `photos/{user_id}/{log_id}.{ext}`
@@ -305,7 +305,7 @@ supabase db push                      # 적용
 | D4 | Claude Sonnet 4.6 (tentative, Week 0 A/B로 최종 확정) | 한국어 자연스러움 + multimodal + 비용 중간 | Low (프롬프트만 조정, `diaries.model_used`로 A/B 가능) |
 | D5 | 폴라로이드 visual style | "캐릭터 엔진"과 감정 1:1 align, AI slop 방어 | Medium (공유 이미지 템플릿 재작성) |
 | D6 | 페르소나 기억 = 제품 해자 | 챗GPT와 가장 큰 차별점, 데이터 lock-in 강함 | High (제품 정체성 근본 변경) |
-| D7 | 공개 프로필 URL `/b/[slug]`를 v1에 포함 | 바이럴 루프 코어 asset (CEO review expansion) | Low (URL 비활성화) |
+| D7 | 공개 프로필 URL `/b/[slug]` 제거 (2026-05-06 사용자 결정) | 현재 제품에는 필요하지 않음. v1 공유는 일기 이미지 중심으로 유지 | Low (legacy 컬럼만 잔존) |
 | D8 | LLM fallback template을 v1에 포함 | Eng+Design review 독립 합의로 승격 | Low (feature flag off) |
 | D9 | proxy.ts 마이그레이션 완료 (2026-04-20) — Supabase SSR helper는 파일명 유지(`lib/supabase/middleware.ts`), 루트 파일 컨벤션만 `proxy.ts`로 rename + `export function proxy` | Next 16 deprecation warning 제거 (codemod `@next/codemod middleware-to-proxy`와 동일 형태) | Low (되돌리려면 rename) |
 | D10 | 카카오 로그인 v1 필수 (Codex는 v2로 제안했으나 오판; 코드 반영 완료 2026-04-20, Supabase Dashboard 활성화는 Kakao 비즈앱 승인(C1) 후) | 한국 시장 UX 마찰 완화 | Medium (비즈앱 승인 대기) |

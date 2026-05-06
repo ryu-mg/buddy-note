@@ -118,40 +118,6 @@ export const openApiDocument = {
         },
       },
     },
-    '/b/{slug}': {
-      get: {
-        tags: ['Public'],
-        summary: 'Public pet profile page',
-        description:
-          'Returns the public HTML profile for a pet when `pets.is_public=true`. This is not a JSON API.',
-        parameters: [
-          {
-            name: 'slug',
-            in: 'path',
-            required: true,
-            schema: {
-              type: 'string',
-              pattern: '^[a-z0-9][a-z0-9-]{2,29}$',
-            },
-          },
-        ],
-        responses: {
-          '200': {
-            description: 'HTML public profile page.',
-            content: {
-              'text/html': {
-                schema: {
-                  type: 'string',
-                },
-              },
-            },
-          },
-          '404': {
-            description: 'Pet does not exist or is not public.',
-          },
-        },
-      },
-    },
     '/api/memory/process': {
       post: {
         tags: ['Ops'],

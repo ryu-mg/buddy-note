@@ -22,6 +22,7 @@ type Props = {
   petName: string
   logDate?: string
   companionRelationship?: string | null
+  compact?: boolean
 }
 
 const MAX_MEMO = 200
@@ -56,6 +57,7 @@ export function UploadForm({
   petName,
   logDate,
   companionRelationship,
+  compact = false,
 }: Props) {
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -202,9 +204,10 @@ export function UploadForm({
               'relative block w-full cursor-pointer text-left',
               'bg-[var(--color-paper)] p-6 pb-11',
               'ring-1 ring-[var(--color-line)]',
-              'motion-safe:-rotate-[1.2deg] motion-safe:transition-transform',
-              'motion-safe:duration-[var(--duration-default)] motion-safe:ease-[var(--ease-soft-out)]',
-              'hover:motion-safe:rotate-0',
+              'motion-safe:transition-transform motion-safe:duration-[var(--duration-default)] motion-safe:ease-[var(--ease-soft-out)]',
+              compact
+                ? ''
+                : 'motion-safe:-rotate-[1.2deg] hover:motion-safe:rotate-0',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent-brand)] focus-visible:ring-offset-2',
             )}
             style={{ borderRadius: 'var(--radius-card)' }}

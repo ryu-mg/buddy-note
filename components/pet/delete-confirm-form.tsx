@@ -8,7 +8,7 @@ import { toast } from 'sonner'
 import { deleteAccount } from '@/app/pet/delete/actions'
 
 type DeleteConfirmFormProps = {
-  /** 사용자가 정확히 타이핑해야 하는 확인 문자열 (대부분 pet.name). */
+  /** 사용자가 정확히 타이핑해야 하는 확인 문자열. */
   confirmTarget: string
   /** 확인 input placeholder 에 쓰일 예시 문구. */
   hint?: string
@@ -18,7 +18,7 @@ type DeleteConfirmFormProps = {
  * 계정 탈퇴 확인 폼.
  *
  * Irreversible action 베스트 프랙티스: "정말 삭제할까요?" 버튼만으로는
- * 부족하므로 펫 이름을 정확히 타이핑해야 버튼이 활성화된다.
+ * 부족하므로 지정된 문구를 정확히 타이핑해야 버튼이 활성화된다.
  *
  * 성공 시 /auth/login 으로 보내며, sonner 토스트로 완료 안내.
  * 실패 시 code 별로 다른 toast.error.

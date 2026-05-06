@@ -48,12 +48,6 @@ const InputSchema = z.object({
 /**
  * 프로필 업데이트.
  *
- * SLUG 정책 (locked 결정):
- *   slug 는 **재생성하지 않는다**. 공개 URL `/b/[slug]` 은 외부 SNS 에
- *   이미 퍼져있을 수 있는 "영구 식별자" 이고, 이름을 바꿨다고 슬러그가
- *   바뀌면 기존 공유 링크가 죽는다 (D7, architecture.md §5 "PUBLIC 상태
- *   유지" 논리와 동일). 슬러그 개명이 필요하면 별도 명시적 UX 로 풀 것.
- *
  * persona_prompt_fragment 는 새 이름/견종/답변으로 **매 저장 시 재생성**.
  * 이 프래그먼트는 LLM 프롬프트에 주입되는 부분이라 이름 바꾸면 자연스레
  * 다음 일기부터 새 이름으로 말한다.
@@ -109,13 +103,13 @@ export async function updatePet(
     return { ok: false, error: '로그인이 필요해요.', code: 'auth' }
   }
 
-  // 소유권 확인 (RLS 도 막지만 explicit guard — slug 취득 겸함).
+  // 소유권 확인 (RLS 도 막지만 explicit guard).
   const { data: pet, error: fetchError } = await supabase
     .from('pets')
-    .select('id, slug, user_id')
+    .select('id, user_id')
     .eq('user_id', user.id)
     .limit(1)
-    .maybeSingle<{ id: string; slug: string; user_id: string }>()
+    .maybeSingle<{ id: string; user_id: string }>()
 
   if (fetchError || !pet) {
     return { ok: false, error: '프로필을 찾지 못했어요.', code: 'db' }
@@ -162,7 +156,6 @@ export async function updatePet(
   try {
     revalidatePath('/pet')
     revalidatePath('/')
-    revalidatePath(`/b/${pet.slug}`)
   } catch {
     // revalidatePath 실패는 critical 아님.
   }

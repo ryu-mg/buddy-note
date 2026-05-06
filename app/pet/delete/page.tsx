@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 
 import { DeleteConfirmForm } from '@/components/pet/delete-confirm-form'
+import { buildDeleteConfirmationText } from '@/lib/pet/delete-confirmation'
 import { createClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
@@ -34,7 +35,9 @@ export default async function PetDeletePage() {
 
   const petName = pet?.name ?? null
   // pet 이 없으면 "탈퇴" 문구로 확인 (actions.ts 와 동일 약속).
-  const confirmTarget = petName ?? '탈퇴'
+  const confirmTarget = pet
+    ? buildDeleteConfirmationText(pet.name)
+    : '탈퇴'
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-xl flex-col gap-6 px-4 pb-20 pt-8 sm:px-6 md:pt-10">
@@ -66,7 +69,7 @@ export default async function PetDeletePage() {
         <ul className="ml-1 flex flex-col gap-1 text-[13px] text-[var(--color-ink-soft)]">
           <li className="flex items-baseline gap-2">
             <span aria-hidden className="text-[var(--color-error)]">•</span>
-            <span>반려동물 프로필과 공개 페이지</span>
+            <span>반려동물 프로필</span>
           </li>
           <li className="flex items-baseline gap-2">
             <span aria-hidden className="text-[var(--color-error)]">•</span>
@@ -89,7 +92,7 @@ export default async function PetDeletePage() {
       >
         <DeleteConfirmForm
           confirmTarget={confirmTarget}
-          hint={petName ? `예) ${petName}` : '"탈퇴" 라고 입력'}
+          hint={pet ? `예) ${confirmTarget}` : '"탈퇴" 라고 입력'}
         />
       </section>
     </main>

@@ -13,7 +13,6 @@ import { cn } from '@/lib/utils'
  * `tone='warm'`이면 제목 옆에 8px 테라코타 dot 하나 — diary 페이지의 warmth와 echo.
  *
  * 사용처:
- * - `/b/[slug]` 공개 프로필에 아직 공개 일기가 없을 때
  * - 향후 feed / tag filter / search 결과 비었을 때
  *
  * 참고: 홈의 "첫 일기 써보기" 폴라로이드는 의도적으로 큰 CTA (passive empty 아님) —

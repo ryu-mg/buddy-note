@@ -47,7 +47,7 @@ export default async function PetThemePage() {
           {pet.name}의 앨범 색을 고를게요
         </h1>
         <p className="text-[13px] leading-[1.55] text-[var(--color-mute)]">
-          저장한 테마는 공개 프로필과 새 공유 이미지에 반영돼요.
+          저장한 테마는 홈과 새 공유 이미지에 반영돼요.
         </p>
       </header>
 

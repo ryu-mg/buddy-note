@@ -35,10 +35,10 @@ export async function savePetTheme(formData: FormData): Promise<SaveThemeResult>
 
   const { data: pet } = await supabase
     .from('pets')
-    .select('id, slug')
+    .select('id')
     .eq('user_id', user.id)
     .limit(1)
-    .maybeSingle<{ id: string; slug: string }>()
+    .maybeSingle<{ id: string }>()
 
   if (!pet) {
     return { ok: false, error: '강아지 정보를 찾지 못했어요.', code: 'db' }
@@ -72,7 +72,6 @@ export async function savePetTheme(formData: FormData): Promise<SaveThemeResult>
   revalidatePath('/pet/theme')
   revalidatePath('/pet')
   revalidatePath('/')
-  revalidatePath(`/b/${pet.slug}`)
 
   return { ok: true }
 }

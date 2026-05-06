@@ -11,7 +11,6 @@ const meta = {
     pet: {
       id: 'pet-1',
       name: '마루',
-      slug: 'maru',
       createdAt: '2026-04-15T00:00:00.000Z',
       avatarUrl: null,
       personalityCode: 'ENFP',

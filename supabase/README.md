@@ -85,10 +85,9 @@ Per Eng review §3.3, we need 8 RLS tests before shipping. Minimum matrix
 
 | Scenario                               | Expected |
 | -------------------------------------- | -------- |
-| anon reads `pets` where is_public=true | allowed  |
-| anon reads `pets` where is_public=false| denied   |
-| anon reads `logs` for public pet       | denied (logs are never public) |
-| anon reads `diaries` for public pet    | allowed  |
+| anon reads `pets`                     | denied   |
+| anon reads `logs`                     | denied   |
+| anon reads `diaries`                  | denied   |
 | anon reads `pet_memory_summary`        | denied   |
 | anon inserts into `pets`               | denied   |
 | auth user reads another user's pet     | denied   |

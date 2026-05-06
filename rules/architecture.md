@@ -45,7 +45,7 @@
       [satori 3포맷]            [pet_memory_summary 압축 업데이트]
              │
              ▼
-      [diary-images bucket]     → [사용자 공유 / /b/[slug]]
+      [diary-images bucket]     → [사용자 이미지 공유]
 ```
 
 ---
@@ -80,8 +80,8 @@ pets (
   breed text
   persona_answers jsonb       -- {q1:'A', q2:'C', ...}
   persona_prompt_fragment text -- "나는 마루, 푸들이야. 에너지 폭발 / ..."
-  slug text UNIQUE             -- /b/[slug] 라우트 handle
-  is_public boolean DEFAULT false
+  slug text UNIQUE             -- legacy handle, 신규 UX 미사용
+  is_public boolean DEFAULT false -- legacy flag, public RLS 정책 제거됨
   deceased_at timestamptz      -- v2 memorial (컬럼 선반영, 미사용)
 )
 
@@ -135,7 +135,7 @@ slug_reserved (
 
 | 테이블 | SELECT | INSERT | UPDATE | DELETE |
 |---|---|---|---|---|
-| `pets` | owner OR `is_public=true` | owner | owner | owner |
+| `pets` | owner only | owner | owner | owner |
 | `logs` | owner only | owner | owner | owner |
 | `diaries` | owner OR (public pet via EXISTS) | **service role only** | owner | cascade |
 | `pet_memory_summary` | owner only | **service** | **service** | **service** |
@@ -160,7 +160,7 @@ RLS 변경 시 **unit test 필수** (`/tests/rls/*.sql` 또는 Supabase dashboar
      f. diaries insert (service role, is_fallback=false)
      g. satori 3포맷 렌더 → diary-images bucket upload (UUID 파일명)
      h. diaries UPDATE image_url_{916,45,11}
-     i. revalidate('/') + revalidate('/logs') + revalidate('/b/[slug]') (on-demand)
+     i. revalidate('/') + revalidate('/logs') (on-demand)
      j. return diary to client
   3. Client: /diary/[id] 페이지로 slide-up 애니메이션
 
@@ -196,34 +196,11 @@ RLS 변경 시 **unit test 필수** (`/tests/rls/*.sql` 또는 Supabase dashboar
 
 ## 5. State Machines
 
-### pets.is_public (공개 프로필 토글)
+### Public profile removal
 
-```
-          ┌─────────────┐
-          │  PRIVATE    │ ← 기본값
-          └──────┬──────┘
-                 │ user toggle
-                 ▼
-        ┌────────────────────┐
-        │  PUBLIC_WARMING    │  ── 10s: 카카오/Twitter crawler warm up
-        └──────┬─────────────┘
-               │
-               ▼
-          ┌─────────┐
-          │ PUBLIC  │ ─── URL live, OG 캐시 퍼짐
-          └────┬────┘
-               │ user toggle off
-               ▼
-        ┌────────────────────┐
-        │ UNPUBLISHING       │  ⚠ 24h 가드
-        │  - dynamic OG 변경 │    (카카오 crawler 캐시)
-        │  - HTML 410 + noindex
-        │  - 유저 경고 모달  │
-        └──────┬─────────────┘
-               │
-               ▼
-          [PRIVATE]
-```
+`/b/[slug]` 공개 프로필은 2026-05-06 사용자 결정으로 제거됐다.
+`pets.slug`, `pets.is_public`, `slug_reserved`는 forward-only migration 호환 때문에 남아 있지만 신규 UX에서는 사용하지 않는다.
+`20260506000004_remove_public_profile_access.sql` 이후 anon은 `pets`, `diaries`, `pet_theme_settings`를 공개 프로필 목적으로 읽을 수 없다.
 
 ### diary lifecycle
 
@@ -309,14 +286,9 @@ docs/                         ← SSOT for architecture, conventions, prompts
 | 컨텐츠 | 캐시 전략 | 무효화 |
 |---|---|---|
 | `/` 홈 타임라인 | RSC render per request | 자동 (dynamic) |
-| `/b/[slug]` | ISR 24h revalidate | diary 추가 시 `revalidateTag('pet-{id}')` |
-| OG 메타 | 동적 SSR | pet 공개 전환 시 dynamic image 갱신 |
 | 공유 이미지 PNG | CDN public URL (diary-images) | 불변 — 새 일기는 새 URL |
 | satori fonts | Vercel Edge cache 빌드 타임 | Pretendard/Nanum Myeongjo subset 빌드 시 |
 | Supabase Storage photos | 7d signed URL | 만료 시 재서명 (client 요청 시) |
-
-### Kakao OG 캐시 이슈 (24h)
-카카오톡은 OG 메타를 24시간 공격적으로 캐시. 유저가 `is_public=false`로 돌려도 구 링크 프리뷰는 24시간 live. 대응: 비공개 전환 시 **OG image를 placeholder로 즉시 교체** (동적 렌더). 링크 자체는 HTTP 410 + `noindex`.
 
 ---
 
@@ -408,7 +380,6 @@ Postgres CHECK constraints
 | Supabase Storage 사용량 | > 80% | warning |
 | LLM 월 비용 | > $100 (v1) | warning |
 | 공유 클릭 / 기록 | 추적만 | (지표) |
-| 공개 프로필 외부 유입 → 앱 | 추적만 | (지표) |
 
 PostHog 무료 tier (1M events/월)로 v1 충분. Supabase Log Drains로 DB 이벤트 따로.
 
