@@ -55,7 +55,7 @@ export default async function Home() {
     return (
       <main className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center gap-3 px-6 text-center">
         <h1 className="text-[22px] font-semibold text-[var(--color-ink)]">
-          buddy-note
+          버디노트
         </h1>
         <p className="text-[14px] leading-[1.6] text-[var(--color-ink-soft)]">
           Supabase 환경 설정이 필요해요. <code>.env.local</code>에
@@ -178,7 +178,7 @@ function AnonymousLanding() {
               memory album
             </p>
             <p className="mt-1 font-serif text-[22px] font-semibold text-[var(--color-ink)]">
-              buddy-note
+              버디노트
             </p>
           </div>
         </div>
@@ -224,7 +224,7 @@ function AnonymousLanding() {
       </section>
 
       <section
-        aria-label="buddy-note 미리보기"
+        aria-label="버디노트 미리보기"
         className="relative mx-auto w-full max-w-[430px] pt-6"
       >
         <div className="absolute right-2 top-0 z-10 rounded-[var(--radius-pill)] border border-[var(--color-line)] bg-[var(--color-bg)] px-3 py-1 font-serif text-[14px] font-semibold text-[var(--color-ink)] shadow-[var(--shadow-card-soft)]">

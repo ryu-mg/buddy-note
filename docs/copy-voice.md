@@ -1,4 +1,4 @@
-# buddy-note Copy Voice
+# 버디노트 Copy Voice
 
 ## 원칙
 

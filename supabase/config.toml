@@ -1,7 +1,7 @@
 # For detailed configuration reference documentation, visit:
 # https://supabase.com/docs/guides/local-development/cli/config
 #
-# A project_id should be unique per project. buddy-note v1.
+# A project_id should be unique per project. 버디노트 v1.
 project_id = "buddy-note"
 
 [api]
@@ -45,7 +45,7 @@ port = 54324
 
 [storage]
 enabled = true
-# The maximum file size allowed (in bytes). 50 MiB default; buddy-note client downsizes photos.
+# The maximum file size allowed (in bytes). 50 MiB default; 버디노트 client downsizes photos.
 file_size_limit = "50MiB"
 
 [auth]

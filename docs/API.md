@@ -1,4 +1,4 @@
-# buddy-note API Docs
+# 버디노트 API Docs
 
 Last updated: 2026-04-21
 
@@ -7,7 +7,7 @@ Interactive Swagger UI:
 - `/api-docs`
 - Raw OpenAPI JSON: `/api/openapi.json`
 
-buddy-note는 일반적인 public JSON API 제품이 아니라 Next.js App Router 앱이다. 사용자-facing write flow는 대부분 **Server Actions**로 처리하고, `app/api/*`는 운영 cron/worker 용도의 내부 API만 둔다.
+버디노트는 일반적인 public JSON API 제품이 아니라 Next.js App Router 앱이다. 사용자-facing write flow는 대부분 **Server Actions**로 처리하고, `app/api/*`는 운영 cron/worker 용도의 내부 API만 둔다.
 
 ## Base URLs
 

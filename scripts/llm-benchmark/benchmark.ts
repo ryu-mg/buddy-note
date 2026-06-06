@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 /**
- * LLM A/B benchmark harness for buddy-note.
+ * LLM A/B benchmark harness for 버디노트.
  *
  * Drops 5-10 pet photos into ./photos/, calls GPT-4o / Claude Sonnet 4.6 /
  * Gemini 2.5 Flash in parallel with the same Korean 1인칭 일기 prompt, and

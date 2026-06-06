@@ -2,6 +2,7 @@
 
 import { X } from 'lucide-react'
 import { useEffect, useState, useTransition } from 'react'
+import { createPortal } from 'react-dom'
 
 import {
   completeFirstEntryTutorial,
@@ -18,6 +19,8 @@ export function FirstEntryTutorialSheet() {
 
   const step = FIRST_ENTRY_TUTORIAL_STEPS[stepIndex]
   const isLast = stepIndex === FIRST_ENTRY_TUTORIAL_STEPS.length - 1
+  const portalTarget =
+    typeof document === 'undefined' ? null : document.body
 
   useEffect(() => {
     if (!open) return
@@ -32,7 +35,7 @@ export function FirstEntryTutorialSheet() {
     return () => window.removeEventListener('keydown', onKeyDown)
   })
 
-  if (!open || !step) return null
+  if (!portalTarget || !open || !step) return null
 
   function goNext() {
     if (!isLast) {
@@ -64,12 +67,12 @@ export function FirstEntryTutorialSheet() {
     })
   }
 
-  return (
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
       aria-labelledby="first-entry-tutorial-title"
-      className="fixed inset-0 z-50 flex items-end justify-center bg-[var(--color-ink)]/20 px-3 pb-3"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-[var(--color-ink)]/20 px-3 pb-[calc(var(--bottom-nav-height)+0.75rem)]"
     >
       <section
         className="w-full max-w-md rounded-t-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-bg)] px-4 pb-5 pt-4 shadow-[var(--shadow-polaroid)]"
@@ -161,6 +164,7 @@ export function FirstEntryTutorialSheet() {
           </Button>
         </div>
       </section>
-    </div>
+    </div>,
+    portalTarget,
   )
 }

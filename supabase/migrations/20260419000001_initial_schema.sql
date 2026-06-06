@@ -1,4 +1,4 @@
--- buddy-note initial schema
+-- 버디노트 initial schema
 -- Source of truth: /Users/bao/.gstack/projects/new-project/bao-main-eng-review-20260419-235500.md
 --   Section 1.2 (memory_update_queue concurrency)
 --   Section 1.5 (RLS matrix)  -- policies live in the next migration

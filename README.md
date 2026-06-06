@@ -1,4 +1,4 @@
-# buddy-note
+# 버디노트
 
 [![CI](https://github.com/ryu-mg/buddy-note/actions/workflows/ci.yml/badge.svg)](https://github.com/ryu-mg/buddy-note/actions/workflows/ci.yml)
 

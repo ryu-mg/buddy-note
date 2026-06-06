@@ -42,7 +42,7 @@ async function notifyDiscord(message: string): Promise<boolean> {
 async function reportFailure(reason: string, detail?: string) {
   const notified = await notifyDiscord(
     [
-      '[buddy-note] LLM health check 실패',
+      '[버디노트] LLM health check 실패',
       `reason: ${reason}`,
       detail ? `detail: ${detail}` : null,
     ]

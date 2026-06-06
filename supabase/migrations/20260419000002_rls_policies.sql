@@ -1,4 +1,4 @@
--- buddy-note RLS policies
+-- 버디노트 RLS policies
 -- Source of truth: Eng review §1.5 (bao-main-eng-review-20260419-235500.md)
 --
 -- Policy matrix (read top-down per table):

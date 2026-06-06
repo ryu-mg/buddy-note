@@ -1,6 +1,6 @@
 {
-  "name": "buddy-note",
-  "short_name": "buddy-note",
+  "name": "버디노트",
+  "short_name": "버디노트",
   "description": "반려동물과 쓰는 AI 일기",
   "start_url": "/",
   "display": "standalone",

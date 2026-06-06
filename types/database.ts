@@ -1,5 +1,5 @@
 /**
- * Hand-written initial database types for buddy-note.
+ * Hand-written initial database types for 버디노트.
  *
  * REGENERATE with the Supabase CLI once you're connected to a project:
  *

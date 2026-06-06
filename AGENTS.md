@@ -1,4 +1,4 @@
-# buddy-note — AI Agent Guide
+# 버디노트 — AI Agent Guide
 
 > **이 문서는 SSOT (Single Source of Truth)** — `CLAUDE.md`, `.cursor/rules`, `.github/copilot-instructions.md` 등은 모두 이 파일로 symlink. 이 파일만 유지하면 모든 AI 툴이 같은 컨텍스트를 본다.
 
@@ -38,7 +38,7 @@
 
 ## 🐾 Project Overview
 
-**buddy-note**는 **"내 강아지의 성격을 1년 동안 기억하는 유일한 앱"**을 지향하는 반려동물 AI 일기 + SNS 공유 이미지 생성 웹앱이다.
+**버디노트**는 **"내 강아지의 성격을 1년 동안 기억하는 유일한 앱"**을 지향하는 반려동물 AI 일기 + SNS 공유 이미지 생성 웹앱이다.
 
 ### 한 줄 정체성
 *기록 앱이 아니라 **반려동물 캐릭터 엔진**.* 로그가 쌓일수록 강아지가 점점 더 자기 자신 같아지는 시스템. (Codex reframing, 2026-04-19)

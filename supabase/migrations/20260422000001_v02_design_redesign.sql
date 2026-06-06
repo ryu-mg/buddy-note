@@ -1,4 +1,4 @@
--- buddy-note v0.2 design/data additions.
+-- 버디노트 v0.2 design/data additions.
 --
 -- Forward-only: add nullable/default-backed fields and a new public milestone
 -- table. No destructive rename/drop.

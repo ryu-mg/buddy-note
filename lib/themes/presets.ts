@@ -26,7 +26,7 @@ export const THEME_PRESETS: ThemePreset[] = [
   {
     key: 'classic_terracotta',
     label: '클래식 테라코타',
-    description: 'buddy-note의 기본 폴라로이드 무드',
+    description: '버디노트의 기본 폴라로이드 무드',
     colors: {
       accent: '#e07a5f',
       accentSoft: '#fde6e0',

@@ -3,7 +3,7 @@ import { test as base, type Page } from '@playwright/test'
 /**
  * Auth 전략
  * ─────────────────────────────────────────────────────────────────
- * buddy-note 의 1차 auth 는 Supabase 이메일 **매직 링크**.
+ * 버디노트의 1차 auth 는 Supabase 이메일 **매직 링크**.
  * 브라우저 E2E 로 이 flow 를 "정직하게" 재현하려면 메일박스 브릿지(inbucket,
  * mailpit, mailosaur 등) 가 필요한데 v1 범위 밖이다.
  *

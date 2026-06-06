@@ -1,10 +1,10 @@
 export const openApiDocument = {
   openapi: '3.1.0',
   info: {
-    title: 'buddy-note API',
+    title: '버디노트 API',
     version: '0.1.0',
     description:
-      'buddy-note internal Route Handler API. User-facing writes are mostly handled by Next.js Server Actions, so this spec focuses on public read and ops endpoints.',
+      '버디노트 internal Route Handler API. User-facing writes are mostly handled by Next.js Server Actions, so this spec focuses on public read and ops endpoints.',
   },
   servers: [
     {

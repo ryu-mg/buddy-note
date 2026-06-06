@@ -1,6 +1,6 @@
 # LLM Benchmark Harness
 
-buddy-note v1 에서 사용할 비전-LLM을 데이터로 결정하기 위한 **실증 A/B 테스트 하네스**.
+버디노트 v1 에서 사용할 비전-LLM을 데이터로 결정하기 위한 **실증 A/B 테스트 하네스**.
 같은 사진 + 같은 한국어 프롬프트를 GPT-4o / Claude Sonnet 4.6 / Gemini 2.5 Flash 에
 병렬로 던지고, 결과를 side-by-side 로 비교하여 사람이 루브릭으로 수동 채점한다.
 

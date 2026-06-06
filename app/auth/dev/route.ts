@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic'
 export async function GET(request: NextRequest) {
   const { origin } = new URL(request.url)
 
-  if (!isDevAuthBypassEnabled()) {
+  if (!isDevAuthBypassEnabled(request.nextUrl.host)) {
     return NextResponse.redirect(new URL('/auth/login', origin))
   }
 

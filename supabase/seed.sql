@@ -1,4 +1,4 @@
--- buddy-note seed data
+-- 버디노트 seed data
 -- Idempotent: safe to run multiple times (ON CONFLICT DO NOTHING).
 
 -- =====================================================================

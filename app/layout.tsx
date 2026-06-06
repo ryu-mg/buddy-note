@@ -17,12 +17,12 @@ export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:4000',
   ),
-  title: 'buddy-note',
+  title: '버디노트',
   description: '반려동물과 쓰는 AI 일기',
   manifest: '/manifest.webmanifest',
   appleWebApp: {
     capable: true,
-    title: 'buddy-note',
+    title: '버디노트',
     statusBarStyle: 'default',
   },
   icons: {

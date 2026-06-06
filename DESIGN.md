@@ -1,6 +1,6 @@
 ---
 version: alpha
-name: buddy-note
+name: 버디노트
 description: 반려동물 캐릭터 엔진 — 폴라로이드 감성과 테라코타 accent가 교차하는 AI 일기 앱. 따뜻함(warmth)과 정확함(precision)을 동시에 담는다.
 colors:
   bg: "#ffffff"
@@ -55,6 +55,11 @@ typography:
     fontSize: 15px
     fontWeight: 400
     lineHeight: 1.7
+  auth-headline:
+    fontFamily: 윤초록우산어린이 대한
+    fontSize: 28px
+    fontWeight: 400
+    lineHeight: 1.2
 rounded:
   polaroid: 0px
   input: 8px
@@ -132,7 +137,7 @@ components:
     textColor: "{colors.accent}"
 ---
 
-# buddy-note Design System
+# 버디노트 Design System
 
 Source of truth for all visual decisions. Version 0.2 · 2026-04-22
 Classifier: APP UI
@@ -197,6 +202,7 @@ UI는 Pretendard Variable(sans), 일기 본문은 마루 부리(serif). **System
 ```
 font-sans: "Pretendard Variable", "Pretendard", -apple-system, "Noto Sans KR", sans-serif
 font-serif: "마루 부리", "MaruBuri", "Nanum Myeongjo", "Noto Serif KR", serif
+font-auth-headline: "Yoon Childfund DaeHan", "마루 부리", "MaruBuri", "Noto Serif KR", serif
 ```
 
 serif(`font-serif`)는 아래 경우에만 허용한다. 작은 라벨·메뉴·입력 UI는 Pretendard 유지.
@@ -206,6 +212,8 @@ serif(`font-serif`)는 아래 경우에만 허용한다. 작은 라벨·메뉴·
 - milestone 숫자
 - 완료 문구 (`저장됐어`, `기억할게`)
 - 일기 본문
+
+로그인 첫 화면의 큰 문구만 윤초록우산어린이 대한(`YoonChildfundkoreaDaeHan.otf`)을 사용한다. 원본 폰트 파일은 수정하지 않고 배포하며, 작은 UI 텍스트·버튼·입력에는 사용하지 않는다.
 
 **Display / Hero (v0.3, 강아지 이름·milestone 숫자):**
 

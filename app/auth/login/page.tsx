@@ -1,3 +1,5 @@
+import { headers } from 'next/headers'
+
 import { isDevAuthBypassEnabled } from '@/lib/auth/dev-bypass'
 
 import { KakaoButton } from './kakao-button'
@@ -8,8 +10,9 @@ type LoginPageProps = {
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const { error } = await searchParams
+  const headerStore = await headers()
   const supabaseConfigured = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL)
-  const devBypassEnabled = isDevAuthBypassEnabled()
+  const devBypassEnabled = isDevAuthBypassEnabled(headerStore.get('host'))
 
   if (!supabaseConfigured) {
     return (
@@ -27,15 +30,6 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   return (
     <div className="space-y-4">
-      <div className="space-y-1 text-center">
-        <p className="text-[14px] font-medium text-[var(--color-ink)]">
-          오늘의 기록을 이어갈게요
-        </p>
-        <p className="text-[13px] leading-[1.55] text-[var(--color-mute)]">
-          로그인하면 버디의 사진, 성격, 지난 일기가 이어져요.
-        </p>
-      </div>
-
       {error ? (
         <p
           role="alert"

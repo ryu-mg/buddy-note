@@ -2,7 +2,7 @@
   "name": "llm-benchmark",
   "version": "0.1.0",
   "private": true,
-  "description": "Standalone LLM A/B benchmark harness for buddy-note (GPT-4o / Claude Sonnet 4.6 / Gemini 2.5 Flash)",
+  "description": "Standalone LLM A/B benchmark harness for 버디노트 (GPT-4o / Claude Sonnet 4.6 / Gemini 2.5 Flash)",
   "type": "module",
   "scripts": {
     "bench": "bun run benchmark.ts"

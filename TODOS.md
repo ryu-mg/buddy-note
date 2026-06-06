@@ -92,14 +92,14 @@ set
 ### [C1] 🔴 카카오 비즈앱 등록 (최우선, 3-7일 승인 대기)
 - **소요**: 10분 신청 + 3-7일 대기
 - **링크**: <https://developers.kakao.com>
-- **단계**: 애플리케이션 추가 → 앱 이름 `buddy-note` → 사업자 카카오 채널 연결 → 도메인/Redirect URI는 나중에 Vercel 도메인 확정 후 추가
+- **단계**: 애플리케이션 추가 → 앱 이름 `버디노트` → 사업자 카카오 채널 연결 → 도메인/Redirect URI는 나중에 Vercel 도메인 확정 후 추가
 - **왜 지금**: Week 3 OAuth 연동 시점에 승인 완료되어 있어야 함. 지금 신청 안 하면 critical path 밀림.
 - **끝나고 알려줄 것**: 앱 REST API 키, JavaScript 키 (Supabase 연동 시 필요)
 
 ### [C2] 🔴 Supabase 프로젝트 생성 (블로커 해제)
 - **소요**: 5분
 - **링크**: <https://supabase.com/dashboard>
-- **단계**: New project → 이름 `buddy-note` → **Region: Northeast Asia (Seoul, ap-northeast-2)** ← 중요 → DB password 생성 + 안전한 곳에 저장
+- **단계**: New project → 이름 `버디노트` → **Region: Northeast Asia (Seoul, ap-northeast-2)** ← 중요 → DB password 생성 + 안전한 곳에 저장
 - **왜 지금**: 모든 schema/auth/storage/RLS 작업의 블로커. 이거 안 되면 dev 환경에서 로그인조차 안 됨.
 - **끝나고 할 일**: Settings → API에서 URL + anon key + service role key 복사 → 아래 C3 진행
 

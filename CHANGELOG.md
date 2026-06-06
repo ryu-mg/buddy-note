@@ -1,6 +1,6 @@
 # Changelog
 
-이 파일은 buddy-note의 주요 변경 사항을 기록한다.
+이 파일은 버디노트의 주요 변경 사항을 기록한다.
 
 ## v0.1.0 pre-release
 

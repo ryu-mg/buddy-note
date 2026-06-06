@@ -4,7 +4,7 @@
 
 테마 수정은 유료 멤버십 사용자에게 pet 앨범의 분위기를 고를 수 있게 하는 프리미엄 기능이다. v1은 자유 색상 편집기가 아니라 브랜드 guardrail 안에서 선택 가능한 preset 방식으로 시작한다.
 
-기본 테라코타 폴라로이드 스타일은 buddy-note의 기준 테마다. 프리미엄 테마는 이 기준을 버리는 기능이 아니라, 강아지의 성격과 계절감에 맞는 앨범 표정을 선택하는 기능이다.
+기본 테라코타 폴라로이드 스타일은 버디노트의 기준 테마다. 프리미엄 테마는 이 기준을 버리는 기능이 아니라, 강아지의 성격과 계절감에 맞는 앨범 표정을 선택하는 기능이다.
 
 ## Background
 
@@ -34,7 +34,7 @@ DESIGN.md는 테라코타 accent, 폴라로이드, warm neutral, purple/violet �
 
 기본 preset:
 
-- `classic_terracotta`: 기본 buddy-note 테라코타
+- `classic_terracotta`: 기본 버디노트 테라코타
 - `field_green`: 차분한 산책/잔디 무드
 - `morning_gold`: 밝은 아침/햇살 무드
 - `quiet_umber`: 조용한 갈색 앨범 무드

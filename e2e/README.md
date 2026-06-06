@@ -1,6 +1,6 @@
 # E2E 테스트 (Playwright)
 
-`@/e2e` 는 buddy-note 의 스모크 + critical path 검증용. 풀 커버리지 아니라 "회귀 감지 그리드".
+`@/e2e` 는 버디노트의 스모크 + critical path 검증용. 풀 커버리지 아니라 "회귀 감지 그리드".
 
 ## 실행
 
@@ -24,7 +24,7 @@ PLAYWRIGHT_AUTOSTART=1 bun run test:e2e
 스테이징이나 프리뷰 URL 로 쏘려면:
 
 ```bash
-PLAYWRIGHT_BASE_URL=https://pr-123.buddy-note.vercel.app bun run test:e2e
+PLAYWRIGHT_BASE_URL=https://pr-123.dev-buddy-note.vercel.app bun run test:e2e
 ```
 
 ## Prereqs

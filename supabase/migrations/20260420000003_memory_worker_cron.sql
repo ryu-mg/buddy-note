@@ -1,4 +1,4 @@
--- buddy-note memory-updater cron setup (pg_cron + pg_net)
+-- 버디노트 memory-updater cron setup (pg_cron + pg_net)
 -- Source of truth: AGENTS.md "LLM pipeline step 5" + rules/architecture.md §9
 --
 -- Why this migration does NOT auto-schedule the job:
@@ -38,7 +38,7 @@ $extensions$;
 -- Post-deploy schedule block (DO NOT uncomment in this file).
 --
 -- Run this in Supabase Studio → SQL Editor, replacing:
---   YOUR_APP_URL        → https://buddy-note.vercel.app  (or your prod host)
+--   YOUR_APP_URL        → https://dev-buddy-note.vercel.app  (or your prod host)
 --   YOUR_WORKER_SECRET  → value of MEMORY_WORKER_SECRET in Vercel env
 --
 -- The worker is cheap (returns fast when queue is empty) so every-minute

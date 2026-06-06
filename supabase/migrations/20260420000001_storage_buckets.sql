@@ -1,4 +1,4 @@
--- buddy-note Storage buckets + RLS
+-- 버디노트 Storage buckets + RLS
 -- Sources of truth:
 --   AGENTS.md "Supabase Storage buckets"
 --   rules/architecture.md §4 (data flow) + §7 (7d signed URL)

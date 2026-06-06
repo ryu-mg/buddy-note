@@ -1,4 +1,4 @@
--- buddy-note memory-updater worker helpers
+-- 버디노트 memory-updater worker helpers
 -- Source of truth: AGENTS.md "LLM pipeline step 5" + rules/architecture.md §9
 --
 -- These functions are called by the Next.js Route Handler at

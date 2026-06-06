@@ -4,11 +4,19 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@font-face {
+  font-family: "Yoon Childfund DaeHan";
+  src: url("/fonts/yoon-childfund-dae-han.otf") format("opentype");
+  font-display: swap;
+  font-style: normal;
+  font-weight: 400;
+}
+
 /* ---------------------------------------------------------------------------
  * DESIGN.md v0.1 — Source of truth for all visual decisions.
  * These raw tokens are surfaced as Tailwind utilities via @theme below and
  * mapped into shadcn's semantic variables in :root / .dark so any shadcn
- * component automatically picks up the buddy-note palette.
+ * component automatically picks up the 버디노트 palette.
  * ------------------------------------------------------------------------- */
 :root {
   /* DESIGN §3 — Color (Neutrals) */
@@ -65,6 +73,8 @@
     "Noto Sans KR", "Segoe UI", Roboto, sans-serif;
   --font-serif:
     "마루 부리", "MaruBuri", "Nanum Myeongjo", "Noto Serif KR", serif;
+  --font-auth-headline:
+    "Yoon Childfund DaeHan", "마루 부리", "MaruBuri", "Noto Serif KR", serif;
 
   /* --------------------------------------------------------------------------
    * shadcn/ui semantic vars — remapped onto DESIGN.md palette.
@@ -101,7 +111,7 @@
      but shadcn's --radius drives its generic radius-* scale). */
   --radius: var(--radius-button);
 
-  /* shadcn charts/sidebar kept greyscale — not used by buddy-note v1 but
+  /* shadcn charts/sidebar kept greyscale — not used by 버디노트 v1 but
      required so components that reference them do not break. */
   --chart-1: var(--color-ink);
   --chart-2: var(--color-ink-soft);
@@ -277,6 +287,7 @@
   /* DESIGN §2 — Typography */
   --font-sans: var(--font-sans);
   --font-serif: var(--font-serif);
+  --font-auth-headline: var(--font-auth-headline);
   --font-heading: var(--font-sans);
 
   /* DESIGN §2 — Hero / Display typography (added v0.3) */
@@ -351,6 +362,22 @@
       opacity: 1;
     }
   }
+  @keyframes auth-dog-marquee-left {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-20%);
+    }
+  }
+  @keyframes auth-dog-marquee-right {
+    from {
+      transform: translateX(-20%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
   @keyframes nav-loader-cycle {
     0%,
     22% {
@@ -379,6 +406,20 @@
   .nav-loader-icon:nth-child(4) {
     animation-delay: 0.9s;
   }
+  .auth-dog-marquee {
+    display: flex;
+    overflow: hidden;
+  }
+  .auth-dog-marquee-track-left {
+    animation: auth-dog-marquee-left 24s linear infinite;
+  }
+  .auth-dog-marquee-track-right {
+    animation: auth-dog-marquee-right 28s linear infinite;
+  }
+  .auth-headline-font {
+    font-family: var(--font-auth-headline);
+    font-weight: 400;
+  }
   @media (prefers-reduced-motion: reduce) {
     .nav-loader-icon {
       animation: none;
@@ -387,6 +428,11 @@
     }
     .nav-loader-icon:first-child {
       opacity: 1;
+    }
+    .auth-dog-marquee-track-left,
+    .auth-dog-marquee-track-right {
+      animation: none;
+      transform: translateX(0);
     }
   }
 

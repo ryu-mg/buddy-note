@@ -1,6 +1,6 @@
 # supabase/
 
-Schema migrations, RLS policies, and seed data for **buddy-note**.
+Schema migrations, RLS policies, and seed data for **버디노트**.
 
 Source of truth for design intent:
 - `~/.gstack/projects/new-project/bao-main-eng-review-20260419-235500.md` (§1.2, §1.5, §1.6)

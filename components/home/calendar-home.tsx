@@ -163,7 +163,7 @@ export function CalendarHome({
             illustration="resting"
             tone="warm"
             title={`${pet.name}의 첫 페이지를 채워볼까?`}
-            hint="사진 한 장이면 buddy가 오늘을 직접 적어줘."
+            hint="사진 한 장이면 버디가 오늘을 직접 적어줘."
             cta={{ label: '첫 기록 남기기', href: '/log' }}
           />
         </main>

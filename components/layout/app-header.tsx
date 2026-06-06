@@ -76,7 +76,7 @@ function HeaderShell({ right }: { right: React.ReactNode }) {
           className="flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent-brand)] focus-visible:ring-offset-2"
         >
           <BuddyHappy className="h-5 w-5 shrink-0" />
-          <span className="text-[15px] font-semibold tracking-[-0.01em] text-[var(--color-ink)]">buddy-note</span>
+          <span className="text-[15px] font-semibold tracking-[-0.01em] text-[var(--color-ink)]">버디노트</span>
         </Link>
         {right}
       </div>
