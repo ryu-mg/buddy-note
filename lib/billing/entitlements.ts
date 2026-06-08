@@ -15,7 +15,24 @@ export type MembershipSnapshot = {
 }
 
 export type Entitlements = {
+  diaryRewrite: boolean
+  fontChange: boolean
   premiumTheme: boolean
+  themeChange: boolean
+}
+
+const NO_ENTITLEMENTS: Entitlements = {
+  diaryRewrite: false,
+  fontChange: false,
+  premiumTheme: false,
+  themeChange: false,
+}
+
+const MEMBERSHIP_ENTITLEMENTS: Entitlements = {
+  diaryRewrite: true,
+  fontChange: true,
+  premiumTheme: true,
+  themeChange: true,
 }
 
 function isAfterNow(value: string | null, now: Date): boolean {
@@ -29,21 +46,23 @@ export function resolveEntitlements(
   membership: MembershipSnapshot | null,
   now = new Date(),
 ): Entitlements {
-  if (!membership) return { premiumTheme: false }
+  if (!membership) return NO_ENTITLEMENTS
 
   if (membership.status === 'trialing') {
-    return { premiumTheme: true }
+    return MEMBERSHIP_ENTITLEMENTS
   }
 
   if (membership.status === 'active' || membership.status === 'canceling') {
-    return { premiumTheme: true }
+    return MEMBERSHIP_ENTITLEMENTS
   }
 
   if (membership.status === 'past_due') {
-    return { premiumTheme: isAfterNow(membership.graceEndsAt, now) }
+    return isAfterNow(membership.graceEndsAt, now)
+      ? MEMBERSHIP_ENTITLEMENTS
+      : NO_ENTITLEMENTS
   }
 
-  return { premiumTheme: false }
+  return NO_ENTITLEMENTS
 }
 
 export function canUsePremiumTheme(
@@ -51,4 +70,18 @@ export function canUsePremiumTheme(
   now = new Date(),
 ): boolean {
   return resolveEntitlements(membership, now).premiumTheme
+}
+
+export function canRewriteDiary(
+  membership: MembershipSnapshot | null,
+  now = new Date(),
+): boolean {
+  return resolveEntitlements(membership, now).diaryRewrite
+}
+
+export function canChangeDiaryFont(
+  membership: MembershipSnapshot | null,
+  now = new Date(),
+): boolean {
+  return resolveEntitlements(membership, now).fontChange
 }

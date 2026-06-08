@@ -1,9 +1,14 @@
-import Image from 'next/image'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
+import type { CSSProperties } from 'react'
 
 import { DeleteDiaryButton } from '@/components/diary/delete-diary-button'
-import { PawPrint } from '@/components/icons/paw-print'
+import { DiaryDetailCard } from '@/components/diary/diary-detail-card'
+import { RewriteDiaryButton } from '@/components/diary/rewrite-diary-button'
+import { canRewriteDiary } from '@/lib/billing/entitlements'
+import { getMembershipSnapshot } from '@/lib/billing/server'
+import { resolveDiaryFontPreset } from '@/lib/diary-fonts/presets'
+import { getPetDiaryFontKey } from '@/lib/diary-fonts/server'
 import { createClient } from '@/lib/supabase/server'
 import { getSignedPhotoUrl } from '@/lib/storage'
 
@@ -11,6 +16,7 @@ import { ShareModal } from './share-modal'
 
 type PageProps = {
   params: Promise<{ id: string }>
+  searchParams?: Promise<{ from?: string }>
 }
 
 // Diary + join된 pet 타입. select 문과 1:1 대응.
@@ -35,24 +41,23 @@ type DiaryWithPet = {
 type LogRef = {
   photo_url: string | null
   photo_storage_path: string | null
+  log_date: string | null
   memo: string | null
   tags: string[] | null
 }
 
-function formatDate(iso: string): string {
-  // "2026년 4월 20일" — 한국 로케일, 앱 UI 톤
+function formatCompactDate(value: string): string {
   try {
-    const d = new Date(iso)
-    const y = d.getFullYear()
-    const m = d.getMonth() + 1
-    const day = d.getDate()
-    return `${y}년 ${m}월 ${day}일`
+    const [datePart] = value.split('T')
+    const [year, month, day] = datePart.split('-')
+    if (!year || !month || !day) return ''
+    return `${year}.${month}.${day}`
   } catch {
     return ''
   }
 }
 
-export default async function DiaryPage({ params }: PageProps) {
+export default async function DiaryPage({ params, searchParams }: PageProps) {
   // Next.js 16 — params는 Promise
   const { id } = await params
 
@@ -91,10 +96,15 @@ export default async function DiaryPage({ params }: PageProps) {
     notFound()
   }
 
+  const membership = await getMembershipSnapshot(supabase, user.id)
+  const canRewrite = canRewriteDiary(membership)
+  const diaryFontKey = await getPetDiaryFontKey(supabase, diary.pet.id)
+  const diaryFont = resolveDiaryFontPreset(diaryFontKey)
+
   // 사진은 매번 fresh signed URL로 다시 발급 — 오래된 photo_url 신뢰 X
   const { data: logData } = await supabase
     .from('logs')
-    .select('photo_url, photo_storage_path, memo, tags')
+    .select('photo_url, photo_storage_path, log_date, memo, tags')
     .eq('id', diary.log_id)
     .single<LogRef>()
 
@@ -106,16 +116,22 @@ export default async function DiaryPage({ params }: PageProps) {
     }
   }
 
-  const dateLabel = formatDate(diary.created_at)
+  const dateLabel = formatCompactDate(
+    logData?.log_date ?? diary.created_at.slice(0, 10),
+  )
+  const source = resolveDiarySource((await searchParams)?.from)
+  const backTarget = source === 'week' ? '/week' : '/'
+  const backLabel = source === 'week' ? '← 주간으로' : '← 홈으로'
+  const rewriteReturnTo = `/diary/${diary.id}${source === 'week' ? '?from=week' : '?from=home'}`
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-xl flex-col gap-8 px-4 pb-16 pt-8">
       <header className="flex items-center justify-between">
         <Link
-          href="/"
+          href={backTarget}
           className="text-[13px] text-[var(--color-mute)] underline-offset-4 transition-opacity hover:opacity-70 hover:underline"
         >
-          ← 홈으로
+          {backLabel}
         </Link>
         <span className="text-[12px] font-medium uppercase tracking-[0.14em] text-[var(--color-mute)]">
           diary
@@ -132,61 +148,16 @@ export default async function DiaryPage({ params }: PageProps) {
         </section>
       ) : null}
 
-      <article
-        aria-labelledby="diary-title"
-        className="relative mx-auto w-full max-w-[420px] bg-[var(--color-paper)] px-6 pb-11 pt-6 shadow-[var(--shadow-card)] ring-1 ring-[var(--color-line)]"
-      >
-        <div className="flex items-baseline justify-between gap-3">
-          <p className="text-[12px] font-medium uppercase tracking-[0.12em] text-[var(--color-mute)]">
-            {dateLabel}
-          </p>
-          <p
-            className="text-[14px] leading-[1.5] text-[var(--color-ink)]"
-            style={{ fontFamily: 'var(--font-serif)' }}
-          >
-            {diary.pet.name}
-          </p>
-        </div>
-
-        {photoUrl ? (
-          <div className="mt-4 overflow-hidden bg-[var(--color-line)]">
-            {/* DESIGN §8 — 사진은 1:1 square crop 기본. Diary 카드 내부는 4:5 ratio. */}
-            <div className="relative aspect-[4/5] w-full">
-              <Image
-                src={photoUrl}
-                alt={`${diary.pet.name}의 사진`}
-                fill
-                sizes="(max-width: 640px) 100vw, 420px"
-                className="object-cover"
-                priority
-              />
-            </div>
-          </div>
-        ) : (
-          <div className="mt-4 flex aspect-[4/5] w-full flex-col items-center justify-center gap-3 bg-[var(--color-line)] text-[13px] text-[var(--color-mute)]">
-            <PawPrint
-              className="h-10 w-10 opacity-75"
-              color="var(--color-accent-brand)"
-              title="사진 없이 남긴 기록"
-            />
-            <span>사진 없이 남긴 기록이에요.</span>
-          </div>
-        )}
-
-        <h1
-          id="diary-title"
-          className="mt-6 text-[26px] font-semibold leading-[1.3] text-[var(--color-ink)]"
-        >
-          {diary.title}
-        </h1>
-
-        <p
-          className="mt-4 whitespace-pre-wrap text-[18px] leading-[1.7] text-[var(--color-ink)]"
-          style={{ fontFamily: 'var(--font-serif)' }}
-        >
-          {diary.body}
-        </p>
-      </article>
+      <DiaryDetailCard
+        titleId="diary-title"
+        title={diary.title}
+        body={diary.body}
+        dateLabel={dateLabel}
+        petName={diary.pet.name}
+        imageUrl={photoUrl}
+        priority
+        style={{ '--font-diary-writing': diaryFont.cssValue } as CSSProperties}
+      />
 
       <section className="mx-auto flex w-full max-w-[420px] flex-col gap-3">
         <ShareModal
@@ -199,6 +170,15 @@ export default async function DiaryPage({ params }: PageProps) {
             '1:1': diary.image_url_11,
           }}
         />
+
+        <div className="flex justify-center">
+          <RewriteDiaryButton
+            diaryId={diary.id}
+            canRewrite={canRewrite}
+            returnTo={rewriteReturnTo}
+            fullWidth
+          />
+        </div>
 
         {diary.is_fallback ? (
           <div className="mt-1 flex flex-col items-center gap-1.5">
@@ -223,4 +203,8 @@ export default async function DiaryPage({ params }: PageProps) {
       </section>
     </main>
   )
+}
+
+function resolveDiarySource(source: string | undefined): 'home' | 'week' {
+  return source === 'week' ? 'week' : 'home'
 }

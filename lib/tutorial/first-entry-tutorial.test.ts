@@ -36,9 +36,16 @@ describe('FIRST_ENTRY_TUTORIAL_STEPS', () => {
     })
   })
 
+  it('includes visual copy for the taller onboarding sheet', () => {
+    for (const step of FIRST_ENTRY_TUTORIAL_STEPS) {
+      expect(step.visualTitle.length).toBeGreaterThan(0)
+      expect(step.visualBody.length).toBeGreaterThan(0)
+    }
+  })
+
   it('uses Korean copy without emoji or banned SaaS words', () => {
     for (const step of FIRST_ENTRY_TUTORIAL_STEPS) {
-      const copy = `${step.title} ${step.body}`
+      const copy = `${step.title} ${step.body} ${step.visualTitle} ${step.visualBody}`
       expect(copy).not.toMatch(/[✨🐶🐾]/)
       expect(copy).not.toContain('스마트')
       expect(copy).not.toContain('혁신')

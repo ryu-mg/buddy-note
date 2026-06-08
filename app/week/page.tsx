@@ -1,6 +1,10 @@
 import { redirect } from 'next/navigation'
 
 import { WeeklyHome } from '@/components/home/weekly-home'
+import { canRewriteDiary } from '@/lib/billing/entitlements'
+import { getMembershipSnapshot } from '@/lib/billing/server'
+import { resolveDiaryFontPreset } from '@/lib/diary-fonts/presets'
+import { getPetDiaryFontKey } from '@/lib/diary-fonts/server'
 import { createClient } from '@/lib/supabase/server'
 import { getSignedPhotoUrl } from '@/lib/storage'
 import type { DiaryMood, RecentCallback } from '@/types/database'
@@ -20,6 +24,7 @@ type DiaryCalendarRow = {
   id: string
   title: string
   body: string
+  image_url_916: string | null
   image_url_45: string | null
   image_url_11: string | null
   mood: DiaryMood | null
@@ -59,7 +64,7 @@ export default async function WeekPage() {
   const { data: rowsRaw } = await supabase
     .from('diaries')
     .select(
-      'id, title, body, image_url_45, image_url_11, mood, created_at, log:logs(log_date, photo_url, photo_storage_path)',
+      'id, title, body, image_url_916, image_url_45, image_url_11, mood, created_at, log:logs(log_date, photo_url, photo_storage_path)',
     )
     .eq('pet_id', pet.id)
     .order('created_at', { ascending: false })
@@ -82,6 +87,11 @@ export default async function WeekPage() {
         title: diary.title,
         body: diary.body,
         imageUrl,
+        shareImages: {
+          '9:16': diary.image_url_916,
+          '4:5': diary.image_url_45,
+          '1:1': diary.image_url_11,
+        },
         logDate: diary.log?.log_date ?? diary.created_at.slice(0, 10),
         createdAt: diary.created_at,
         mood: diary.mood,
@@ -89,7 +99,12 @@ export default async function WeekPage() {
     }),
   )
 
-  const [{ count: diaryCount }, { data: memoryRaw }] = await Promise.all([
+  const [
+    { count: diaryCount },
+    { data: memoryRaw },
+    membership,
+    diaryFontKey,
+  ] = await Promise.all([
     supabase
       .from('diaries')
       .select('id', { count: 'exact', head: true })
@@ -99,7 +114,10 @@ export default async function WeekPage() {
       .select('recent_callbacks')
       .eq('pet_id', pet.id)
       .maybeSingle<MemoryRow>(),
+    getMembershipSnapshot(supabase, user.id),
+    getPetDiaryFontKey(supabase, pet.id),
   ])
+  const diaryFont = resolveDiaryFontPreset(diaryFontKey)
 
   let avatarUrl: string | null = null
   if (pet.profile_photo_storage_path) {
@@ -124,6 +142,8 @@ export default async function WeekPage() {
       diaryCount={diaryCount ?? diaries.length}
       recentCallbacks={memoryRaw?.recent_callbacks ?? []}
       todayHasDiary={todayHasDiary}
+      canRewrite={canRewriteDiary(membership)}
+      diaryFontCssValue={diaryFont.cssValue}
     />
   )
 }

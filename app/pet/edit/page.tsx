@@ -1,7 +1,8 @@
 import { redirect } from 'next/navigation'
 
-import { createClient } from '@/lib/supabase/server'
+import { BackLink } from '@/components/layout/back-link'
 import { PetEditForm } from '@/components/pet/pet-edit-form'
+import { createClient } from '@/lib/supabase/server'
 import type { PersonaAnswers } from '@/types/database'
 
 export const dynamic = 'force-dynamic'
@@ -44,6 +45,8 @@ export default async function PetEditPage() {
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-2xl flex-col gap-6 px-4 pb-20 pt-8 sm:px-6 md:pt-10">
+      <BackLink href="/more" label="더보기로 돌아가기" />
+
       <header className="flex flex-col gap-1">
         <p className="text-[12px] font-medium uppercase tracking-[0.14em] text-[var(--color-mute)]">
           프로필 수정

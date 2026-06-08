@@ -5,6 +5,30 @@
 @custom-variant dark (&:is(.dark *));
 
 @font-face {
+  font-family: "LINE Seed Sans KR";
+  src: url("/fonts/line-seed-kr-thin.woff2") format("woff2");
+  font-display: swap;
+  font-style: normal;
+  font-weight: 300;
+}
+
+@font-face {
+  font-family: "LINE Seed Sans KR";
+  src: url("/fonts/line-seed-kr-regular.woff2") format("woff2");
+  font-display: swap;
+  font-style: normal;
+  font-weight: 400 500;
+}
+
+@font-face {
+  font-family: "LINE Seed Sans KR";
+  src: url("/fonts/line-seed-kr-bold.woff2") format("woff2");
+  font-display: swap;
+  font-style: normal;
+  font-weight: 600 800;
+}
+
+@font-face {
   font-family: "Yoon Childfund DaeHan";
   src: url("/fonts/yoon-childfund-dae-han.otf") format("opentype");
   font-display: swap;
@@ -67,13 +91,15 @@
   --bottom-nav-content-height: 4rem;
   --bottom-nav-offset-gap: 1.5rem;
 
-  /* DESIGN §2 — Typography tokens (font-face loaded in app/layout.tsx) */
+  /* DESIGN §2 — Typography tokens */
   --font-sans:
-    "Pretendard Variable", "Pretendard", -apple-system, BlinkMacSystemFont,
+    "LINE Seed Sans KR", -apple-system, BlinkMacSystemFont,
     "Noto Sans KR", "Segoe UI", Roboto, sans-serif;
   --font-serif:
     "마루 부리", "MaruBuri", "Nanum Myeongjo", "Noto Serif KR", serif;
   --font-auth-headline:
+    "Yoon Childfund DaeHan", "마루 부리", "MaruBuri", "Noto Serif KR", serif;
+  --font-diary-body:
     "Yoon Childfund DaeHan", "마루 부리", "MaruBuri", "Noto Serif KR", serif;
 
   /* --------------------------------------------------------------------------
@@ -288,6 +314,7 @@
   --font-sans: var(--font-sans);
   --font-serif: var(--font-serif);
   --font-auth-headline: var(--font-auth-headline);
+  --font-diary-body: var(--font-diary-body);
   --font-heading: var(--font-sans);
 
   /* DESIGN §2 — Hero / Display typography (added v0.3) */
@@ -362,6 +389,16 @@
       opacity: 1;
     }
   }
+  @keyframes bottom-sheet-enter {
+    from {
+      opacity: 0;
+      transform: translateY(28px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
   @keyframes auth-dog-marquee-left {
     from {
       transform: translateX(0);
@@ -418,6 +455,10 @@
   }
   .auth-headline-font {
     font-family: var(--font-auth-headline);
+    font-weight: 400;
+  }
+  .diary-writing-font {
+    font-family: var(--font-diary-writing, var(--font-diary-body));
     font-weight: 400;
   }
   @media (prefers-reduced-motion: reduce) {

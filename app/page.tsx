@@ -5,6 +5,10 @@ import {
   type CalendarDiary,
   type CalendarPet,
 } from '@/components/home/calendar-home'
+import { canRewriteDiary } from '@/lib/billing/entitlements'
+import { getMembershipSnapshot } from '@/lib/billing/server'
+import { resolveDiaryFontPreset } from '@/lib/diary-fonts/presets'
+import { getPetDiaryFontKey } from '@/lib/diary-fonts/server'
 import { createClient } from '@/lib/supabase/server'
 import { getSignedPhotoUrl } from '@/lib/storage'
 import { FIRST_ENTRY_TUTORIAL_VERSION } from '@/lib/tutorial/first-entry-tutorial'
@@ -80,20 +84,32 @@ export default async function Home() {
     .eq('tutorial_version', FIRST_ENTRY_TUTORIAL_VERSION)
     .maybeSingle<TutorialStateRow>()
 
-  const themeKey = await getPetThemeKey(supabase, pet.id)
+  const [themeKey, diaryFontKey] = await Promise.all([
+    getPetThemeKey(supabase, pet.id),
+    getPetDiaryFontKey(supabase, pet.id),
+  ])
+  const diaryFont = resolveDiaryFontPreset(diaryFontKey)
 
-  const { data: rowsRaw } = await supabase
-    .from('diaries')
-    .select(
-      'id, title, body, image_url_916, image_url_45, image_url_11, mood, created_at, log:logs(log_date, photo_url, photo_storage_path)',
-    )
-    .eq('pet_id', pet.id)
-    .order('created_at', { ascending: false })
-    .limit(180)
-    .returns<DiaryCalendarRow[]>()
+  const [diaryResult, unreadResult, membership] = await Promise.all([
+    supabase
+      .from('diaries')
+      .select(
+        'id, title, body, image_url_916, image_url_45, image_url_11, mood, created_at, log:logs(log_date, photo_url, photo_storage_path)',
+      )
+      .eq('pet_id', pet.id)
+      .order('created_at', { ascending: false })
+      .limit(180)
+      .returns<DiaryCalendarRow[]>(),
+    supabase
+      .from('notifications')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .is('read_at', null),
+    getMembershipSnapshot(supabase, user.id),
+  ])
 
   const diaries: CalendarDiary[] = await Promise.all(
-    (rowsRaw ?? []).map(async (diary): Promise<CalendarDiary> => {
+    (diaryResult.data ?? []).map(async (diary): Promise<CalendarDiary> => {
       let imageUrl: string | null =
         diary.image_url_45 ?? diary.image_url_11 ?? diary.log?.photo_url ?? null
 
@@ -142,8 +158,11 @@ export default async function Home() {
     <CalendarHome
       pet={calendarPet}
       diaries={diaries}
+      unreadNotificationCount={unreadResult.count ?? 0}
       showFirstEntryTutorial={showFirstEntryTutorial}
       themeKey={themeKey}
+      canRewrite={canRewriteDiary(membership)}
+      diaryFontCssValue={diaryFont.cssValue}
     />
   )
 }

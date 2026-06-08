@@ -73,10 +73,7 @@ export function EmptyState({
         </div>
 
         {hint ? (
-          <p
-            className="mt-3 text-center text-[14px] leading-[1.65] text-[var(--color-ink-soft)] opacity-70 sm:text-[15px]"
-            style={{ fontFamily: 'var(--font-serif)' }}
-          >
+          <p className="mt-3 text-center text-[14px] leading-[1.65] text-[var(--color-ink-soft)] opacity-70 sm:text-[15px]">
             {hint}
           </p>
         ) : null}

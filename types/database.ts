@@ -63,12 +63,55 @@ export type MembershipStatus =
   | 'ended'
   | 'refunded';
 
+export type NotificationKind =
+  | 'notice'
+  | 'membership'
+  | 'diary'
+  | 'support'
+  | 'system';
+
+export type SupportFaqCategory = 'usage' | 'membership' | 'account' | 'diary';
+
+export type SupportInquiryCategory = 'question' | 'bug' | 'feature';
+
+export type SupportInquiryTopic =
+  | 'account'
+  | 'diary'
+  | 'membership'
+  | 'notification'
+  | 'payment'
+  | 'profile'
+  | 'login'
+  | 'upload'
+  | 'layout'
+  | 'performance'
+  | 'sharing'
+  | 'theme'
+  | 'other';
+
+export type SupportInquiryStatus =
+  | 'open'
+  | 'reviewing'
+  | 'answered'
+  | 'closed';
+
+export type PaymentEnvironment = 'test' | 'live';
+
+export type PaymentOrderStatus =
+  | 'pending'
+  | 'ready'
+  | 'approved'
+  | 'failed'
+  | 'canceled';
+
 export type ThemePresetKey =
   | 'classic_terracotta'
   | 'field_green'
   | 'morning_gold'
   | 'quiet_umber'
   | 'mist_blue';
+
+export type DiaryFontKey = 'buddy_hand' | 'line_seed' | 'maru_buri';
 
 /**
  * Entry in pet_memory_summary.recent_callbacks (jsonb).
@@ -287,6 +330,11 @@ export interface MembershipRow {
   current_period_ends_at: string | null;
   cancel_at_period_end: boolean;
   grace_ends_at: string | null;
+  provider: string | null;
+  provider_customer_key: string | null;
+  provider_billing_key: string | null;
+  last_payment_order_id: string | null;
+  last_payment_key: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -306,9 +354,225 @@ export type MembershipInsert = Omit<
   status?: MembershipStatus;
   plan_key?: string;
   cancel_at_period_end?: boolean;
+  provider?: string | null;
+  provider_customer_key?: string | null;
+  provider_billing_key?: string | null;
+  last_payment_order_id?: string | null;
+  last_payment_key?: string | null;
 };
 
 export type MembershipUpdate = Partial<MembershipInsert>;
+
+export interface NotificationRow {
+  id: string;
+  user_id: string;
+  kind: NotificationKind;
+  title: string;
+  body: string;
+  href: string | null;
+  read_at: string | null;
+  created_at: string;
+}
+
+export type NotificationInsert = Omit<
+  NotificationRow,
+  'id' | 'created_at' | 'read_at'
+> & {
+  id?: string;
+  created_at?: string;
+  read_at?: string | null;
+};
+
+export type NotificationUpdate = Partial<NotificationInsert>;
+
+export interface NotificationPreferenceRow {
+  user_id: string;
+  all_notifications_enabled: boolean;
+  diary_reminder_enabled: boolean;
+  diary_complete_enabled: boolean;
+  notice_enabled: boolean;
+  membership_enabled: boolean;
+  support_enabled: boolean;
+  reminder_time: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export type NotificationPreferenceInsert = Omit<
+  NotificationPreferenceRow,
+  | 'all_notifications_enabled'
+  | 'diary_reminder_enabled'
+  | 'diary_complete_enabled'
+  | 'notice_enabled'
+  | 'membership_enabled'
+  | 'support_enabled'
+  | 'reminder_time'
+  | 'created_at'
+  | 'updated_at'
+> & {
+  all_notifications_enabled?: boolean;
+  diary_reminder_enabled?: boolean;
+  diary_complete_enabled?: boolean;
+  notice_enabled?: boolean;
+  membership_enabled?: boolean;
+  support_enabled?: boolean;
+  reminder_time?: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type NotificationPreferenceUpdate =
+  Partial<NotificationPreferenceInsert>;
+
+export interface SupportFaqRow {
+  id: string;
+  category: SupportFaqCategory;
+  question: string;
+  answer: string;
+  sort_order: number;
+  is_published: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export type SupportFaqInsert = Omit<
+  SupportFaqRow,
+  'id' | 'created_at' | 'updated_at' | 'category' | 'sort_order' | 'is_published'
+> & {
+  id?: string;
+  created_at?: string;
+  updated_at?: string;
+  category?: SupportFaqCategory;
+  sort_order?: number;
+  is_published?: boolean;
+};
+
+export type SupportFaqUpdate = Partial<SupportFaqInsert>;
+
+export interface NoticeRow {
+  id: string;
+  title: string;
+  body: string;
+  published_at: string | null;
+  is_published: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export type NoticeInsert = Omit<
+  NoticeRow,
+  'id' | 'created_at' | 'updated_at' | 'is_published'
+> & {
+  id?: string;
+  created_at?: string;
+  updated_at?: string;
+  is_published?: boolean;
+};
+
+export type NoticeUpdate = Partial<NoticeInsert>;
+
+export interface SupportInquiryRow {
+  id: string;
+  user_id: string;
+  category: SupportInquiryCategory;
+  topic: SupportInquiryTopic | null;
+  title: string;
+  body: string;
+  status: SupportInquiryStatus;
+  admin_note: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type SupportInquiryInsert = Omit<
+  SupportInquiryRow,
+  'id' | 'created_at' | 'updated_at' | 'status' | 'admin_note' | 'topic'
+> & {
+  id?: string;
+  created_at?: string;
+  updated_at?: string;
+  status?: SupportInquiryStatus;
+  admin_note?: string | null;
+  topic?: SupportInquiryTopic | null;
+};
+
+export type SupportInquiryUpdate = Partial<SupportInquiryInsert>;
+
+export interface SupportInquiryAttachmentRow {
+  id: string;
+  inquiry_id: string;
+  user_id: string;
+  storage_path: string;
+  file_name: string;
+  content_type: 'image/jpeg' | 'image/png' | 'image/webp';
+  file_size: number;
+  created_at: string;
+}
+
+export type SupportInquiryAttachmentInsert = Omit<
+  SupportInquiryAttachmentRow,
+  'id' | 'created_at'
+> & {
+  id?: string;
+  created_at?: string;
+};
+
+export type SupportInquiryAttachmentUpdate =
+  Partial<SupportInquiryAttachmentInsert>;
+
+export interface MembershipPaymentOrderRow {
+  id: string;
+  user_id: string;
+  order_id: string;
+  order_name: string;
+  amount: number;
+  currency: string;
+  provider: string;
+  environment: PaymentEnvironment;
+  status: PaymentOrderStatus;
+  payment_key: string | null;
+  checkout_url: string | null;
+  approved_at: string | null;
+  failure_code: string | null;
+  failure_message: string | null;
+  raw_response: Json | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type MembershipPaymentOrderInsert = Omit<
+  MembershipPaymentOrderRow,
+  | 'id'
+  | 'created_at'
+  | 'updated_at'
+  | 'currency'
+  | 'provider'
+  | 'environment'
+  | 'status'
+  | 'payment_key'
+  | 'checkout_url'
+  | 'approved_at'
+  | 'failure_code'
+  | 'failure_message'
+  | 'raw_response'
+> & {
+  id?: string;
+  created_at?: string;
+  updated_at?: string;
+  currency?: string;
+  provider?: string;
+  environment?: PaymentEnvironment;
+  status?: PaymentOrderStatus;
+  payment_key?: string | null;
+  checkout_url?: string | null;
+  approved_at?: string | null;
+  failure_code?: string | null;
+  failure_message?: string | null;
+  raw_response?: Json | null;
+};
+
+export type MembershipPaymentOrderUpdate =
+  Partial<MembershipPaymentOrderInsert>;
 
 export interface PetThemeSettingRow {
   id: string;
@@ -329,6 +593,27 @@ export type PetThemeSettingInsert = Omit<
 };
 
 export type PetThemeSettingUpdate = Partial<PetThemeSettingInsert>;
+
+export interface PetDiaryFontSettingRow {
+  id: string;
+  pet_id: string;
+  font_key: DiaryFontKey;
+  created_at: string;
+  updated_at: string;
+}
+
+export type PetDiaryFontSettingInsert = Omit<
+  PetDiaryFontSettingRow,
+  'id' | 'created_at' | 'updated_at' | 'font_key'
+> & {
+  id?: string;
+  created_at?: string;
+  updated_at?: string;
+  font_key?: DiaryFontKey;
+};
+
+export type PetDiaryFontSettingUpdate =
+  Partial<PetDiaryFontSettingInsert>;
 
 export interface UserTutorialStateRow {
   id: string;
@@ -398,10 +683,50 @@ export interface Database {
         Insert: MembershipInsert;
         Update: MembershipUpdate;
       };
+      notifications: {
+        Row: NotificationRow;
+        Insert: NotificationInsert;
+        Update: NotificationUpdate;
+      };
+      notification_preferences: {
+        Row: NotificationPreferenceRow;
+        Insert: NotificationPreferenceInsert;
+        Update: NotificationPreferenceUpdate;
+      };
+      support_faqs: {
+        Row: SupportFaqRow;
+        Insert: SupportFaqInsert;
+        Update: SupportFaqUpdate;
+      };
+      notices: {
+        Row: NoticeRow;
+        Insert: NoticeInsert;
+        Update: NoticeUpdate;
+      };
+      support_inquiries: {
+        Row: SupportInquiryRow;
+        Insert: SupportInquiryInsert;
+        Update: SupportInquiryUpdate;
+      };
+      support_inquiry_attachments: {
+        Row: SupportInquiryAttachmentRow;
+        Insert: SupportInquiryAttachmentInsert;
+        Update: SupportInquiryAttachmentUpdate;
+      };
+      membership_payment_orders: {
+        Row: MembershipPaymentOrderRow;
+        Insert: MembershipPaymentOrderInsert;
+        Update: MembershipPaymentOrderUpdate;
+      };
       pet_theme_settings: {
         Row: PetThemeSettingRow;
         Insert: PetThemeSettingInsert;
         Update: PetThemeSettingUpdate;
+      };
+      pet_diary_font_settings: {
+        Row: PetDiaryFontSettingRow;
+        Insert: PetDiaryFontSettingInsert;
+        Update: PetDiaryFontSettingUpdate;
       };
       user_tutorial_state: {
         Row: UserTutorialStateRow;

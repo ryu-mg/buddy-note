@@ -30,6 +30,14 @@ type UploadProfilePhotoArgs = {
   contentType?: string
 }
 
+type UploadSupportInquiryImageArgs = {
+  userId: string
+  inquiryId: string
+  attachmentId: string
+  file: File
+  ext: string
+}
+
 /**
  * Upload a pet photo into the private `photos` bucket.
  *
@@ -86,6 +94,38 @@ export async function uploadProfilePhoto(
   if (error) {
     log.error('uploadProfilePhoto failed', { err: error })
     return { error: '대표 사진을 저장하지 못했어요.' }
+  }
+
+  return { path }
+}
+
+/**
+ * Upload a support inquiry attachment into the private `photos` bucket.
+ *
+ * Path convention: `{userId}/support/{inquiryId}/{attachmentId}.{ext}`.
+ * The first path segment remains the authenticated user id, so existing
+ * photos bucket RLS allows owner-scoped signed URL generation.
+ */
+export async function uploadSupportInquiryImage(
+  args: UploadSupportInquiryImageArgs,
+): Promise<{ path: string } | { error: string }> {
+  const { userId, inquiryId, attachmentId, file, ext } = args
+  const admin = createAdminClient()
+  if (!admin) return { error: 'Supabase 설정이 필요해요.' }
+
+  const normalizedExt = ext.replace(/^\./, '').toLowerCase()
+  if (!normalizedExt) return { error: '이미지 확장자를 확인할 수 없어요.' }
+
+  const path = `${userId}/support/${inquiryId}/${attachmentId}.${normalizedExt}`
+
+  const { error } = await admin.storage.from(PHOTOS_BUCKET).upload(path, file, {
+    contentType: file.type || `image/${normalizedExt}`,
+    upsert: false,
+  })
+
+  if (error) {
+    log.error('uploadSupportInquiryImage failed', { err: error })
+    return { error: '첨부 이미지를 올리지 못했어요.' }
   }
 
   return { path }

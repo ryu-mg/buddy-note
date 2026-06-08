@@ -1,9 +1,9 @@
 import Link from 'next/link'
+import { Bell } from 'lucide-react'
 
 import { BuddyHappy } from '@/components/illustrations/buddy-happy'
+import { shouldShowUnreadNotificationDot } from '@/lib/notifications/state'
 import { createClient } from '@/lib/supabase/server'
-
-import { SignoutButton } from './signout-button'
 
 /**
  * AppHeader — 전역 상단 네비.
@@ -40,28 +40,29 @@ export async function AppHeader() {
     )
   }
 
-  const { data: pet } = await supabase
-    .from('pets')
-    .select('name')
+  const { count: unreadCount } = await supabase
+    .from('notifications')
+    .select('id', { count: 'exact', head: true })
     .eq('user_id', user.id)
-    .limit(1)
-    .maybeSingle<{ name: string }>()
+    .is('read_at', null)
 
   return (
     <HeaderShell
       right={
-        <div className="flex items-center gap-4">
-          {pet?.name ? (
-            <Link
-              href="/pet"
-              className="rounded-[var(--radius-pill)] border border-[var(--color-line)] bg-[var(--color-paper)] px-3 py-1 font-serif text-[13px] font-semibold text-[var(--color-ink)] transition-colors hover:border-[var(--color-accent-brand)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent-brand)] focus-visible:ring-offset-2"
-              aria-label={`현재 반려동물: ${pet.name} — 프로필 설정`}
-            >
-              {pet.name}
-            </Link>
+        <Link
+          href="/notifications"
+          aria-label={
+            unreadCount && unreadCount > 0
+              ? `읽지 않은 알림 ${unreadCount}개 확인하기`
+              : '최근 알림 확인하기'
+          }
+          className="relative inline-flex size-9 items-center justify-center rounded-[var(--radius-button)] text-[var(--color-ink-soft)] transition-colors hover:bg-[var(--color-paper)] hover:text-[var(--color-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent-brand)] focus-visible:ring-offset-2"
+        >
+          <Bell aria-hidden className="size-4" strokeWidth={1.9} />
+          {shouldShowUnreadNotificationDot(unreadCount ?? 0) ? (
+            <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-[var(--color-error)] ring-2 ring-[var(--color-bg)]" />
           ) : null}
-          <SignoutButton />
-        </div>
+        </Link>
       }
     />
   )

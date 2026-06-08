@@ -1,16 +1,21 @@
 'use client'
 
 import Image from 'next/image'
+import Link from 'next/link'
 import type { CSSProperties } from 'react'
 import { useMemo, useState } from 'react'
+import { Bell } from 'lucide-react'
 
 import { ShareModal } from '@/app/diary/[id]/share-modal'
 import { UploadForm } from '@/app/log/upload-form'
+import { DiaryDetailCard } from '@/components/diary/diary-detail-card'
+import { RewriteDiaryButton } from '@/components/diary/rewrite-diary-button'
 import { EmptyState } from '@/components/empty/empty-state'
 import { PawPrint } from '@/components/icons/paw-print'
 import { FirstEntryTutorialSheet } from '@/components/tutorial/first-entry-tutorial-sheet'
 import { CountUp } from '@/lib/motion/count-up'
 import { MOOD_CSS_VAR } from '@/lib/mood'
+import { shouldShowUnreadNotificationDot } from '@/lib/notifications/state'
 import type { ThemePresetKey } from '@/lib/themes/presets'
 import { buildThemeStyle } from '@/lib/themes/style'
 import type { DiaryMood } from '@/types/database'
@@ -84,6 +89,12 @@ function longDateLabel(key: string): string {
   return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`
 }
 
+function compactDateLabel(key: string): string {
+  const [year, month, day] = key.split('-')
+  if (!year || !month || !day) return ''
+  return `${year}.${month}.${day}`
+}
+
 function daysSince(iso: string): number {
   const start = new Date(iso).getTime()
   if (Number.isNaN(start)) return 1
@@ -118,13 +129,19 @@ function buildMonthDays(
 export function CalendarHome({
   pet,
   diaries,
+  unreadNotificationCount = 0,
   showFirstEntryTutorial = false,
   themeKey = null,
+  canRewrite = false,
+  diaryFontCssValue = 'var(--font-diary-body)',
 }: {
   pet: CalendarPet
   diaries: CalendarDiary[]
+  unreadNotificationCount?: number
   showFirstEntryTutorial?: boolean
   themeKey?: ThemePresetKey | null
+  canRewrite?: boolean
+  diaryFontCssValue?: string
 }) {
   const todayKey = todayInSeoul()
   const [activeMonth, setActiveMonth] = useState(() => {
@@ -159,6 +176,11 @@ export function CalendarHome({
           className="mx-auto flex min-h-screen w-full max-w-md flex-col gap-8 px-4 py-12"
           style={themeStyle}
         >
+          <HomePetHeader
+            pet={pet}
+            dayN={dayN}
+            unreadNotificationCount={unreadNotificationCount}
+          />
           <EmptyState
             illustration="resting"
             tone="warm"
@@ -186,27 +208,11 @@ export function CalendarHome({
       className="mx-auto flex min-h-screen w-full max-w-3xl flex-col gap-6 px-4 pb-28 pt-8 sm:px-6 md:pt-10"
       style={themeStyle}
     >
-      <header className="flex flex-col gap-2">
-        <h1 className="font-serif text-[var(--text-display-md)] font-semibold leading-[1.05] text-[var(--color-ink)]">
-          {pet.name}
-        </h1>
-        <div className="flex items-baseline gap-3">
-          <CountUp
-            to={dayN}
-            suffix="일째"
-            className="font-serif text-[20px] font-semibold text-[var(--theme-accent,var(--color-accent-brand))]"
-          />
-          {pet.personalityCode && pet.personalityLabel ? (
-            <span className="rounded-[var(--radius-pill)] bg-[var(--theme-accent-soft,var(--color-accent-brand-soft))] px-2.5 py-0.5 text-[11px] font-semibold tracking-[0.06em] text-[var(--theme-accent,var(--color-accent-brand))]">
-              {pet.personalityCode} · {pet.personalityLabel}
-            </span>
-          ) : (
-            <span className="text-[12px] text-[var(--color-mute)]">
-              하루에 한 장씩, 기억을 남겨요.
-            </span>
-          )}
-        </div>
-      </header>
+      <HomePetHeader
+        pet={pet}
+        dayN={dayN}
+        unreadNotificationCount={unreadNotificationCount}
+      />
 
       <section
         aria-label="월간 기록 달력"
@@ -330,11 +336,63 @@ export function CalendarHome({
           dateKeyValue={selectedKey}
           diary={selectedDiary}
           isFuture={selectedIsFuture}
+          canRewrite={canRewrite}
+          diaryFontCssValue={diaryFontCssValue}
           onClose={() => setSelectedKey(null)}
         />
       ) : null}
       {showFirstEntryTutorial ? <FirstEntryTutorialSheet /> : null}
     </main>
+  )
+}
+
+function HomePetHeader({
+  pet,
+  dayN,
+  unreadNotificationCount,
+}: {
+  pet: CalendarPet
+  dayN: number
+  unreadNotificationCount: number
+}) {
+  return (
+    <header className="flex items-start justify-between gap-4">
+      <div className="min-w-0 flex flex-col gap-2">
+        <h1 className="truncate text-[var(--text-display-md)] font-semibold leading-[1.05] text-[var(--color-ink)]">
+          {pet.name}
+        </h1>
+        <div className="flex flex-wrap items-baseline gap-3">
+          <CountUp
+            to={dayN}
+            suffix="일째"
+            className="text-[20px] font-semibold text-[var(--theme-accent,var(--color-accent-brand))]"
+          />
+          {pet.personalityCode && pet.personalityLabel ? (
+            <span className="rounded-[var(--radius-pill)] bg-[var(--theme-accent-soft,var(--color-accent-brand-soft))] px-2.5 py-0.5 text-[11px] font-semibold tracking-[0.06em] text-[var(--theme-accent,var(--color-accent-brand))]">
+              {pet.personalityCode} · {pet.personalityLabel}
+            </span>
+          ) : (
+            <span className="text-[12px] text-[var(--color-mute)]">
+              하루에 한 장씩, 기억을 남겨요.
+            </span>
+          )}
+        </div>
+      </div>
+      <Link
+        href="/notifications"
+        aria-label={
+          unreadNotificationCount > 0
+            ? `읽지 않은 알림 ${unreadNotificationCount}개 확인하기`
+            : '최근 알림 확인하기'
+        }
+        className="relative mt-1 inline-flex size-10 shrink-0 items-center justify-center rounded-[var(--radius-button)] text-[var(--color-ink-soft)] transition-colors hover:bg-[var(--color-paper)] hover:text-[var(--color-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent,var(--color-accent-brand))] focus-visible:ring-offset-2"
+      >
+        <Bell aria-hidden className="size-5" strokeWidth={1.9} />
+        {shouldShowUnreadNotificationDot(unreadNotificationCount) ? (
+          <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-[var(--color-error)] ring-2 ring-[var(--color-bg)]" />
+        ) : null}
+      </Link>
+    </header>
   )
 }
 
@@ -373,54 +431,65 @@ function CalendarSheet({
   dateKeyValue,
   diary,
   isFuture,
+  canRewrite,
+  diaryFontCssValue,
   onClose,
 }: {
   pet: CalendarPet
   dateKeyValue: string
   diary: CalendarDiary | null
   isFuture: boolean
+  canRewrite: boolean
+  diaryFontCssValue: string
   onClose: () => void
 }) {
   return (
     <div
       role="dialog"
       aria-modal="true"
-      aria-labelledby="calendar-sheet-title"
+      aria-labelledby={diary ? 'calendar-diary-title' : 'calendar-sheet-title'}
       className="fixed inset-x-0 top-0 bottom-[var(--bottom-nav-height)] z-30 flex items-end justify-center bg-[var(--color-ink)]/20 px-3 motion-safe:animate-[soft-fade_200ms_var(--ease-soft-out)_forwards] motion-reduce:opacity-100"
       onClick={onClose}
     >
       <section
-        className="max-h-[86vh] w-full max-w-md overflow-y-auto rounded-t-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-bg)] px-4 pb-10 pt-4 shadow-[var(--shadow-polaroid)] [-ms-overflow-style:none] [scrollbar-width:none] motion-safe:animate-[soft-fade_200ms_var(--ease-soft-out)_forwards] motion-reduce:animate-[soft-fade_200ms_forwards] [&::-webkit-scrollbar]:hidden"
+        className="max-h-[86vh] w-full max-w-md overflow-y-auto rounded-t-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-bg)] px-4 pb-10 pt-4 shadow-[var(--shadow-polaroid)] [-ms-overflow-style:none] [scrollbar-width:none] motion-safe:animate-[bottom-sheet-enter_260ms_cubic-bezier(0.2,0.9,0.25,1)_both] motion-reduce:animate-[soft-fade_200ms_forwards] [&::-webkit-scrollbar]:hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mx-auto mb-4 h-1 w-10 rounded-[var(--radius-pill)] bg-[var(--color-line)]" />
-        <div className="mb-5 flex items-start justify-between gap-4">
-          <div className="flex flex-col gap-1">
-            <p className="text-[12px] font-medium uppercase tracking-[0.14em] text-[var(--color-mute)]">
-              {longDateLabel(dateKeyValue)}
-            </p>
-            <h2
-              id="calendar-sheet-title"
-              className="text-[20px] font-semibold text-[var(--color-ink)]"
+        {!diary ? (
+          <div className="mb-5 flex items-start justify-between gap-4">
+            <div className="flex flex-col gap-1">
+              <p className="text-[12px] font-medium uppercase tracking-[0.14em] text-[var(--color-mute)]">
+                {longDateLabel(dateKeyValue)}
+              </p>
+              <h2
+                id="calendar-sheet-title"
+                className="text-[20px] font-semibold text-[var(--color-ink)]"
+              >
+                {`${pet.name}의 기록 남기기`}
+              </h2>
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="min-h-11 rounded-[var(--radius-button)] px-3 text-[13px] text-[var(--color-mute)] transition-colors hover:bg-[var(--color-paper)]"
             >
-              {diary ? '이 날의 일기' : `${pet.name}의 기록 남기기`}
-            </h2>
+              닫기
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="min-h-11 rounded-[var(--radius-button)] px-3 text-[13px] text-[var(--color-mute)] transition-colors hover:bg-[var(--color-paper)]"
-          >
-            닫기
-          </button>
-        </div>
+        ) : null}
 
         {isFuture ? (
           <p className="rounded-[var(--radius-input)] bg-[var(--color-paper)] px-4 py-3 text-[14px] text-[var(--color-ink-soft)]">
             아직 오지 않은 날은 기록할 수 없어요.
           </p>
         ) : diary ? (
-          <DiaryPreview diary={diary} petName={pet.name} />
+          <DiaryPreview
+            diary={diary}
+            petName={pet.name}
+            canRewrite={canRewrite}
+            diaryFontCssValue={diaryFontCssValue}
+          />
         ) : (
           <UploadForm
             petId={pet.id}
@@ -438,42 +507,39 @@ function CalendarSheet({
 function DiaryPreview({
   diary,
   petName,
+  canRewrite,
+  diaryFontCssValue,
 }: {
   diary: CalendarDiary
   petName: string
+  canRewrite: boolean
+  diaryFontCssValue: string
 }) {
   return (
-    <article className="flex flex-col gap-4">
-      {diary.imageUrl ? (
-        <div className="relative aspect-[4/5] overflow-hidden bg-[var(--color-paper)]">
-          <Image
-            src={diary.imageUrl}
-            alt={`${petName}의 ${diary.title} 사진`}
-            fill
-            sizes="(max-width: 640px) 100vw, 420px"
-            className="object-cover"
-          />
-        </div>
-      ) : null}
-      <div className="flex flex-col gap-2">
-        <h3 className="text-[20px] font-semibold leading-[1.35] text-[var(--color-ink)]">
-          {diary.title}
-        </h3>
-        <p
-          className="whitespace-pre-wrap text-[15px] leading-[1.7] text-[var(--color-ink-soft)]"
-          style={{ fontFamily: 'var(--font-serif)' }}
-        >
-          {diary.body}
-        </p>
-      </div>
-      <div className="pt-1">
+    <div className="flex flex-col gap-3">
+      <DiaryDetailCard
+        titleId="calendar-diary-title"
+        title={diary.title}
+        body={diary.body}
+        dateLabel={compactDateLabel(diary.logDate)}
+        petName={petName}
+        imageUrl={diary.imageUrl}
+        style={{ '--font-diary-writing': diaryFontCssValue } as CSSProperties}
+      />
+      <div className="flex flex-col gap-2 px-1">
         <ShareModal
           diaryId={diary.id}
           title={diary.title}
           petName={petName}
           images={diary.shareImages}
         />
+        <RewriteDiaryButton
+          diaryId={diary.id}
+          canRewrite={canRewrite}
+          returnTo="/"
+          fullWidth
+        />
       </div>
-    </article>
+    </div>
   )
 }

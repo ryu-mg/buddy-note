@@ -72,8 +72,7 @@ export function DiaryCard({
         </h3>
 
         <p
-          className="mt-2 line-clamp-2 text-[14px] leading-[1.65] text-[var(--color-ink-soft)] sm:text-[15px]"
-          style={{ fontFamily: 'var(--font-serif)' }}
+          className="diary-writing-font mt-2 line-clamp-2 text-[14px] leading-[1.65] text-[var(--color-ink-soft)] sm:text-[15px]"
         >
           {body}
         </p>

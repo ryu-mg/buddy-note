@@ -7,11 +7,15 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
 import { renderAllFormats } from '@/lib/image/render-3-formats'
+import { canRewriteDiary } from '@/lib/billing/entitlements'
+import { getMembershipSnapshot } from '@/lib/billing/server'
+import { generateDiary } from '@/lib/llm/generate-diary'
 import { createLogger } from '@/lib/logger'
 import { deletePhoto, getSignedPhotoUrl, uploadDiaryImage } from '@/lib/storage'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { getPetThemeKey } from '@/lib/themes/server'
+import type { RecentCallback } from '@/types/database'
 
 const log = createLogger('diary:action')
 
@@ -30,6 +34,14 @@ export type DeleteDiaryResult =
 export type EnsureDiaryShareImagesResult =
   | { ok: true; images: ShareImages }
   | { ok: false; error: string; code?: 'auth' | 'not_found' | 'render' | 'db' }
+
+export type RewriteDiaryResult =
+  | { ok: true }
+  | {
+      ok: false
+      error: string
+      code?: 'auth' | 'not_found' | 'entitlement' | 'llm' | 'render' | 'db'
+    }
 
 const DiaryIdSchema = z.string().uuid('잘못된 요청이에요.')
 
@@ -170,6 +182,156 @@ export async function ensureDiaryShareImages(
       code: 'render',
     }
   }
+}
+
+export async function rewriteDiary(diaryId: string): Promise<RewriteDiaryResult> {
+  const parsed = DiaryIdSchema.safeParse(diaryId)
+  if (!parsed.success) {
+    return { ok: false, error: '잘못된 요청이에요.', code: 'not_found' }
+  }
+
+  const supabase = await createClient()
+  if (!supabase) {
+    return { ok: false, error: 'Supabase 설정이 필요해요.', code: 'db' }
+  }
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) {
+    return { ok: false, error: '로그인이 필요해요.', code: 'auth' }
+  }
+
+  const membership = await getMembershipSnapshot(supabase, user.id)
+  if (!canRewriteDiary(membership)) {
+    return {
+      ok: false,
+      error: '일기 다시 쓰기는 멤버십에서 사용할 수 있어요.',
+      code: 'entitlement',
+    }
+  }
+
+  const { data: diary, error: fetchError } = await supabase
+    .from('diaries')
+    .select(
+      'id, log_id, pet:pets(id, name, user_id, persona_prompt_fragment), log:logs(memo, photo_url, photo_storage_path)',
+    )
+    .eq('id', parsed.data)
+    .maybeSingle<{
+      id: string
+      log_id: string
+      pet: {
+        id: string
+        name: string
+        user_id: string
+        persona_prompt_fragment: string | null
+      } | null
+      log: {
+        memo: string | null
+        photo_url: string | null
+        photo_storage_path: string | null
+      } | null
+    }>()
+
+  if (fetchError || !diary || !diary.pet || diary.pet.user_id !== user.id) {
+    return { ok: false, error: '기록을 찾지 못했어요.', code: 'not_found' }
+  }
+
+  const admin = createAdminClient()
+  if (!admin) {
+    return { ok: false, error: 'Supabase 설정이 필요해요.', code: 'db' }
+  }
+
+  let photoUrl: string | null = diary.log?.photo_url ?? null
+  let photoBase64: string | undefined
+  let photoMediaType: 'image/jpeg' | undefined
+  if (diary.log?.photo_storage_path) {
+    const signed = await getSignedPhotoUrl(diary.log.photo_storage_path)
+    if ('url' in signed) {
+      photoUrl = signed.url
+      try {
+        const photoResponse = await fetch(signed.url)
+        if (photoResponse.ok) {
+          const buffer = Buffer.from(await photoResponse.arrayBuffer())
+          photoBase64 = buffer.toString('base64')
+          photoMediaType = 'image/jpeg'
+        }
+      } catch (err) {
+        log.warn('rewrite photo fetch skipped', { err })
+      }
+    }
+  }
+
+  let recentCallbacks: RecentCallback[] = []
+  const { data: memoryRow } = await admin
+    .from('pet_memory_summary')
+    .select('recent_callbacks')
+    .eq('pet_id', diary.pet.id)
+    .maybeSingle<{ recent_callbacks: RecentCallback[] | null }>()
+  if (Array.isArray(memoryRow?.recent_callbacks)) {
+    recentCallbacks = memoryRow.recent_callbacks
+  }
+
+  const diaryResult = await generateDiary({
+    photoBase64,
+    photoMediaType,
+    petName: diary.pet.name,
+    personaFragment: diary.pet.persona_prompt_fragment ?? '',
+    memo: diary.log?.memo ?? '',
+    recentCallbacks,
+  })
+
+  let images: ShareImages = {
+    '9:16': null,
+    '4:5': null,
+    '1:1': null,
+  }
+
+  try {
+    const themeKey = await getPetThemeKey(admin, diary.pet.id)
+    const renderedImages = await renderAllFormats({
+      photoUrl,
+      petName: diary.pet.name,
+      diaryTitle: diaryResult.data.title,
+      diaryBody: diaryResult.data.body,
+      themeKey,
+    })
+    images = await uploadRenderedImages(renderedImages)
+  } catch (err) {
+    log.warn('rewrite share image render failed — diary text will still update', {
+      err,
+    })
+  }
+
+  const { error: updateError } = await (admin as UntypedSupabase)
+    .from('diaries')
+    .update({
+      title: diaryResult.data.title,
+      body: diaryResult.data.body,
+      mood: diaryResult.data.mood,
+      image_url_916: images['9:16'],
+      image_url_45: images['4:5'],
+      image_url_11: images['1:1'],
+      is_fallback: diaryResult.meta.isFallback,
+      model_used: diaryResult.meta.modelUsed,
+      latency_ms: diaryResult.meta.latencyMs,
+      tokens_input: diaryResult.meta.tokensInput,
+      tokens_output: diaryResult.meta.tokensOutput,
+    })
+    .eq('id', diary.id)
+
+  if (updateError) {
+    log.error('rewrite diary update failed', { err: updateError })
+    return {
+      ok: false,
+      error: '다시 쓴 일기를 저장하지 못했어요. 잠시 후 다시 시도해주세요.',
+      code: 'db',
+    }
+  }
+
+  revalidatePath('/')
+  revalidatePath(`/diary/${diary.id}`)
+  return { ok: true }
 }
 
 /**

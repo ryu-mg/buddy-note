@@ -63,9 +63,9 @@
 
 ### 제품 결정 (lock됨, post-review)
 - **Stack**: Next.js 16 App Router + TypeScript + Tailwind v4 + Supabase (AWS Seoul) + Vercel + satori/resvg + Claude Sonnet 4.6 (Week 0 A/B 후 최종 확정)
-- **Visual style**: 폴라로이드 (24px white border, -1.2deg 기울임, 명조체 diary 본문, 5% grain)
+- **Visual style**: 폴라로이드 (24px white border, -1.2deg 기울임, 윤초록우산어린이체 diary 본문, 5% grain)
 - **Accent color**: 테라코타 `#e07a5f` (purple/violet 절대 금지)
-- **Typography**: UI = Pretendard Variable, Diary 본문 = Nanum Myeongjo (serif, "쓰여진 기록" 메타포)
+- **Typography**: UI = LINE Seed Sans KR, Diary 본문 = 윤초록우산어린이 대한, Display/강아지 이름 = MaruBuri serif
 - **Anti-pattern**: 이모지, pastel, bubbly radius, gradient, "all-in-one / 스마트 / 혁신" 카피 — 전부 금지
 
 ### 언어
@@ -152,7 +152,7 @@ RLS 전수. 공개 프로필 기능 제거 후 `pets`, `logs`, `diaries`, `pet_m
 ```
 new-project/
 ├── app/
-│   ├── layout.tsx                    # Pretendard + Nanum Myeongjo CDN
+│   ├── layout.tsx                    # LINE Seed Sans KR local + Nanum Myeongjo CDN
 │   ├── page.tsx                      # 홈 (auth state 표시, placeholder)
 │   ├── globals.css                   # DESIGN.md tokens @theme inline (Tailwind v4)
 │   ├── auth/

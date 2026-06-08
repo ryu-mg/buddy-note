@@ -23,12 +23,13 @@ function membership(
 
 describe('resolveEntitlements', () => {
   it('allows premium theme during trial or active membership', () => {
-    expect(resolveEntitlements(membership('trialing'), NOW).premiumTheme).toBe(
-      true,
-    )
-    expect(resolveEntitlements(membership('active'), NOW).premiumTheme).toBe(
-      true,
-    )
+    expect(resolveEntitlements(membership('trialing'), NOW)).toEqual({
+      diaryRewrite: true,
+      fontChange: true,
+      premiumTheme: true,
+      themeChange: true,
+    })
+    expect(resolveEntitlements(membership('active'), NOW).premiumTheme).toBe(true)
   })
 
   it('allows past_due only inside the grace period', () => {
@@ -47,6 +48,12 @@ describe('resolveEntitlements', () => {
   })
 
   it('does not grant premium theme when membership is absent or ended', () => {
+    expect(resolveEntitlements(null, NOW)).toEqual({
+      diaryRewrite: false,
+      fontChange: false,
+      premiumTheme: false,
+      themeChange: false,
+    })
     expect(canUsePremiumTheme(null, NOW)).toBe(false)
     expect(canUsePremiumTheme(membership('free'), NOW)).toBe(false)
     expect(canUsePremiumTheme(membership('ended'), NOW)).toBe(false)

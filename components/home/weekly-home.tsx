@@ -1,7 +1,13 @@
+'use client'
+
 import Image from 'next/image'
 import Link from 'next/link'
-import type { ReactNode } from 'react'
+import type { CSSProperties, KeyboardEvent, PointerEvent, ReactNode } from 'react'
+import { useState } from 'react'
 
+import { ShareModal } from '@/app/diary/[id]/share-modal'
+import { DiaryDetailCard } from '@/components/diary/diary-detail-card'
+import { RewriteDiaryButton } from '@/components/diary/rewrite-diary-button'
 import { BuddyAvatar } from '@/components/home/buddy-avatar'
 import { EmptyState } from '@/components/empty/empty-state'
 import { PawPrint } from '@/components/icons/paw-print'
@@ -24,6 +30,11 @@ type WeeklyDiary = {
   title: string
   body: string
   imageUrl: string | null
+  shareImages: {
+    '9:16': string | null
+    '4:5': string | null
+    '1:1': string | null
+  }
   logDate: string
   createdAt: string
   mood: DiaryMood | null
@@ -35,6 +46,8 @@ type WeeklyHomeProps = {
   diaryCount: number
   recentCallbacks: RecentCallback[]
   todayHasDiary: boolean
+  canRewrite: boolean
+  diaryFontCssValue: string
 }
 
 function daysSince(iso: string): number {
@@ -49,15 +62,24 @@ function shortDate(key: string): string {
   return `${date.getMonth() + 1}월 ${date.getDate()}일`
 }
 
+function compactDateLabel(key: string): string {
+  const [year, month, day] = key.split('-')
+  if (!year || !month || !day) return ''
+  return `${year}.${month}.${day}`
+}
+
 export function WeeklyHome({
   pet,
   diaries,
   diaryCount,
   recentCallbacks,
   todayHasDiary,
+  canRewrite,
+  diaryFontCssValue,
 }: WeeklyHomeProps) {
   const dayN = daysSince(pet.createdAt)
   const greeting = buildBuddyGreeting({ personalityCode: pet.personalityCode })
+  const [selectedDiary, setSelectedDiary] = useState<WeeklyDiary | null>(null)
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col gap-7 px-4 pb-28 pt-8 sm:px-6 md:pt-10">
@@ -65,10 +87,7 @@ export function WeeklyHome({
         <div className="flex items-start gap-4">
           <BuddyAvatar name={pet.name} imageUrl={pet.avatarUrl} size="lg" />
           <div className="min-w-0 flex-1">
-            <p className="text-[12px] font-medium uppercase tracking-[0.14em] text-[var(--color-mute)]">
-              buddy card
-            </p>
-            <h1 className="mt-1 truncate font-serif text-[var(--text-display-md)] font-semibold leading-none text-[var(--color-ink)]">
+            <h1 className="truncate text-[var(--text-display-md)] font-semibold leading-none text-[var(--color-ink)]">
               {pet.name}
             </h1>
             {pet.personalityCode && pet.personalityLabel ? (
@@ -109,10 +128,7 @@ export function WeeklyHome({
       <section className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-[12px] font-medium uppercase tracking-[0.14em] text-[var(--color-mute)]">
-              this week
-            </p>
-            <h2 className="mt-1 text-[20px] font-semibold text-[var(--color-ink)]">
+            <h2 className="text-[20px] font-semibold text-[var(--color-ink)]">
               최근 버디노트
             </h2>
           </div>
@@ -127,7 +143,11 @@ export function WeeklyHome({
         {diaries.length > 0 ? (
           <div className="flex snap-x gap-4 overflow-x-auto pb-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {diaries.map((diary) => (
-              <TimelineCard key={diary.id} diary={diary} />
+              <TimelineCard
+                key={diary.id}
+                diary={diary}
+                onOpen={() => setSelectedDiary(diary)}
+              />
             ))}
           </div>
         ) : (
@@ -140,6 +160,16 @@ export function WeeklyHome({
           />
         )}
       </section>
+
+      {selectedDiary ? (
+        <WeeklyDiarySheet
+          diary={selectedDiary}
+          petName={pet.name}
+          canRewrite={canRewrite}
+          diaryFontCssValue={diaryFontCssValue}
+          onClose={() => setSelectedDiary(null)}
+        />
+      ) : null}
     </main>
   )
 }
@@ -148,7 +178,7 @@ function Stat({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="rounded-[var(--radius-button)] bg-[var(--color-bg)]/70 px-4 py-3">
       <p className="text-[12px] text-[var(--color-mute)]">{label}</p>
-      <p className="mt-1 font-serif text-[24px] font-semibold leading-none text-[var(--color-ink)]">
+      <p className="mt-1 text-[24px] font-semibold leading-none text-[var(--color-ink)]">
         {value}
       </p>
     </div>
@@ -160,10 +190,7 @@ function CallbackStrip({ callbacks }: { callbacks: RecentCallback[] }) {
 
   return (
     <section className="rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-bg)] px-5 py-4">
-      <p className="text-[12px] font-medium uppercase tracking-[0.14em] text-[var(--color-mute)]">
-        remembered
-      </p>
-      <p className="mt-2 text-[15px] leading-[1.65] text-[var(--color-ink-soft)]">
+      <p className="text-[15px] leading-[1.65] text-[var(--color-ink-soft)]">
         {callback
           ? `전에 ${callback.note} 했던 거, 내가 아직 기억하고 있어.`
           : '3일만 더 쌓이면, 내가 자주 하는 행동을 먼저 기억해볼게.'}
@@ -174,53 +201,136 @@ function CallbackStrip({ callbacks }: { callbacks: RecentCallback[] }) {
 
 function TimelineCard({
   diary,
+  onOpen,
 }: {
   diary: WeeklyDiary
+  onOpen: () => void
 }) {
   const accent = diary.mood ? MOOD_CSS_VAR[diary.mood] : 'var(--color-accent-brand)'
+  const openDiary = () => onOpen()
+  const handleKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
+    if (event.key !== 'Enter' && event.key !== ' ') return
+    event.preventDefault()
+    openDiary()
+  }
+  const handlePointerUp = (event: PointerEvent<HTMLButtonElement>) => {
+    if (event.pointerType === 'mouse') return
+    openDiary()
+  }
 
   return (
-    <Link
-      href={`/diary/${diary.id}`}
-      className="group/card w-[72vw] max-w-[280px] shrink-0 snap-start"
-    >
+    <div className="group/card w-[72vw] max-w-[280px] shrink-0 snap-start">
       <article
         className={[
           'bg-[var(--color-paper)] p-4 pb-8 ring-1 ring-[var(--color-line)] shadow-[var(--shadow-card)]',
           'motion-safe:transition-transform motion-safe:duration-200 motion-safe:group-hover/card:-translate-y-0.5',
         ].join(' ')}
       >
-        <div className="relative aspect-[4/5] overflow-hidden bg-[var(--color-line)]">
-          {diary.imageUrl ? (
-            <Image
-              src={diary.imageUrl}
-              alt={`${diary.title} 사진`}
-              fill
-              sizes="280px"
-              className="object-cover"
+        <button
+          type="button"
+          aria-label={`${shortDate(diary.logDate)} ${diary.title} 일기 보기`}
+          onClick={openDiary}
+          onKeyDown={handleKeyDown}
+          onPointerUp={handlePointerUp}
+          className="block w-full cursor-pointer text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent-brand)] focus-visible:ring-offset-2"
+        >
+          <div className="relative aspect-[4/5] overflow-hidden bg-[var(--color-line)]">
+            {diary.imageUrl ? (
+              <Image
+                src={diary.imageUrl}
+                alt={`${diary.title} 사진`}
+                fill
+                sizes="280px"
+                className="object-cover"
+              />
+            ) : (
+              <div className="flex h-full items-center justify-center text-[12px] text-[var(--color-mute)]">
+                사진 없음
+              </div>
+            )}
+            <span
+              aria-hidden
+              className="absolute bottom-3 left-3 h-2.5 w-2.5 rounded-full"
+              style={{ background: accent }}
             />
-          ) : (
-            <div className="flex h-full items-center justify-center text-[12px] text-[var(--color-mute)]">
-              사진 없음
-            </div>
-          )}
-          <span
-            aria-hidden
-            className="absolute bottom-3 left-3 h-2.5 w-2.5 rounded-full"
-            style={{ background: accent }}
-          />
-        </div>
-        <p className="mt-4 text-[12px] font-medium text-[var(--color-mute)]">
-          {shortDate(diary.logDate)}
-          {diary.mood ? ` · ${MOOD_LABELS[diary.mood]}` : ''}
-        </p>
-        <h3 className="mt-1 line-clamp-1 text-[16px] font-semibold text-[var(--color-ink)]">
-          {diary.title}
-        </h3>
-        <p className="mt-2 line-clamp-2 font-serif text-[14px] leading-[1.65] text-[var(--color-ink-soft)]">
-          {diary.body}
-        </p>
+          </div>
+          <p className="mt-4 text-[12px] font-medium text-[var(--color-mute)]">
+            {shortDate(diary.logDate)}
+            {diary.mood ? ` · ${MOOD_LABELS[diary.mood]}` : ''}
+          </p>
+          <h3 className="mt-1 line-clamp-1 text-[16px] font-semibold text-[var(--color-ink)]">
+            {diary.title}
+          </h3>
+          <p className="diary-writing-font mt-2 line-clamp-2 text-[14px] leading-[1.65] text-[var(--color-ink-soft)]">
+            {diary.body}
+          </p>
+        </button>
       </article>
-    </Link>
+    </div>
+  )
+}
+
+function WeeklyDiarySheet({
+  diary,
+  petName,
+  canRewrite,
+  diaryFontCssValue,
+  onClose,
+}: {
+  diary: WeeklyDiary
+  petName: string
+  canRewrite: boolean
+  diaryFontCssValue: string
+  onClose: () => void
+}) {
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="weekly-diary-title"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--color-ink)]/30 px-4 py-6 motion-safe:animate-[soft-fade_200ms_var(--ease-soft-out)_forwards] motion-reduce:opacity-100"
+      onClick={onClose}
+    >
+      <section
+        className="max-h-[min(86vh,760px)] w-full max-w-md overflow-y-auto rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-bg)] px-4 pb-6 pt-4 shadow-[var(--shadow-polaroid)] [-ms-overflow-style:none] [scrollbar-width:none] motion-safe:animate-[soft-fade_200ms_var(--ease-soft-out)_forwards] motion-reduce:animate-[soft-fade_200ms_forwards] [&::-webkit-scrollbar]:hidden"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="mb-4 flex justify-end">
+          <button
+            type="button"
+            onClick={onClose}
+            className="min-h-11 rounded-[var(--radius-button)] px-3 text-[13px] text-[var(--color-mute)] transition-colors hover:bg-[var(--color-paper)]"
+          >
+            닫기
+          </button>
+        </div>
+
+        <div className="flex flex-col gap-3">
+          <DiaryDetailCard
+            titleId="weekly-diary-title"
+            title={diary.title}
+            body={diary.body}
+            dateLabel={compactDateLabel(diary.logDate)}
+            petName={petName}
+            imageUrl={diary.imageUrl}
+            style={{ '--font-diary-writing': diaryFontCssValue } as CSSProperties}
+          />
+          <div className="flex flex-col gap-2 px-1">
+            <ShareModal
+              diaryId={diary.id}
+              title={diary.title}
+              petName={petName}
+              images={diary.shareImages}
+            />
+            <RewriteDiaryButton
+              diaryId={diary.id}
+              canRewrite={canRewrite}
+              returnTo="/week"
+              fullWidth
+            />
+          </div>
+        </div>
+      </section>
+    </div>
   )
 }

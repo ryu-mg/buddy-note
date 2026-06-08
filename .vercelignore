@@ -1,0 +1,9 @@
+.codex/
+.playwright-mcp/
+.omc/
+.omx/
+coverage/
+playwright-report/
+test-results/
+storybook-static/
+*.log

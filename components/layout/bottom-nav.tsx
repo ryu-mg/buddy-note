@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useTransition } from 'react'
-import { Bone, CalendarDays, Home, UserRound } from 'lucide-react'
+import { Bone, CalendarDays, Home, MoreHorizontal } from 'lucide-react'
 
 import { PawPrint } from '@/components/icons/paw-print'
 
@@ -21,7 +21,7 @@ export function BottomNav() {
   const items = [
     { href: '/week', label: '주간', icon: CalendarDays },
     { href: '/', label: '홈', icon: Home },
-    { href: '/pet', label: '내 정보', icon: UserRound },
+    { href: '/more', label: '더보기', icon: MoreHorizontal },
   ]
 
   return (
@@ -29,7 +29,7 @@ export function BottomNav() {
       aria-label="주요 메뉴"
       className="fixed inset-x-0 bottom-0 z-40 h-[var(--bottom-nav-height)] border-t border-[var(--color-line)] bg-[var(--color-bg)]"
     >
-      <div className="mx-auto grid h-full max-w-md grid-cols-3 px-4 pb-[env(safe-area-inset-bottom)]">
+      <div className="mx-auto grid h-full max-w-md grid-cols-3 px-3 pb-[env(safe-area-inset-bottom)]">
         {items.map((item) => {
           const active =
             item.href === '/'

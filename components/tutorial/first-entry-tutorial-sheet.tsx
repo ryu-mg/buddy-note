@@ -1,6 +1,6 @@
 'use client'
 
-import { X } from 'lucide-react'
+import { CalendarDays, ImagePlus, PenLine, X } from 'lucide-react'
 import { useEffect, useState, useTransition } from 'react'
 import { createPortal } from 'react-dom'
 
@@ -75,7 +75,7 @@ export function FirstEntryTutorialSheet() {
       className="fixed inset-0 z-50 flex items-end justify-center bg-[var(--color-ink)]/20 px-3 pb-[calc(var(--bottom-nav-height)+0.75rem)]"
     >
       <section
-        className="w-full max-w-md rounded-t-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-bg)] px-4 pb-5 pt-4 shadow-[var(--shadow-polaroid)]"
+        className="flex min-h-[min(72vh,620px)] w-full max-w-md flex-col rounded-t-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-bg)] px-4 pb-5 pt-4 shadow-[var(--shadow-polaroid)]"
         onClick={!isLast ? goNext : undefined}
       >
         <div className="mx-auto mb-4 h-1 w-10 rounded-[var(--radius-pill)] bg-[var(--color-line)]" />
@@ -112,14 +112,16 @@ export function FirstEntryTutorialSheet() {
           </button>
         </div>
 
-        <div className="flex flex-col gap-2">
+        <TutorialVisual stepId={step.id} title={step.visualTitle} body={step.visualBody} />
+
+        <div className="mt-5 flex flex-col gap-2">
           <h2
             id="first-entry-tutorial-title"
-            className="text-[20px] font-semibold text-[var(--color-ink)]"
+            className="text-[23px] font-semibold leading-[1.28] text-[var(--color-ink)]"
           >
             {step.title}
           </h2>
-          <p className="text-[14px] leading-[1.65] text-[var(--color-ink-soft)]">
+          <p className="text-[15px] leading-[1.7] text-[var(--color-ink-soft)]">
             {step.body}
           </p>
         </div>
@@ -130,7 +132,7 @@ export function FirstEntryTutorialSheet() {
           </p>
         ) : null}
 
-        <div className="mt-5 flex gap-2">
+        <div className="mt-auto flex gap-2 pt-7">
           {isLast && step.secondaryCta ? (
             <Button
               type="button"
@@ -166,5 +168,44 @@ export function FirstEntryTutorialSheet() {
       </section>
     </div>,
     portalTarget,
+  )
+}
+
+function TutorialVisual({
+  stepId,
+  title,
+  body,
+}: {
+  stepId: string
+  title: string
+  body: string
+}) {
+  const Icon =
+    stepId === 'calendar-view'
+      ? ImagePlus
+      : stepId === 'week-view'
+        ? CalendarDays
+        : PenLine
+
+  return (
+    <div className="relative overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-paper)] px-5 py-5">
+      <div className="absolute right-4 top-4 h-16 w-16 rounded-full bg-[var(--color-accent-brand-soft)]" />
+      <div className="relative">
+        <div className="inline-flex size-12 items-center justify-center rounded-[var(--radius-button)] bg-[var(--color-bg)] text-[var(--color-accent-brand)] shadow-[var(--shadow-card-soft)]">
+          <Icon aria-hidden className="size-6" strokeWidth={1.8} />
+        </div>
+        <p className="mt-6 font-serif text-[25px] font-semibold leading-[1.2] text-[var(--color-ink)]">
+          {title}
+        </p>
+        <p className="mt-2 text-[13px] leading-[1.55] text-[var(--color-ink-soft)]">
+          {body}
+        </p>
+        <div className="mt-5 grid grid-cols-3 gap-2" aria-hidden>
+          <span className="h-16 rounded-[8px] bg-[var(--color-bg)] shadow-[var(--shadow-card-soft)]" />
+          <span className="h-16 rounded-[8px] bg-[var(--color-accent-brand-soft)] shadow-[var(--shadow-card-soft)]" />
+          <span className="h-16 rounded-[8px] bg-[var(--color-bg)] shadow-[var(--shadow-card-soft)]" />
+        </div>
+      </div>
+    </div>
   )
 }

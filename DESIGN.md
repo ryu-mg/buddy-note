@@ -24,34 +24,34 @@ colors:
   mood-lonely: "#7f8f9f"
 typography:
   h1:
-    fontFamily: Pretendard Variable
+    fontFamily: LINE Seed Sans KR
     fontSize: 28px
     fontWeight: 700
     lineHeight: 1.14
     letterSpacing: -0.01em
   h2:
-    fontFamily: Pretendard Variable
+    fontFamily: LINE Seed Sans KR
     fontSize: 20px
     fontWeight: 700
     lineHeight: 1.3
   body:
-    fontFamily: Pretendard Variable
+    fontFamily: LINE Seed Sans KR
     fontSize: 16px
     fontWeight: 400
     lineHeight: 1.5
   caption:
-    fontFamily: Pretendard Variable
+    fontFamily: LINE Seed Sans KR
     fontSize: 14px
     fontWeight: 400
     lineHeight: 1.43
   meta:
-    fontFamily: Pretendard Variable
+    fontFamily: LINE Seed Sans KR
     fontSize: 12px
     fontWeight: 500
     lineHeight: 1.33
     letterSpacing: 0.14em
   diary-body:
-    fontFamily: 마루 부리
+    fontFamily: 윤초록우산어린이 대한
     fontSize: 15px
     fontWeight: 400
     lineHeight: 1.7
@@ -197,23 +197,23 @@ v0.2부터 버디(강아지)가 화면의 주인공처럼 느껴지는 순간을
 
 ## Typography
 
-UI는 Pretendard Variable(sans), 일기 본문은 마루 부리(serif). **System font 금지** — 없으면 fallback은 Noto Sans KR / Nanum Myeongjo.
+UI는 LINE Seed Sans KR(sans), 일기 본문은 윤초록우산어린이 대한, 강아지 이름·display는 마루 부리(serif). **System font 금지** — 없으면 fallback은 Noto Sans KR / Nanum Myeongjo.
 
 ```
-font-sans: "Pretendard Variable", "Pretendard", -apple-system, "Noto Sans KR", sans-serif
+font-sans: "LINE Seed Sans KR", -apple-system, "Noto Sans KR", sans-serif
 font-serif: "마루 부리", "MaruBuri", "Nanum Myeongjo", "Noto Serif KR", serif
 font-auth-headline: "Yoon Childfund DaeHan", "마루 부리", "MaruBuri", "Noto Serif KR", serif
+font-diary-body: "Yoon Childfund DaeHan", "마루 부리", "MaruBuri", "Noto Serif KR", serif
 ```
 
-serif(`font-serif`)는 아래 경우에만 허용한다. 작은 라벨·메뉴·입력 UI는 Pretendard 유지.
+serif(`font-serif`)는 아래 경우에만 허용한다. 작은 라벨·메뉴·입력 UI는 LINE Seed Sans KR 유지.
 
 - 강아지 이름
 - MBTI 코드
 - milestone 숫자
 - 완료 문구 (`저장됐어`, `기억할게`)
-- 일기 본문
 
-로그인 첫 화면의 큰 문구만 윤초록우산어린이 대한(`YoonChildfundkoreaDaeHan.otf`)을 사용한다. 원본 폰트 파일은 수정하지 않고 배포하며, 작은 UI 텍스트·버튼·입력에는 사용하지 않는다.
+로그인 첫 화면의 큰 문구와 강아지가 직접 써주는 일기 본문은 윤초록우산어린이 대한(`YoonChildfundkoreaDaeHan.otf`)을 사용한다. 원본 폰트 파일은 수정하지 않고 배포하며, 작은 UI 텍스트·버튼·입력에는 사용하지 않는다.
 
 **Display / Hero (v0.3, 강아지 이름·milestone 숫자):**
 
@@ -223,7 +223,7 @@ serif(`font-serif`)는 아래 경우에만 허용한다. 작은 라벨·메뉴·
 
 토큰: `--text-display-{sm,md,lg}` (app/globals.css `@theme inline`). hero size에는 항상 `font-serif` 적용 — sans는 H1까지.
 
-**Week 0 주의:** satori는 한국어 웹폰트를 자동 로드하지 않는다. Pretendard + 마루 부리 한글 subset을 빌드 타임에 생성해 Edge Function에서 fetch (~1.5 MB bundle).
+**Week 0 주의:** satori는 한국어 웹폰트를 자동 로드하지 않는다. LINE Seed Sans KR + 마루 부리 한글 subset을 빌드 타임에 생성해 Edge Function에서 fetch (~1.5 MB bundle).
 
 ## Layout
 

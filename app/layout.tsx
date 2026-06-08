@@ -2,7 +2,6 @@ import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import type { Metadata, Viewport } from 'next'
 
-import { AppHeader } from '@/components/layout/app-header'
 import { BottomNavGate } from '@/components/layout/bottom-nav-gate'
 import { Toaster } from '@/components/ui/sonner'
 
@@ -48,11 +47,6 @@ export default function RootLayout({
   return (
     <html lang="ko" className="h-full antialiased">
       <head>
-        {/* DESIGN §2 — Pretendard Variable (sans, UI) */}
-        <link
-          rel="stylesheet"
-          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css"
-        />
         {/* DESIGN §2 — MaruBuri (serif, diary/display) */}
         <link
           rel="stylesheet"
@@ -60,7 +54,6 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col font-sans bg-[var(--color-bg)] text-[var(--color-ink)]">
-        <AppHeader />
         <main className="flex-1">{children}</main>
         <BottomNavGate />
         <Toaster />

@@ -9,6 +9,36 @@ Format: Priority (P1/P2/P3) + Effort (S/M/L/XL, 인간 teams / CC+gstack compres
 
 이번 구현은 `memberships`와 `pet_theme_settings` migration을 포함한다. 결제 provider는 아직 붙지 않았기 때문에, 실제 유료/체험 사용자를 열어주는 작업은 아래를 처리해야 한다.
 
+## Toss Payments 멤버십 출시 전 당신이 해야 할 일
+
+이번 구현은 Toss Pay 결제창 생성 → 성공 리다이렉트 → 서버 승인 → `memberships.status='active'` 갱신 → `/api/membership/renew` 정기 갱신 endpoint 흐름을 포함한다. 실제 운영 전 아래 값과 상점 설정은 직접 준비해야 한다.
+
+### [PAY-1] Toss Payments 상점 생성 및 키 발급
+
+- Toss Payments 콘솔에서 테스트 키와 실결제 키를 발급한다.
+- `.env.local` 및 Vercel Environment Variables에 아래를 채운다.
+  - `TOSS_PAYMENTS_ENV=test` 또는 `live`
+  - `TOSS_PAYMENTS_TEST_CLIENT_KEY`
+  - `TOSS_PAYMENTS_TEST_SECRET_KEY`
+  - `TOSS_PAYMENTS_LIVE_CLIENT_KEY`
+  - `TOSS_PAYMENTS_LIVE_SECRET_KEY`
+
+### [PAY-2] Toss Pay 직접 결제 가능 여부 확인
+
+현재 서버는 `method='CARD'`, `flowMode='DIRECT'`, `easyPay='TOSSPAY'`로 결제창을 요청한다. Toss 상점 설정에서 해당 결제수단이 활성화되어 있어야 한다.
+
+### [PAY-3] 자동 갱신/빌링키 계약 확인
+
+정기 갱신 endpoint는 `memberships.provider_customer_key`와 `memberships.provider_billing_key`가 저장된 사용자만 처리한다. 월 자동 갱신을 운영하려면 Toss Payments 빌링키/자동결제 계약을 완료하고, 첫 결제 또는 빌링키 등록 플로우에서 두 값을 저장하도록 상점 설정을 마무리해야 한다.
+
+### [PAY-4] 운영 웹훅 URL 등록
+
+환불, 결제 취소, 결제 실패, 자동 갱신 실패를 안정적으로 반영하려면 Toss 웹훅 URL을 등록해야 한다. 구현 예정 URL은 `/api/payments/toss/webhook`으로 잡고, secret 검증 정책 확정 후 추가한다. Vercel Cron은 `/api/membership/renew`를 호출하고 `Authorization: Bearer $MEMBERSHIP_RENEWAL_SECRET` 또는 `$CRON_SECRET`을 보내도록 설정한다.
+
+### [PAY-5] 멤버십 가격 확정
+
+코드 기본값은 월 4,900원이다. 가격을 바꾸려면 `lib/billing/plan.ts`의 `MEMBERSHIP_MONTHLY_AMOUNT_KRW`를 먼저 변경하고, 결제 승인 테스트를 다시 수행한다.
+
 ### [THEME-1] Supabase migration 적용
 
 아래 명령으로 새 테이블을 원격 Supabase에 적용한다.

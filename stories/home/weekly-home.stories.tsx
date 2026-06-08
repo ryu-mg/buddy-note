@@ -18,6 +18,8 @@ const meta = {
     },
     diaryCount: 4,
     todayHasDiary: false,
+    canRewrite: false,
+    diaryFontCssValue: 'var(--font-diary-body)',
     recentCallbacks: [
       {
         note: '공원에서 새 친구 만난 날',
@@ -31,6 +33,11 @@ const meta = {
         title: '하천길 탐험',
         body: '오늘은 늘 가던 길 말고 다른 쪽으로 갔어. 새 냄새가 많았다.',
         imageUrl: null,
+        shareImages: {
+          '9:16': null,
+          '4:5': null,
+          '1:1': null,
+        },
         logDate: '2026-04-21',
         createdAt: '2026-04-21T08:00:00.000Z',
         mood: 'curious',
