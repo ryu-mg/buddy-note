@@ -134,10 +134,10 @@ export default async function MorePage() {
       <SectionLabel>모아보기</SectionLabel>
       <MenuGroup>
         <MenuRow
-          href="/"
+          href="/logs"
           icon={FileText}
           title="내 기록"
-          description={`${daysSinceCreated}일째 기록을 모아봐요`}
+          description="쌓인 기록을 통계로 살펴봐요"
         />
       </MenuGroup>
 
