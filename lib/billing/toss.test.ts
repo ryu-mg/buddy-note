@@ -4,6 +4,7 @@ import {
   buildMembershipOrderId,
   buildTossBasicAuthorization,
   getTossPaymentConfig,
+  isRecoverableApprovedTossPayment,
   isPaymentAmountVerified,
 } from '@/lib/billing/toss'
 
@@ -44,5 +45,42 @@ describe('toss payment config', () => {
     expect(buildMembershipOrderId('user-123').length).toBeLessThanOrEqual(64)
     expect(isPaymentAmountVerified(4900, 4900)).toBe(true)
     expect(isPaymentAmountVerified(4900, 100)).toBe(false)
+  })
+
+  it('accepts queried Toss payments only when order, key, amount, and DONE status match', () => {
+    const payment = {
+      status: 'DONE',
+      orderId: 'bn_order_1',
+      paymentKey: 'payment_key_1',
+      totalAmount: 4900,
+    }
+
+    expect(
+      isRecoverableApprovedTossPayment(payment, {
+        orderId: 'bn_order_1',
+        paymentKey: 'payment_key_1',
+        amount: 4900,
+      }),
+    ).toBe(true)
+    expect(
+      isRecoverableApprovedTossPayment(
+        { ...payment, totalAmount: 100 },
+        {
+          orderId: 'bn_order_1',
+          paymentKey: 'payment_key_1',
+          amount: 4900,
+        },
+      ),
+    ).toBe(false)
+    expect(
+      isRecoverableApprovedTossPayment(
+        { ...payment, status: 'READY' },
+        {
+          orderId: 'bn_order_1',
+          paymentKey: 'payment_key_1',
+          amount: 4900,
+        },
+      ),
+    ).toBe(false)
   })
 })

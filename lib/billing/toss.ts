@@ -14,6 +14,19 @@ export type TossPaymentConfigResult =
 
 export type TossEnv = Partial<Record<string, string | undefined>>
 
+export type RecoverableTossPayment = {
+  status?: string
+  orderId?: string
+  paymentKey?: string
+  totalAmount?: number
+}
+
+export type ExpectedTossPayment = {
+  orderId: string
+  paymentKey: string
+  amount: number
+}
+
 export function getTossPaymentConfig(
   env: TossEnv = process.env,
 ): TossPaymentConfigResult {
@@ -71,4 +84,17 @@ export function isPaymentAmountVerified(
   approvedAmount: number,
 ): boolean {
   return Number.isInteger(requestedAmount) && requestedAmount === approvedAmount
+}
+
+export function isRecoverableApprovedTossPayment(
+  payment: RecoverableTossPayment,
+  expected: ExpectedTossPayment,
+): boolean {
+  return (
+    payment.status === 'DONE' &&
+    payment.orderId === expected.orderId &&
+    payment.paymentKey === expected.paymentKey &&
+    typeof payment.totalAmount === 'number' &&
+    isPaymentAmountVerified(expected.amount, payment.totalAmount)
+  )
 }
