@@ -495,7 +495,6 @@ function CalendarSheet({
             petId={pet.id}
             petName={pet.name}
             logDate={dateKeyValue}
-            companionRelationship={pet.companionRelationship}
             compact
           />
         )}

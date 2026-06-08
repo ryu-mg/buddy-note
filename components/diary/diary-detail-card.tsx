@@ -36,14 +36,7 @@ export function DiaryDetailCard({
       )}
       style={style}
     >
-      <DiaryPhotoFrame
-        title={title}
-        petName={petName}
-        imageUrl={imageUrl}
-        priority={priority}
-      />
-
-      <div className="flex flex-col gap-3 px-2 pb-7 pt-5">
+      <div className="flex flex-col gap-3 px-2 pb-5 pt-4">
         <h1
           id={titleId}
           className="diary-writing-font text-[24px] font-semibold leading-[1.35] text-[var(--color-ink)]"
@@ -54,6 +47,14 @@ export function DiaryDetailCard({
           {body}
         </p>
       </div>
+
+      <DiaryPhotoFrame
+        title={title}
+        petName={petName}
+        imageUrl={imageUrl}
+        priority={priority}
+        className="mx-auto mb-2 w-full max-w-[320px]"
+      />
     </article>
   )
 }

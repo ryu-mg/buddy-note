@@ -12,6 +12,7 @@ type DiaryPhotoFrameProps = {
   petName: string
   imageUrl: string | null
   priority?: boolean
+  className?: string
 }
 
 export function DiaryPhotoFrame({
@@ -19,12 +20,18 @@ export function DiaryPhotoFrame({
   petName,
   imageUrl,
   priority = false,
+  className,
 }: DiaryPhotoFrameProps) {
   const [loadedImageUrl, setLoadedImageUrl] = useState<string | null>(null)
 
   if (!imageUrl) {
     return (
-      <div className="flex aspect-[4/5] w-full flex-col items-center justify-center gap-3 rounded-[var(--radius-button)] bg-[var(--color-line)] text-[13px] text-[var(--color-mute)]">
+      <div
+        className={cn(
+          'flex aspect-[4/5] w-full flex-col items-center justify-center gap-3 rounded-[var(--radius-button)] bg-[var(--color-line)] text-[13px] text-[var(--color-mute)]',
+          className,
+        )}
+      >
         <PawPrint
           className="h-10 w-10 opacity-75"
           color="var(--color-accent-brand)"
@@ -40,13 +47,16 @@ export function DiaryPhotoFrame({
   return (
     <div
       aria-busy={!loaded}
-      className="relative aspect-[4/5] overflow-hidden rounded-[var(--radius-button)] bg-[var(--color-bg)]"
+      className={cn(
+        'relative aspect-[4/5] overflow-hidden rounded-[var(--radius-button)] bg-[var(--color-bg)]',
+        className,
+      )}
     >
       <Image
         src={imageUrl}
         alt={`${petName}의 ${title} 사진`}
         fill
-        sizes="(max-width: 640px) 100vw, 420px"
+        sizes="320px"
         className={cn(
           'object-cover opacity-0',
           'motion-safe:transition-opacity motion-safe:duration-300 motion-safe:ease-out motion-reduce:opacity-100',

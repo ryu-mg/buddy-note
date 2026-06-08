@@ -31,7 +31,7 @@ export default async function LogPage() {
 
   const { data: pet } = await supabase
     .from('pets')
-    .select('id, name, persona_prompt_fragment, companion_relationship, guardian_relationship')
+    .select('id, name, persona_prompt_fragment')
     .eq('user_id', user.id)
     .limit(1)
     .maybeSingle()
@@ -59,16 +59,13 @@ export default async function LogPage() {
           className="mt-1 text-[14px] leading-[1.55] text-[var(--color-ink-soft)]"
           style={{ fontFamily: 'var(--font-sans)' }}
         >
-          사진 한 장만 올려주면 {pet.name}의 말투로 일기를 적어줄게요.
+          짧게 남겨주면 {pet.name}의 말투로 일기를 적어줄게요.
         </p>
       </header>
 
       <UploadForm
         petId={pet.id}
         petName={pet.name}
-        companionRelationship={
-          pet.companion_relationship ?? pet.guardian_relationship ?? null
-        }
       />
     </main>
   )
